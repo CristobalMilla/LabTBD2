@@ -1,13 +1,12 @@
 package Grupo4.Lab2.Controllers;
-
-import com.Alvolante.Backend.Entity.UsuarioEntity;
-import com.Alvolante.Backend.Service.UsuarioService;
-import com.Alvolante.Backend.dto.LoginDto;
+import Grupo4.Lab2.Services.UsuarioService;
+import Grupo4.Lab2.Entities.UsuarioEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import Grupo4.Lab2.DTO.LoginDTO;
 
 /**
  * UsuarioController es un controlador que maneja las solicitudes HTTP relacionadas con los usuarios.
@@ -20,9 +19,6 @@ public class UsuarioController {
     @Autowired
     private UsuarioService userservice;
 
-    @Autowired
-    private UsuarioService usuarioService;
-
     /**
      * Endpoint para registrar un nuevo usuario.
      *
@@ -30,6 +26,7 @@ public class UsuarioController {
      * @return La respuesta HTTP con el usuario registrado o un mensaje de error.
      */
     @PreAuthorize("hasRole('TRABAJADOR') or hasRole('ADMIN')")
+    
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UsuarioEntity nuevo) {
         try {
@@ -47,8 +44,8 @@ public class UsuarioController {
      * @return Un código indicando el resultado de la operación de login.
      */
     @PostMapping("/login")
-    public int login(@RequestBody LoginDto loginDto) {
-        return usuarioService.login(loginDto.getEmail(), loginDto.getPassword());
+    public int login(@RequestBody LoginDTO loginDto) {
+        return userservice.login(loginDto.getEmail(), loginDto.getPassword());
     }
 
     /**
@@ -58,9 +55,9 @@ public class UsuarioController {
      * @return El usuario correspondiente al ID proporcionado.
      */
     @GetMapping("/id")
-    public UsuarioEntity getUsuarioById(@RequestParam("id") String id) {
-        System.out.printf("Id a buscar: " + id);
-        return userservice.getUserById(Integer.parseInt(id));
+    public UsuarioEntity getUsuarioById(@RequestParam("id") Long id) {
+        System.out.println("Id a buscar: " + id);
+        return userservice.getUserById(id);
     }
 
     /**

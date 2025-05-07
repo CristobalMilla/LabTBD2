@@ -1,8 +1,8 @@
 package Grupo4.Lab2.Services;
-
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import Grupo4.Lab2.Entities.UsuarioEntity;
+import Grupo4.Lab2.Repositories.UsuarioRepository; 
 
 import java.util.Date;
 

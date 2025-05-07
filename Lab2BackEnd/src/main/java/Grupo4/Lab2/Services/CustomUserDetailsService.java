@@ -1,12 +1,11 @@
 package Grupo4.Lab2.Services;
-
-import com.Alvolante.Backend.Entity.UsuarioEntity;
-import com.Alvolante.Backend.Repository.UsuarioRepository;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import Grupo4.Lab2.Entities.UsuarioEntity;
+import Grupo4.Lab2.Repositories.UsuarioRepository;
 
 /**
  * CustomUserDetailsService es una clase de servicio que implementa la interfaz UserDetailsService necesaria para integrar Spring Security.
