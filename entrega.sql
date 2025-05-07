@@ -1,0 +1,200 @@
+-- Crear tablas principales para el sistema de delivery
+CREATE TABLE clientes (
+    cliente_id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100),
+    direccion TEXT,
+    email VARCHAR(100),
+    telefono VARCHAR(20)
+);
+
+CREATE TABLE repartidores (
+    repartidor_id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100),
+    telefono VARCHAR(20),
+    disponible BOOLEAN DEFAULT true
+);
+
+CREATE TABLE empresas (
+    empresa_id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100),
+    direccion TEXT,
+    tipo_servicio VARCHAR(50)
+);
+
+CREATE TABLE productos (
+    producto_id SERIAL PRIMARY KEY,
+    empresa_id INT REFERENCES empresas(empresa_id),
+    nombre VARCHAR(100),
+    descripcion TEXT,
+    precio DECIMAL(10,2),
+    requiere_receta BOOLEAN DEFAULT false
+);
+
+CREATE TABLE pedidos (
+    pedido_id SERIAL PRIMARY KEY,
+    cliente_id INT REFERENCES clientes(cliente_id),
+    empresa_id INT REFERENCES empresas(empresa_id),
+    repartidor_id INT REFERENCES repartidores(repartidor_id),
+    fecha TIMESTAMP,
+    estado VARCHAR(50)
+);
+
+CREATE TABLE detalle_pedidos (
+    detalle_id SERIAL PRIMARY KEY,
+    pedido_id INT REFERENCES pedidos(pedido_id),
+    producto_id INT REFERENCES productos(producto_id),
+    cantidad INT
+);
+
+CREATE TABLE medios_pago (
+    medio_id SERIAL PRIMARY KEY,
+    tipo VARCHAR(50)
+);
+
+CREATE TABLE pagos (
+    pago_id SERIAL PRIMARY KEY,
+    pedido_id INT REFERENCES pedidos(pedido_id),
+    medio_id INT REFERENCES medios_pago(medio_id),
+    monto DECIMAL(10,2)
+);
+
+CREATE TABLE calificaciones (
+    calificacion_id SERIAL PRIMARY KEY,
+    pedido_id INT REFERENCES pedidos(pedido_id),
+    puntuacion INT,
+    comentario TEXT
+);
+
+-- Insertar datos de ejemplo
+INSERT INTO clientes (nombre, direccion, email, telefono) VALUES
+('Ana Torres', 'Av. Central 123', 'ana@example.com', '912345678'),
+('Luis Pérez', 'Calle Norte 456', 'luis@example.com', '987654321');
+
+INSERT INTO repartidores (nombre, telefono) VALUES
+('Carlos Gómez', '911112223'),
+('Sofía Rojas', '922223334');
+
+INSERT INTO empresas (nombre, direccion, tipo_servicio) VALUES
+('Farmacia Salud', 'Av. Salud 101', 'medicamentos'),
+('Express Documentos', 'Calle Oficina 22', 'documentos');
+
+INSERT INTO productos (empresa_id, nombre, descripcion, precio, requiere_receta) VALUES
+(1, 'Paracetamol 500mg', 'Analgésico y antipirético', 2500, false),
+(1, 'Amoxicilina 500mg', 'Antibiótico', 4200, true),
+(2, 'Envío carta notarial', 'Servicio de entrega certificada', 8000, false);
+
+INSERT INTO pedidos (cliente_id, empresa_id, repartidor_id, fecha, estado) VALUES
+(1, 1, 1, '2025-03-20 09:00:00', 'entregado'),
+(2, 2, 2, '2025-03-21 14:00:00', 'cancelado');
+
+INSERT INTO detalle_pedidos (pedido_id, producto_id, cantidad) VALUES
+(1, 1, 2),
+(1, 2, 1),
+(2, 3, 1);
+
+INSERT INTO medios_pago (tipo) VALUES ('Tarjeta de crédito'), ('Efectivo');
+
+INSERT INTO pagos (pedido_id, medio_id, monto) VALUES
+(1, 1, 9200),
+(2, 2, 8000);
+
+INSERT INTO calificaciones (pedido_id, puntuacion, comentario) VALUES
+(1, 5, 'Muy buen servicio y rápido.');
+
+-- Insertar datos adicionales
+INSERT INTO clientes (nombre, direccion, email, telefono) VALUES
+('María López', 'Calle Luna 123', 'maria@example.com', '911111111'),
+('Pedro Ramírez', 'Av. Sol 456', 'pedro@example.com', '922222222'),
+('Lucía Díaz', 'Jr. Estrella 789', 'lucia@example.com', '933333333');
+INSERT INTO repartidores (nombre, telefono) VALUES
+('Miguel Torres', '933445566'),
+('Elena Mendoza', '944556677'),
+('Raúl Vargas', '955667788');
+
+INSERT INTO pedidos (cliente_id, empresa_id, repartidor_id, fecha, estado) VALUES
+(3, 1, 3, '2025-03-22 10:30:00', 'entregado'),
+(4, 2, 4, '2025-03-22 12:15:00', 'entregado'),
+(5, 1, 5, '2025-03-23 09:45:00', 'entregado'),
+(1, 2, 3, '2025-03-24 11:00:00', 'entregado'),
+(2, 1, 3, '2025-03-25 13:00:00', 'entregado'),
+(3, 2, 3, '2025-03-26 15:00:00', 'entregado'),
+(4, 1, 5, '2025-03-27 09:30:00', 'entregado'),
+(5, 2, 4, '2025-03-28 14:00:00', 'entregado'),
+(1, 1, 2, '2025-03-29 16:00:00', 'entregado'),
+(2, 2, 2, '2025-03-30 17:30:00', 'entregado');
+
+INSERT INTO detalle_pedidos (pedido_id, producto_id, cantidad) VALUES
+(3, 1, 1),
+(3, 2, 1),
+(4, 3, 1),
+(5, 1, 2),
+(6, 3, 1),
+(7, 1, 1),
+(8, 2, 1),
+(9, 3, 2),
+(10, 1, 1),
+(10, 2, 1);
+
+INSERT INTO pagos (pedido_id, medio_id, monto) VALUES
+(3, 1, 6700),
+(4, 2, 8000),
+(5, 1, 5000),
+(6, 2, 8000),
+(7, 1, 2500),
+(8, 1, 4200),
+(9, 2, 16000),
+(10, 2, 6700);
+
+INSERT INTO calificaciones (pedido_id, puntuacion, comentario) VALUES
+(3, 5, 'Muy amable y rápido.'),
+(4, 4, 'Buen servicio.'),
+(5, 3, 'Tardó un poco, pero correcto.'),
+(6, 5, 'Excelente. Muy recomendado.'),
+(7, 4, 'Bien.'),
+(8, 5, 'Rápido y eficiente.'),
+(9, 2, 'Se equivocó en la entrega.'),
+(10, 5, 'Perfecto.');
+
+-- Consultas SQL complejas
+-- 1. ¿Qué cliente ha gastado más dinero en pedidos entregados?
+
+-- 2. ¿Cuáles son los productos o servicios más pedidos en el último mes por categoría?
+
+-- 3. Listar las empresas asociadas con más entregas fallidas.
+
+-- 4. Calcular el tiempo promedio entre pedido y entrega por repartidor.
+
+-- 5. Obtener los 3 repartidores con mejor rendimiento (basado en entregas y puntuación).
+SELECT r.nombre as repartidor, COUNT(p.pedido_id) as pedidos, AVG(c.puntuacion) as calificación_avg
+FROM (repartidores as r
+INNER JOIN pedidos as p ON r.repartidor_id = p.repartidor_id) 
+FULL JOIN calificaciones as c ON p.pedido_id = c.pedido_id
+WHERE p.estado = 'entregado'
+GROUP BY r.repartidor_id
+ORDER BY COUNT(p.pedido_id) DESC, AVG(c.puntuacion) DESC
+LIMIT 3;
+-- 6. ¿Qué medio de pago se utiliza más en pedidos urgentes?
+
+
+-- Procedimientos almacenados
+-- 7. Registrar un pedido completo.
+
+-- 8. Cambiar el estado de un pedido con validación.
+
+-- 9. Descontar stock al confirmar pedido (si aplica).
+
+
+-- Triggers
+-- 10. Insertar automáticamente la fecha de entrega al marcar como entregado.
+
+-- 11. Registrar una notificación si se detecta un problema crítico en el pedido.
+
+-- 12. Insertar una calificación automática si no se recibe en 48 horas.
+
+
+-- Vistas
+-- 13. Resumen de pedidos por cliente (monto total, número de pedidos).
+
+-- 14. Vista de desempeño por repartidor.
+
+-- 15. Vista de empresas asociadas con mayor volumen de paquetes entregados.
