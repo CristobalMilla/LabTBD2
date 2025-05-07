@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import Grupo4.Lab2.DTO.LoginDTO;
+import Grupo4.Lab2.Config.JwtUtil;
 
 /**
  * UsuarioController es un controlador que maneja las solicitudes HTTP relacionadas con los usuarios.
@@ -15,6 +16,9 @@ import Grupo4.Lab2.DTO.LoginDTO;
 @RequestMapping("/api/usuarios")
 @CrossOrigin
 public class UsuarioController {
+    @Autowired
+    private JwtUtil jwtUtil;
+
 
     @Autowired
     private UsuarioService userservice;
@@ -44,8 +48,13 @@ public class UsuarioController {
      * @return Un código indicando el resultado de la operación de login.
      */
     @PostMapping("/login")
-    public int login(@RequestBody LoginDTO loginDto) {
-        return userservice.login(loginDto.getEmail(), loginDto.getPassword());
+    public ResponseEntity<?> login(@RequestBody LoginDTO loginDto) {
+        int result = userservice.login(loginDto.getEmail(), loginDto.getPassword());
+        if(result == 1 /* o el valor que corresponda según el rol */) {
+            String token = jwtUtil.createToken(loginDto.getEmail());
+            return ResponseEntity.ok(token);
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales incorrectas");
     }
 
     /**
