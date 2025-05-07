@@ -9,7 +9,7 @@ public class Sql2oConfig {
 
     @Bean
     public Sql2o sql2o() {
-        String url = "jdbc:postgresql://localhost:5432/lab2";
+        String url = "jdbc:postgresql://localhost:5432/lab2tbd";
         String username = "postgres";   // Cambia por nombre de usuario 
         String password = "2702";       // Cambia por contraseña de SQL
         return new Sql2o(url, username, password);
