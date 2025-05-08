@@ -68,12 +68,22 @@ CREATE TABLE IF NOT EXISTS calificaciones (
     comentario TEXT
 );
 
-CREATE TABLE urgencias (
+CREATE TABLE IF NOT EXISTS urgencias (
     urgencia_id SERIAL PRIMARY KEY,
     pedido_id INT UNIQUE REFERENCES pedidos(pedido_id),
     nivel VARCHAR(10) NOT NULL CHECK (nivel IN ('urgente','no urgente'))
 );
 
+CREATE TABLE IF NOT EXISTS usuario (
+    idUsuario SERIAL PRIMARY KEY,
+    rut VARCHAR(20) NOT NULL,
+    nameParam VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    phone VARCHAR(20),
+    birthdate DATE,
+    password VARCHAR(100) NOT NULL,
+    role VARCHAR(50) NOT NULL
+);
 
 -- Insertar datos de ejemplo
 INSERT INTO clientes (nombre, direccion, email, telefono) VALUES
@@ -173,6 +183,12 @@ VALUES
     (4, 'no urgente'),
     (5, 'urgente');
 
+INSERT INTO usuario (rut, nameParam, email, phone, birthdate, password, role)
+VALUES 
+('11111111-1', 'Usuario Administrador', 'admin@example.com', '123456789', '1980-01-01', 'adminPass', 'ADMIN'),
+('22222222-2', 'Usuario Trabajador', 'trabajador@example.com', '987654321', '1990-05-15', 'trabajadorPass', 'TRABAJADOR'),
+('33333333-3', 'Usuario Cliente', 'cliente@example.com', '555555555', '2000-09-09', 'clientePass', 'CLIENTE');
+
 -- Consultas SQL complejas
 -- 1. ¿Qué cliente ha gastado más dinero en pedidos entregados?
 SELECT sp.id_cliente, c.nombre AS cliente, sp.num_pedidos AS num_pedidos_pagados, sp.suma_pagos
@@ -204,7 +220,7 @@ FROM (
     INNER JOIN productos p ON dp.producto_id = p.producto_id
     WHERE pe.fecha >= CURRENT_DATE - INTERVAL '1 month'
     GROUP BY p.categoria, p.producto_id, p.nombre
-) t
+)
 WHERE rnk = 1
 ORDER BY categoria;
 

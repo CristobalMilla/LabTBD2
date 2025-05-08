@@ -1,5 +1,6 @@
 package Grupo4.Lab2.Services;
 
+import Grupo4.Lab2.DTO.ProductoMasPedidoDTO;
 import Grupo4.Lab2.Entities.ProductoEntity;
 import Grupo4.Lab2.Repositories.ProductoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,5 +54,12 @@ public class ProductoService {
      */
     public void deleteById(long id) {
         productoRepo.deleteById(id);
+    }
+
+    /**
+     * Servicio de la Query 2. Obtiene los productos más pedidos en el último mes.
+     */
+    public List<ProductoMasPedidoDTO> getProductosMasPedidosUltimoMes() {
+        return productoRepo.getProductosMasPedidosUltimoMes();
     }
 }

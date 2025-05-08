@@ -1,5 +1,6 @@
 package Grupo4.Lab2.Repositories;
 
+import Grupo4.Lab2.DTO.ProductoMasPedidoDTO;
 import Grupo4.Lab2.Entities.ProductoEntity;
 import org.sql2o.Connection;
 import org.sql2o.Sql2o;
@@ -39,8 +40,8 @@ public class ProductoRepository {
      * Guarda un nuevo producto.
      */
     public void save(ProductoEntity product) {
-        String sql = "INSERT INTO productos (empresa_id, nombre, descripcion, precio, requiere_receta) " +
-                     "VALUES (:empresa_id, :nombre, :descripcion, :precio, :requiere_receta)";
+        String sql = "INSERT INTO productos (empresa_id, nombre, descripcion, precio, requiere_receta, categoria, stock) " +
+                     "VALUES (:empresa_id, :nombre, :descripcion, :precio, :requiere_receta, :categoria, :stock)";
         try (Connection con = sql2o.beginTransaction()) {
             con.createQuery(sql, true)
                 .addParameter("empresa_id", product.getEmpresa_id())
@@ -48,6 +49,8 @@ public class ProductoRepository {
                 .addParameter("descripcion", product.getDescripcion())
                 .addParameter("precio", product.getPrecio())
                 .addParameter("requiere_receta", product.isRequiere_receta())
+                .addParameter("categoria", product.getCategoria())
+                .addParameter("stock", product.getStock())
                 .executeUpdate();
             con.commit();
         }
@@ -73,6 +76,30 @@ public class ProductoRepository {
             con.createQuery(sql)
                 .addParameter("id", id)
                 .executeUpdate();
+        }
+    }
+
+    /**
+     * Query 2
+     * Obtiene los productos más pedidos en el último mes por categoría.
+     * Utiliza un DTO para devolver solo los campos necesarios.
+     */
+    public List<ProductoMasPedidoDTO> getProductosMasPedidosUltimoMes() {
+        String sql = "SELECT categoria, producto_id, nombre, total_cantidad " +
+                     "FROM ( " +
+                     "    SELECT p.categoria, p.producto_id, p.nombre, SUM(dp.cantidad) AS total_cantidad, " +
+                     "           RANK() OVER(PARTITION BY p.categoria ORDER BY SUM(dp.cantidad) DESC) AS rnk " +
+                     "    FROM pedidos pe " +
+                     "    INNER JOIN detalle_pedidos dp ON pe.pedido_id = dp.pedido_id " +
+                     "    INNER JOIN productos p ON dp.producto_id = p.producto_id " +
+                     "    WHERE pe.fecha >= CURRENT_DATE - INTERVAL '1 month' " +
+                     "    GROUP BY p.categoria, p.producto_id, p.nombre " +
+                     ") sub " +
+                     "WHERE rnk = 1 " +
+                     "ORDER BY categoria";
+        try (Connection con = sql2o.open()) {
+            return con.createQuery(sql)
+                      .executeAndFetch(ProductoMasPedidoDTO.class);
         }
     }
 }

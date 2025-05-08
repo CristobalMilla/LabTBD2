@@ -13,6 +13,8 @@ public class ProductoEntity {
     private String descripcion;
     private BigDecimal precio;
     private boolean requiere_receta;
+    private String categoria;
+    private Integer stock;
 
     /**
      * Constructor con todos los atributos.
@@ -23,14 +25,18 @@ public class ProductoEntity {
      * @param descripcion La descripción del producto.
      * @param precio El precio del producto.
      * @param requiere_receta Indica si el producto requiere receta.
+     * @param categoria La categoría del producto.
+     * @param stock El stock del producto.
      */
-    public ProductoEntity(long producto_id, int empresa_id, String nombre, String descripcion, BigDecimal precio, boolean requiere_receta) {
+    public ProductoEntity(long producto_id, int empresa_id, String nombre, String descripcion, BigDecimal precio, boolean requiere_receta, String categoria, Integer stock) {
         this.producto_id = producto_id;
         this.empresa_id = empresa_id;
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.precio = precio;
         this.requiere_receta = requiere_receta;
+        this.categoria = categoria;
+        this.stock = stock;
     }
 
     /**
@@ -87,5 +93,21 @@ public class ProductoEntity {
 
     public void setRequiere_receta(boolean requiere_receta) {
         this.requiere_receta = requiere_receta;
+    }
+
+    public String getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(String categoria) {
+        this.categoria = categoria;
+    }
+
+    public Integer getStock() {
+        return stock;
+    }
+
+    public void setStock(Integer stock) {
+        this.stock = stock;
     }
 }

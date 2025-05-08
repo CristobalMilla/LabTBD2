@@ -1,5 +1,6 @@
 package Grupo4.Lab2.Controllers;
 
+import Grupo4.Lab2.DTO.ProductoMasPedidoDTO;
 import Grupo4.Lab2.Entities.ProductoEntity;
 import Grupo4.Lab2.Services.ProductoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,5 +75,14 @@ public class ProductoController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
+    }
+
+    /**
+     * Endpoint para la query 2: Obtener los productos más pedidos en el último mes.
+     */
+    @GetMapping("/mas-pedidos-ultimo-mes")
+    public ResponseEntity<List<ProductoMasPedidoDTO>> getProductosMasPedidosUltimoMes() {
+        List<ProductoMasPedidoDTO> resultados = productoService.getProductosMasPedidosUltimoMes();
+        return ResponseEntity.ok(resultados);
     }
 }
