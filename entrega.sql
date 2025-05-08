@@ -1,5 +1,5 @@
 -- Crear tablas principales para el sistema de delivery
-CREATE TABLE clientes (
+CREATE TABLE IF NOT EXISTS clientes (
     cliente_id SERIAL PRIMARY KEY,
     nombre VARCHAR(100),
     direccion TEXT,
@@ -7,21 +7,21 @@ CREATE TABLE clientes (
     telefono VARCHAR(20)
 );
 
-CREATE TABLE repartidores (
+CREATE TABLE IF NOT EXISTS repartidores (
     repartidor_id SERIAL PRIMARY KEY,
     nombre VARCHAR(100),
     telefono VARCHAR(20),
     disponible BOOLEAN DEFAULT true
 );
 
-CREATE TABLE empresas (
+CREATE TABLE IF NOT EXISTS empresas (
     empresa_id SERIAL PRIMARY KEY,
     nombre VARCHAR(100),
     direccion TEXT,
     tipo_servicio VARCHAR(50)
 );
 
-CREATE TABLE productos (
+CREATE TABLE IF NOT EXISTS productos (
     producto_id SERIAL PRIMARY KEY,
     empresa_id INT REFERENCES empresas(empresa_id),
     nombre VARCHAR(100),
@@ -31,7 +31,7 @@ CREATE TABLE productos (
     categoria VARCHAR(100) 
 );
 
-CREATE TABLE pedidos (
+CREATE TABLE IF NOT EXISTS pedidos (
     pedido_id SERIAL PRIMARY KEY,
     cliente_id INT REFERENCES clientes(cliente_id),
     empresa_id INT REFERENCES empresas(empresa_id),
@@ -40,26 +40,26 @@ CREATE TABLE pedidos (
     estado VARCHAR(50)
 );
 
-CREATE TABLE detalle_pedidos (
+CREATE TABLE IF NOT EXISTS detalle_pedidos (
     detalle_id SERIAL PRIMARY KEY,
     pedido_id INT REFERENCES pedidos(pedido_id),
     producto_id INT REFERENCES productos(producto_id),
     cantidad INT
 );
 
-CREATE TABLE medios_pago (
+CREATE TABLE IF NOT EXISTS medios_pago (
     medio_id SERIAL PRIMARY KEY,
     tipo VARCHAR(50)
 );
 
-CREATE TABLE pagos (
+CREATE TABLE IF NOT EXISTS pagos (
     pago_id SERIAL PRIMARY KEY,
     pedido_id INT REFERENCES pedidos(pedido_id),
     medio_id INT REFERENCES medios_pago(medio_id),
     monto DECIMAL(10,2)
 );
 
-CREATE TABLE calificaciones (
+CREATE TABLE IF NOT EXISTS calificaciones (
     calificacion_id SERIAL PRIMARY KEY,
     pedido_id INT REFERENCES pedidos(pedido_id),
     puntuacion INT,
@@ -214,9 +214,53 @@ LIMIT 3;
 -- 6. ¿Qué medio de pago se utiliza más en pedidos urgentes?
 
 
--- Procedimientos almacenados
--- 7. Registrar un pedido completo.
 
+-- 7. Registrar un pedido completo.  --se pone el OR REPLACE en caso de que ya exista ese pedido
+CREATE OR REPLACE FUNCTION registrar_pedido(
+       p_cliente_id INT,
+       p_empresa_id INT,
+       p_repartidor_id INT,
+       p_estado VARCHAR,
+       p_productos INT[],
+       p_cantidades INT[],
+       p_medio_pago_id INT
+)
+RETURNS VOID AS $$
+DECLARE
+       nuevo_id INT; --id del pedido
+       i INT; -- indice, empieza en 1
+BEGIN
+    -- primeros insertamos el pedido
+    INSERT INTO pedidos (cliente_id, empresa_id, repartidor_id, fecha, estado)
+    VALUES (p_cliente_id, p_empresa_id, p_repartidor_id, NOW()::timestamp(0), p_estado)
+    RETURNING pedido_id INTO nuevo_id;
+
+    -- ahora insertamos el detalle del pedido
+    FOR I IN 1..array_length(p_productos, 1) LOOP --recorremos desde 1 hasta el fin del arreglo de los productos
+        INSERT INTO detalle_pedidos (pedido_id, producto_id, cantidad) -- insertamos producto por producto en detalle_pedidos
+        VALUES (nuevo_id, p_productos[i], p_cantidades[i]);
+    END LOOP;
+
+    -- luego, insertamos en pagos con su precio
+    INSERT INTO pagos (pedido_id, medio_id, monto)
+    SELECT nuevo_id, p_medio_pago_id,
+           SUM(p.precio * DP.cantidad)
+    FROM detalle_pedidos DP
+    JOIN productos P ON P.producto_id = DP.producto_id
+    WHERE DP.pedido_id = nuevo_id
+    GROUP BY DP.pedido_id; --agrupamos x id del pedido
+END;
+$$ LANGUAGE plpgsql;
+--
+SELECT registrar_pedido(
+               1,              -- cliente_id
+               1,              -- empresa_id
+               2,              -- repartidor_id
+               'en camino',    -- estado del pedido
+               ARRAY[1, 2],    -- productos
+               ARRAY[2, 1],    -- cantidades
+               2               -- medio de pago (efectivo)
+);
 -- 8. Cambiar el estado de un pedido con validación.
 
 -- 9. Descontar stock al confirmar pedido (si aplica).
@@ -226,7 +270,7 @@ LIMIT 3;
 -- 10. Insertar automáticamente la fecha de entrega al marcar como entregado.
 
 -- 11. Registrar una notificación si se detecta un problema crítico en el pedido.
-CREATE TABLE notificaciones (
+CREATE TABLE IF NOT EXISTS notificaciones (
     notificacion_id SERIAL PRIMARY KEY,
     pedido_id INT REFERENCES pedidos(pedido_id),
     mensaje VARCHAR(50),
@@ -244,7 +288,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER notificacion_pedido_critico
+CREATE OR REPLACE TRIGGER notificacion_pedido_critico
 AFTER UPDATE OF estado ON pedidos
 FOR EACH ROW
 WHEN (NEW.estado = 'critico')
@@ -283,7 +327,7 @@ CREATE OR REPLACE VIEW resumen_pedidos_x_cliente AS
 -- 14. Vista de desempeño por repartidor.
 
 -- 15. Vista de empresas asociadas con mayor volumen de paquetes entregados.
-CREATE VIEW empresas_mas_pedidos_entregados AS
+CREATE OR REPLACE VIEW empresas_mas_pedidos_entregados AS
 SELECT e.empresa_id, e.nombre AS empresa_nombre, COUNT(p.pedido_id) AS total_pedidos_entregados
 FROM empresas e
 LEFT JOIN pedidos p ON e.empresa_id = p.empresa_id
