@@ -161,6 +161,13 @@ INSERT INTO calificaciones (pedido_id, puntuacion, comentario) VALUES
 -- 2. ¿Cuáles son los productos o servicios más pedidos en el último mes por categoría?
 
 -- 3. Listar las empresas asociadas con más entregas fallidas.
+SELECT e.empresa_id, e.nombre AS empresa_nombre, COUNT(p.pedido_id) AS pedidos_cancelados_count
+FROM empresas e
+LEFT JOIN pedidos p ON e.empresa_id = p.empresa_id
+WHERE p.estado = 'cancelado'
+GROUP BY e.empresa_id, e.nombre
+HAVING COUNT(p.pedido_id) > 0
+ORDER BY pedidos_cancelados_count DESC;
 
 -- 4. Calcular el tiempo promedio entre pedido y entrega por repartidor.
 
@@ -188,6 +195,30 @@ LIMIT 3;
 -- 10. Insertar automáticamente la fecha de entrega al marcar como entregado.
 
 -- 11. Registrar una notificación si se detecta un problema crítico en el pedido.
+CREATE TABLE notificaciones (
+    notificacion_id SERIAL PRIMARY KEY,
+    pedido_id INT REFERENCES pedidos(pedido_id),
+    mensaje VARCHAR(50),
+    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE OR REPLACE FUNCTION registrar_notificacion_critica()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.estado = 'critico' THEN
+        INSERT INTO notificaciones (pedido_id, mensaje)
+        VALUES (NEW.pedido_id, 'Pedido critico.');
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER notificacion_pedido_critico
+AFTER UPDATE OF estado ON pedidos
+FOR EACH ROW
+WHEN (NEW.estado = 'critico')
+EXECUTE FUNCTION registrar_notificacion_critica();
+
 
 -- 12. Insertar una calificación automática si no se recibe en 48 horas.
 
@@ -198,3 +229,10 @@ LIMIT 3;
 -- 14. Vista de desempeño por repartidor.
 
 -- 15. Vista de empresas asociadas con mayor volumen de paquetes entregados.
+CREATE VIEW empresas_mas_pedidos_entregados AS
+SELECT e.empresa_id, e.nombre AS empresa_nombre, COUNT(p.pedido_id) AS total_pedidos_entregados
+FROM empresas e
+LEFT JOIN pedidos p ON e.empresa_id = p.empresa_id
+WHERE p.estado = 'entregado'
+GROUP BY e.empresa_id, e.nombre
+ORDER BY total_pedidos_entregados DESC;
