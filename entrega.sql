@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS pedidos (
     empresa_id INT REFERENCES empresas(empresa_id),
     repartidor_id INT REFERENCES repartidores(repartidor_id),
     fecha TIMESTAMP,
+    fecha_entrega timestamp,
     estado VARCHAR(50)
 );
 
@@ -251,7 +252,7 @@ BEGIN
     GROUP BY DP.pedido_id; --agrupamos x id del pedido
 END;
 $$ LANGUAGE plpgsql;
---
+--ejemplo:
 SELECT registrar_pedido(
                1,              -- cliente_id
                1,              -- empresa_id
@@ -261,13 +262,72 @@ SELECT registrar_pedido(
                ARRAY[2, 1],    -- cantidades
                2               -- medio de pago (efectivo)
 );
--- 8. Cambiar el estado de un pedido con validación.
 
+-- 8. Cambiar el estado de un pedido con validación. La validación que puse es que si ya fue entregado o cancelado no se puede cambiar (el cambio seria para poner que ya fue entregado)
+CREATE OR REPLACE FUNCTION cambiar_estado_pedido(
+    p_pedido_id INT,
+    p_nuevo_estado VARCHAR)
+RETURNS VOID AS $$
+BEGIN
+    -- verficamos que el pedido exista
+    IF NOT EXISTS (
+            SELECT 1 FROM pedidos
+            WHERE pedido_id = pedido_id
+    ) THEN
+        RAISE EXCEPTION 'En la función cambiar_estado_pedido. Se ingresó un pedido de id % que no existe.', p_pedido_id;
+    END IF;
+
+    --verificamos q el estado sea valido para cambiarlo
+    IF EXISTS (
+        SELECT 1 FROM pedidos
+        WHERE pedido_id = p_pedido_id
+          AND estado IN ('entregado', 'cancelado') --validación, no puede tener estos estados
+    ) THEN
+        RAISE EXCEPTION 'En la función cambiar_estado_pedido. Se intentó cambiar un estado del pedido %, que ya fue entregado o cancelado.', p_pedido_id;
+    end if;
+
+    --validamos q el nuevo estado no este vacio
+    IF p_nuevo_estado IS NULL OR TRIM(p_nuevo_estado) = '' THEN --si esta vacio o tiene espacios
+        RAISE EXCEPTION 'En la función cambiar_estado_pedido. Se ingresó un estado vacío, por favor rellenarlo';
+    END IF;
+
+    UPDATE pedidos
+    SET estado = p_nuevo_estado
+    WHERE pedido_id = p_pedido_id;
+end;
+$$ LANGUAGE plpgsql;
+
+
+--ejemplos:
+--SELECT cambiar_estado_pedido(666, 'en camino'); --lanza la excepción q no existe el pedido
+--SELECT cambiar_estado_pedido(2, 'en camino'); -- lanza excepción q ya fue cancelado
+--SELECT cambiar_estado_pedido(74, 'entregado');-- se cambia del estado 'en camino' a 'entregado'
 -- 9. Descontar stock al confirmar pedido (si aplica).
 
 
 -- Triggers
 -- 10. Insertar automáticamente la fecha de entrega al marcar como entregado.
+--función del trigger
+CREATE OR REPLACE FUNCTION insertar_fecha_entrega()
+RETURNS TRIGGER AS $$
+BEGIN
+    --primero hay q verificar q este entregado
+    IF NEW.estado = 'entregado'
+        THEN
+        NEW.fecha_entrega = NOW()::timestamp(0);
+    end if;
+    RETURN NEW;
+end;
+$$ LANGUAGE plpgsql;
+
+--trigger
+CREATE TRIGGER trigger_insertar_fecha_entrega
+BEFORE UPDATE ON pedidos
+FOR EACH ROW
+WHEN (OLD.estado IS DISTINCT FROM
+    'entregado' AND NEW.estado = 'entregado')
+EXECUTE FUNCTION insertar_fecha_entrega();
+
 
 -- 11. Registrar una notificación si se detecta un problema crítico en el pedido.
 CREATE TABLE IF NOT EXISTS notificaciones (
