@@ -2,15 +2,12 @@ package Grupo4.Lab2.Repositories;
 
 
 import Grupo4.Lab2.Entities.EmpresaEntity;
-import Grupo4.Lab2.Entities.UsuarioEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.sql2o.Connection;
 import org.sql2o.Sql2o;
 
 import java.util.List;
-import java.util.Optional;
-
 @Repository
 public class EmpresaRepository {
 
@@ -30,19 +27,19 @@ public class EmpresaRepository {
         }
     }
 
-    public EmpresaEntity findById(long id){
+    public EmpresaEntity findById(long empresa_id){
         String sql = "SELECT * FROM empresas WHERE empresa_id = :id";
         try (Connection con = sql2o.open()){
             return con.createQuery(sql)
-                    .addParameter("id", id)
+                    .addParameter("empresa_id", empresa_id)
                     .executeAndFetchFirst(EmpresaEntity.class);
         }
     }
-    public String findNombreById(long id){
-        String sql = "SELECT empresas.nombre FROM empresas WHERE empresa_id = :id";
+    public String findNombreById(long empresa_id){
+        String sql = "SELECT empresas.nombre FROM empresas WHERE empresa_id = :empresa_id";
         try (Connection con = sql2o.open()){
             return con.createQuery(sql)
-                    .addParameter("id",id)
+                    .addParameter("empresa_id",empresa_id)
                     .executeAndFetchFirst(String.class);
         }
     }
@@ -72,11 +69,11 @@ public class EmpresaRepository {
         }
     }
 
-    public void deleteById(long id){
-        String sql = "DELETE FROM empresas WHERE empresa_id = :id";
+    public void deleteById(long empresa_id){
+        String sql = "DELETE FROM empresas WHERE empresa_id = :empresa_id";
         try (Connection con = sql2o.open()){
             con.createQuery(sql)
-                    .addParameter("id", id)
+                    .addParameter("empresa_id", empresa_id)
                     .executeUpdate();
         }
     }

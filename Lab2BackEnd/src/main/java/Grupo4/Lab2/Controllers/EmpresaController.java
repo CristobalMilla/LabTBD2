@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RequestMapping("/api/empresa")
+@RequestMapping("/api/empresas")
 @CrossOrigin
 public class EmpresaController {
     @Autowired
