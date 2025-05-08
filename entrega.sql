@@ -28,7 +28,8 @@ CREATE TABLE IF NOT EXISTS productos (
     descripcion TEXT,
     precio DECIMAL(10,2),
     requiere_receta BOOLEAN DEFAULT false,
-    categoria VARCHAR(100) 
+    categoria VARCHAR(100),
+    stock INT DEFAULT NULL
 );
 
 CREATE TABLE IF NOT EXISTS pedidos (
@@ -67,6 +68,13 @@ CREATE TABLE IF NOT EXISTS calificaciones (
     comentario TEXT
 );
 
+CREATE TABLE urgencias (
+    urgencia_id SERIAL PRIMARY KEY,
+    pedido_id INT UNIQUE REFERENCES pedidos(pedido_id),
+    nivel VARCHAR(10) NOT NULL CHECK (nivel IN ('urgente','no urgente'))
+);
+
+
 -- Insertar datos de ejemplo
 INSERT INTO clientes (nombre, direccion, email, telefono) VALUES
 ('Ana Torres', 'Av. Central 123', 'ana@example.com', '912345678'),
@@ -80,10 +88,10 @@ INSERT INTO empresas (nombre, direccion, tipo_servicio) VALUES
 ('Farmacia Salud', 'Av. Salud 101', 'medicamentos'),
 ('Express Documentos', 'Calle Oficina 22', 'documentos');
 
-INSERT INTO productos (empresa_id, nombre, descripcion, precio, requiere_receta, categoria) VALUES
-(1, 'Paracetamol 500mg', 'Analgésico y antipirético', 2500, false, 'Medicamentos'),
-(1, 'Amoxicilina 500mg', 'Antibiótico', 4200, true, 'Medicamentos'),
-(2, 'Envío carta notarial', 'Servicio de entrega certificada', 8000, false, 'Documentos');
+INSERT INTO productos (empresa_id, nombre, descripcion, precio, requiere_receta, categoria, stock) VALUES
+(1, 'Paracetamol 500mg', 'Analgésico y antipirético', 2500, false, 'Medicamentos', 100),
+(1, 'Amoxicilina 500mg', 'Antibiótico', 4200, true, 'Medicamentos', 200),
+(2, 'Envío carta notarial', 'Servicio de entrega certificada', 8000, false, 'Documentos', NULL);
 
 INSERT INTO pedidos (cliente_id, empresa_id, repartidor_id, fecha, estado) VALUES
 (1, 1, 1, '2025-05-20 09:00:00', 'entregado'),
@@ -157,6 +165,14 @@ INSERT INTO calificaciones (pedido_id, puntuacion, comentario) VALUES
 (9, 2, 'Se equivocó en la entrega.'),
 (10, 5, 'Perfecto.');
 
+INSERT INTO urgencias (pedido_id, nivel)
+VALUES 
+    (1, 'urgente'),
+    (2, 'no urgente'),
+    (3, 'urgente'),
+    (4, 'no urgente'),
+    (5, 'urgente');
+
 -- Consultas SQL complejas
 -- 1. ¿Qué cliente ha gastado más dinero en pedidos entregados?
 SELECT sp.id_cliente, c.nombre AS cliente, sp.num_pedidos AS num_pedidos_pagados, sp.suma_pagos
@@ -212,8 +228,16 @@ WHERE p.estado = 'entregado'
 GROUP BY r.repartidor_id
 ORDER BY COUNT(p.pedido_id) DESC, AVG(c.puntuacion) DESC
 LIMIT 3;
--- 6. ¿Qué medio de pago se utiliza más en pedidos urgentes?
 
+-- 6. ¿Qué medio de pago se utiliza más en pedidos urgentes?
+SELECT mp.tipo AS medio_pago, COUNT(*) AS total_urgentes
+FROM pagos pg
+JOIN urgencias u ON pg.pedido_id = u.pedido_id
+JOIN medios_pago mp ON pg.medio_id = mp.medio_id
+WHERE u.nivel = 'urgente'
+GROUP BY mp.tipo
+ORDER BY COUNT(*) DESC
+LIMIT 1;
 
 
 -- 7. Registrar un pedido completo.  --se pone el OR REPLACE en caso de que ya exista ese pedido
@@ -296,14 +320,40 @@ BEGIN
     WHERE pedido_id = p_pedido_id;
 end;
 $$ LANGUAGE plpgsql;
-
-
 --ejemplos:
 --SELECT cambiar_estado_pedido(666, 'en camino'); --lanza la excepción q no existe el pedido
 --SELECT cambiar_estado_pedido(2, 'en camino'); -- lanza excepción q ya fue cancelado
 --SELECT cambiar_estado_pedido(74, 'entregado');-- se cambia del estado 'en camino' a 'entregado'
--- 9. Descontar stock al confirmar pedido (si aplica).
 
+-- 9. Descontar stock al confirmar pedido (si aplica).
+CREATE OR REPLACE FUNCTION confirmar_pedido_descontar(p_pedido_id INT)
+RETURNS VOID AS $$
+BEGIN
+    -- Verificar que el pedido exista
+    IF NOT EXISTS (
+        SELECT 1 FROM pedidos
+        WHERE pedido_id = p_pedido_id
+    ) THEN
+        RAISE EXCEPTION 'No existe el pedido con ID %', p_pedido_id;
+    END IF;
+
+    -- Cambiar estado a 'entregado'
+    UPDATE pedidos
+    SET estado = 'entregado'
+    WHERE pedido_id = p_pedido_id;
+
+    -- Descontar stock solo en productos que tengan stock definido
+    UPDATE productos
+    SET stock = stock - dp.cantidad
+    FROM detalle_pedidos dp
+    WHERE productos.producto_id = dp.producto_id
+      AND dp.pedido_id = p_pedido_id
+      AND productos.stock IS NOT NULL;
+END;
+$$ LANGUAGE plpgsql;
+-- Ejmplo de uso: 
+-- SELECT confirmar_pedido_descontar(1);
+-- En este caso, se cambiara a entregado (el pedido 1) y se descontará el stock de los productos en el pedido con ID 1.
 
 -- Triggers
 -- 10. Insertar automáticamente la fecha de entrega al marcar como entregado.
