@@ -1,0 +1,84 @@
+package Grupo4.Lab2.Repositories;
+
+
+import Grupo4.Lab2.Entities.EmpresaEntity;
+import Grupo4.Lab2.Entities.UsuarioEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+import org.sql2o.Connection;
+import org.sql2o.Sql2o;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public class EmpresaRepository {
+
+    private final Sql2o sql2o;
+
+    @Autowired
+    public EmpresaRepository(Sql2o sql2o){
+        this.sql2o = sql2o;
+    }
+
+    public List<EmpresaEntity> findAll(){
+        String sql = "SELECT * FROM empresas";
+        try (Connection con = sql2o.open()){
+            List<EmpresaEntity> empresas = con.createQuery(sql)
+                    .executeAndFetch(EmpresaEntity.class);
+            return empresas;
+        }
+    }
+
+    public EmpresaEntity findById(long id){
+        String sql = "SELECT * FROM empresas WHERE empresa_id = :id";
+        try (Connection con = sql2o.open()){
+            return con.createQuery(sql)
+                    .addParameter("id", id)
+                    .executeAndFetchFirst(EmpresaEntity.class);
+        }
+    }
+    public String findNombreById(long id){
+        String sql = "SELECT empresas.nombre FROM empresas WHERE empresa_id = :id";
+        try (Connection con = sql2o.open()){
+            return con.createQuery(sql)
+                    .addParameter("id",id)
+                    .executeAndFetchFirst(String.class);
+        }
+    }
+    public void save(EmpresaEntity empresa){
+        String sql = "INSERT INTO empresas (nombre, direccion, tipo_servicio) VALUES (:nombre, :direccion, :tipo_servicio)";
+        try (Connection con = sql2o.beginTransaction()){
+            Long generatedId = con.createQuery(sql, true)
+                    .addParameter("nombre", empresa.getNombre())
+                    .addParameter("direccion", empresa.getDireccion())
+                    .addParameter("tipo_servicio", empresa.getTipoServicio())
+                    .executeUpdate()
+                    .getKey(Long.class);
+            empresa.setEmpresaId(generatedId);
+            con.commit();
+        }
+    }
+    public void update(EmpresaEntity empresa) {
+        String sql = "UPDATE empresas SET nombre = :nombre, direccion = :direccion, tipo_servicio = :tipo_servicio WHERE empresa_id = :empresa_id";
+        try (Connection con = sql2o.beginTransaction()) {
+            con.createQuery(sql)
+                    .addParameter("nombre", empresa.getNombre())
+                    .addParameter("direccion", empresa.getDireccion())
+                    .addParameter("tipo_servicio", empresa.getTipoServicio())
+                    .addParameter("empresa_id", empresa.getEmpresaId())
+                    .executeUpdate();
+            con.commit();
+        }
+    }
+
+    public void deleteById(long id){
+        String sql = "DELETE FROM empresas WHERE empresa_id = :id";
+        try (Connection con = sql2o.open()){
+            con.createQuery(sql)
+                    .addParameter("id", id)
+                    .executeUpdate();
+        }
+    }
+
+}
