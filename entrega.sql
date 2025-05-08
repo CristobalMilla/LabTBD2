@@ -157,6 +157,20 @@ INSERT INTO calificaciones (pedido_id, puntuacion, comentario) VALUES
 
 -- Consultas SQL complejas
 -- 1. ¿Qué cliente ha gastado más dinero en pedidos entregados?
+SELECT sp.id_cliente, c.nombre AS cliente, sp.num_pedidos AS num_pedidos_pagados, sp.suma_pagos
+FROM clientes c
+INNER JOIN (SELECT p.cliente_id AS id_cliente, COUNT(*) AS num_pedidos, SUM(pa.monto) AS suma_pagos
+			FROM pedidos p
+			INNER JOIN pagos pa ON p.pedido_id = pa.pedido_id
+			WHERE p.estado = 'entregado'
+			GROUP BY p.cliente_id) AS sp
+ON c.cliente_id = sp.id_cliente
+WHERE sp.suma_pagos = (SELECT MAX(suma_pagos) AS max_pagos
+					   FROM (SELECT p.cliente_id, SUM(pa.monto) AS suma_pagos
+						     FROM pedidos p
+						     INNER JOIN pagos pa ON p.pedido_id = pa.pedido_id
+						     WHERE p.estado = 'entregado'
+						     GROUP BY p.cliente_id));
 
 -- 2. ¿Cuáles son los productos o servicios más pedidos en el último mes por categoría?
 
@@ -221,7 +235,22 @@ EXECUTE FUNCTION registrar_notificacion_critica();
 
 
 -- 12. Insertar una calificación automática si no se recibe en 48 horas.
+CREATE OR REPLACE FUNCTION calificacion_auto() RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO calificaciones ("pedido_id", "puntuacion", "comentario")
+    SELECT p.pedido_id, 3, 'calificado automaticamente'
+    FROM pedidos p
+    LEFT JOIN calificaciones c ON p.pedido_id = c.pedido_id
+    WHERE c.pedido_id IS NULL
+    AND p.fecha + INTERVAL '48 hours' <= NOW();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE TRIGGER activar_calificacion_auto
+AFTER INSERT ON pedidos
+	FOR EACH STATEMENT
+EXECUTE FUNCTION calificacion_auto();
 
 -- Vistas
 -- 13. Resumen de pedidos por cliente (monto total, número de pedidos).
