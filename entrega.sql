@@ -265,12 +265,20 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE TRIGGER activar_calificacion_auto
-AFTER INSERT ON pedidos
+	AFTER INSERT ON pedidos
 	FOR EACH STATEMENT
-EXECUTE FUNCTION calificacion_auto();
+	EXECUTE FUNCTION calificacion_auto();
+
 
 -- Vistas
 -- 13. Resumen de pedidos por cliente (monto total, número de pedidos).
+CREATE OR REPLACE VIEW resumen_pedidos_x_cliente AS
+	SELECT p.cliente_id id, c.nombre AS nombre_cliente, COUNT(*) AS num_pedidos, SUM(pa.monto) AS monto_total
+	FROM pedidos p
+	INNER JOIN pagos pa ON p.pedido_id = pa.pedido_id
+	INNER JOIN clientes c ON c.cliente_id = p.cliente_id
+	WHERE p.estado = 'entregado'
+	GROUP BY p.cliente_id, c.nombre;
 
 -- 14. Vista de desempeño por repartidor.
 
