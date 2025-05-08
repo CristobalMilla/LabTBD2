@@ -27,7 +27,8 @@ CREATE TABLE productos (
     nombre VARCHAR(100),
     descripcion TEXT,
     precio DECIMAL(10,2),
-    requiere_receta BOOLEAN DEFAULT false
+    requiere_receta BOOLEAN DEFAULT false,
+    categoria VARCHAR(100) 
 );
 
 CREATE TABLE pedidos (
@@ -78,14 +79,14 @@ INSERT INTO empresas (nombre, direccion, tipo_servicio) VALUES
 ('Farmacia Salud', 'Av. Salud 101', 'medicamentos'),
 ('Express Documentos', 'Calle Oficina 22', 'documentos');
 
-INSERT INTO productos (empresa_id, nombre, descripcion, precio, requiere_receta) VALUES
-(1, 'Paracetamol 500mg', 'Analgésico y antipirético', 2500, false),
-(1, 'Amoxicilina 500mg', 'Antibiótico', 4200, true),
-(2, 'Envío carta notarial', 'Servicio de entrega certificada', 8000, false);
+INSERT INTO productos (empresa_id, nombre, descripcion, precio, requiere_receta, categoria) VALUES
+(1, 'Paracetamol 500mg', 'Analgésico y antipirético', 2500, false, 'Medicamentos'),
+(1, 'Amoxicilina 500mg', 'Antibiótico', 4200, true, 'Medicamentos'),
+(2, 'Envío carta notarial', 'Servicio de entrega certificada', 8000, false, 'Documentos');
 
 INSERT INTO pedidos (cliente_id, empresa_id, repartidor_id, fecha, estado) VALUES
-(1, 1, 1, '2025-03-20 09:00:00', 'entregado'),
-(2, 2, 2, '2025-03-21 14:00:00', 'cancelado');
+(1, 1, 1, '2025-05-20 09:00:00', 'entregado'),
+(2, 2, 2, '2025-05-21 14:00:00', 'cancelado');
 
 INSERT INTO detalle_pedidos (pedido_id, producto_id, cantidad) VALUES
 (1, 1, 2),
@@ -173,6 +174,22 @@ WHERE sp.suma_pagos = (SELECT MAX(suma_pagos) AS max_pagos
 						     GROUP BY p.cliente_id));
 
 -- 2. ¿Cuáles son los productos o servicios más pedidos en el último mes por categoría?
+SELECT categoria, producto_id, nombre, total_cantidad
+FROM (
+    SELECT 
+        p.categoria,
+        p.producto_id,
+        p.nombre,
+        SUM(dp.cantidad) AS total_cantidad,
+        RANK() OVER(PARTITION BY p.categoria ORDER BY SUM(dp.cantidad) DESC) AS rnk
+    FROM pedidos pe
+    INNER JOIN detalle_pedidos dp ON pe.pedido_id = dp.pedido_id
+    INNER JOIN productos p ON dp.producto_id = p.producto_id
+    WHERE pe.fecha >= CURRENT_DATE - INTERVAL '1 month'
+    GROUP BY p.categoria, p.producto_id, p.nombre
+) t
+WHERE rnk = 1
+ORDER BY categoria;
 
 -- 3. Listar las empresas asociadas con más entregas fallidas.
 SELECT e.empresa_id, e.nombre AS empresa_nombre, COUNT(p.pedido_id) AS pedidos_cancelados_count
@@ -248,12 +265,20 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE TRIGGER activar_calificacion_auto
-AFTER INSERT ON pedidos
+	AFTER INSERT ON pedidos
 	FOR EACH STATEMENT
-EXECUTE FUNCTION calificacion_auto();
+	EXECUTE FUNCTION calificacion_auto();
+
 
 -- Vistas
 -- 13. Resumen de pedidos por cliente (monto total, número de pedidos).
+CREATE OR REPLACE VIEW resumen_pedidos_x_cliente AS
+	SELECT p.cliente_id id, c.nombre AS nombre_cliente, COUNT(*) AS num_pedidos, SUM(pa.monto) AS monto_total
+	FROM pedidos p
+	INNER JOIN pagos pa ON p.pedido_id = pa.pedido_id
+	INNER JOIN clientes c ON c.cliente_id = p.cliente_id
+	WHERE p.estado = 'entregado'
+	GROUP BY p.cliente_id, c.nombre;
 
 -- 14. Vista de desempeño por repartidor.
 
