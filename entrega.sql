@@ -262,11 +262,11 @@ CREATE OR REPLACE FUNCTION registrar_pedido(
        p_empresa_id INT,
        p_repartidor_id INT,
        p_estado VARCHAR,
-       p_productos INT[],
+       p_productos INT[], --lista de id de productos
        p_cantidades INT[],
        p_medio_pago_id INT
 )
-RETURNS VOID AS $$
+RETURNS INT AS $$
 DECLARE
        nuevo_id INT; --id del pedido
        i INT; -- indice, empieza en 1
@@ -290,6 +290,8 @@ BEGIN
     JOIN productos P ON P.producto_id = DP.producto_id
     WHERE DP.pedido_id = nuevo_id
     GROUP BY DP.pedido_id; --agrupamos x id del pedido
+
+    RETURN nuevo_id;
 END;
 $$ LANGUAGE plpgsql;
 --ejemplo:
