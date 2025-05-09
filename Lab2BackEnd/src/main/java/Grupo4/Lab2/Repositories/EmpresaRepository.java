@@ -35,14 +35,7 @@ public class EmpresaRepository {
                     .executeAndFetchFirst(EmpresaEntity.class);
         }
     }
-    public String findNombreById(long empresa_id){
-        String sql = "SELECT empresas.nombre FROM empresas WHERE empresa_id = :empresa_id";
-        try (Connection con = sql2o.open()){
-            return con.createQuery(sql)
-                    .addParameter("empresa_id",empresa_id)
-                    .executeAndFetchFirst(String.class);
-        }
-    }
+
     public void save(EmpresaEntity empresa){
         String sql = "INSERT INTO empresas (nombre, direccion, tipo_servicio) VALUES (:nombre, :direccion, :tipo_servicio)";
         try (Connection con = sql2o.beginTransaction()){

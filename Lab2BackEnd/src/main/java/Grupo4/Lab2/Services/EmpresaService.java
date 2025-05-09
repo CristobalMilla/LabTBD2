@@ -17,9 +17,7 @@ public class EmpresaService {
     public List<EmpresaEntity> findAll() {
         return empresaRepository.findAll();
     }
-    public String findNombreById(long id) {
-        return empresaRepository.findNombreById(id);
-    }
+
     public void save(EmpresaEntity empresa) {
         empresaRepository.save(empresa);
     }
