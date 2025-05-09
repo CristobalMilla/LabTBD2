@@ -20,4 +20,8 @@ public class PedidosService {
         return pedidosRepository.registrarPedido(dto);
     }
 
+    public void cambiarEstadoPedido(int pedidoId, String nuevoEstado) {
+        pedidosRepository.cambiarEstadoPedido(pedidoId, nuevoEstado);
+    }
+
 }

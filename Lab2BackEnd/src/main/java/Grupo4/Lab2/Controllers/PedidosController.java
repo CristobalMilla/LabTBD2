@@ -6,10 +6,7 @@ import Grupo4.Lab2.Services.PedidosService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/api/pedidos")
@@ -31,6 +28,16 @@ public class PedidosController {
             return ResponseEntity.badRequest().body("Datos inválidos: " + e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error interno: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/cambiar-estado/{pedido_id}/{nuevo_estado}")
+    public ResponseEntity<String> cambiarEstadoPedido(@PathVariable("pedido_id") int pedidoId, @PathVariable("nuevo_estado") String nuevoEstado) {
+        try {
+            pedidosService.cambiarEstadoPedido(pedidoId, nuevoEstado);
+            return ResponseEntity.ok("Estado del pedido actualizado correctamente.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
 }

@@ -47,32 +47,6 @@ public class PedidosRepository {
         }
     }
 
-    public void update(PedidosEntity pedido) {
-        try (Connection conn = sql2o.open()) {
-            String query = "UPDATE pedidos SET " +
-                    "cliente_id = :clienteId, " +
-                    "empresa_id = :empresaId, " +
-                    "repartidor_id = :repartidorId, " +
-                    "fecha = :fecha, " +
-                    "fecha_entrega = :fechaEntrega, " +
-                    "estado = :estado " +
-
-                    "WHERE pedido_id = :pedidoId";
-
-            conn.createQuery(query)
-                    .addParameter("clienteId", pedido.getCliente_id())
-                    .addParameter("empresaId", pedido.getEmpresa_id())
-                    .addParameter("repartidorId", pedido.getRepartidor_id())
-                    .addParameter("fecha", pedido.getFecha())
-                    .addParameter("fechaEntrega", pedido.getFecha_entrega())
-                    .addParameter("estado", pedido.getEstado())
-                    .addParameter("pedidoId", pedido.getPedido_id())
-                    .executeUpdate();
-        } catch (Exception e) {
-            System.err.println("Error al actualizar el pedido con ID " + pedido.getPedido_id() + ": " + e.getMessage());
-        }
-    }
-
     public void deleteById(long idPedido) {
         try (Connection conn = sql2o.open()) {
             String query = "DELETE FROM pedidos WHERE pedido_id = :idPedido";
@@ -84,41 +58,59 @@ public class PedidosRepository {
         }
     }
 
-        // 7.
-        public boolean registrarPedido(RegistrarPedidoDTO dto) {
-            String sql = "SELECT registrar_pedido(" +
-                        ":clienteId," +
-                        ":empresaId," +
-                        ":repartidorId, " +
-                        ":estado, " +
-                        ":productos, " +
-                        ":cantidades, " +
-                        ":medioPagoId::INTEGER)";
+    // 7.
+    public boolean registrarPedido(RegistrarPedidoDTO dto) {
+        String sql = "SELECT registrar_pedido(" +
+                    ":clienteId," +
+                    ":empresaId," +
+                    ":repartidorId, " +
+                    ":estado, " +
+                    ":productos, " +
+                    ":cantidades, " +
+                    ":medioPagoId::INTEGER)";
 
-            try (Connection conn = sql2o.open()) {
-                // Acceder a la conexión JDBC subyacente
-                java.sql.Connection jdbcConn = conn.getJdbcConnection();
+        try (Connection conn = sql2o.open()) {
+            // Acceder a la conexión JDBC para usar el createArray
+            java.sql.Connection jdbcConn = conn.getJdbcConnection();
 
-                // Crear los arreglos SQL
-                Array productosSql = jdbcConn.createArrayOf("INTEGER", dto.getProductos());
-                Array cantidadesSql = jdbcConn.createArrayOf("INTEGER", dto.getCantidades());
+            // Crea un sql array de tipo INTEGER[]
+            // basicamente convierte el arrreglo Integer[] a SQL INTEGER[]
+            Array productosSql = jdbcConn.createArrayOf("INTEGER", dto.getProductos());
+            Array cantidadesSql = jdbcConn.createArrayOf("INTEGER", dto.getCantidades());
 
-                Object result = conn.createQuery(sql)
-                        .addParameter("clienteId", dto.getCliente_id())
-                        .addParameter("empresaId", dto.getEmpresa_id())
-                        .addParameter("repartidorId", dto.getRepartidor_id())
-                        .addParameter("estado", dto.getEstado())
-                        .addParameter("productos", productosSql) // el objeto productos
-                        .addParameter("cantidades", cantidadesSql)
-                        .addParameter("medioPagoId", dto.getMedio_pago_id())
-                        .executeScalar();
+            Object result = conn.createQuery(sql)
+                    .addParameter("clienteId", dto.getCliente_id())
+                    .addParameter("empresaId", dto.getEmpresa_id())
+                    .addParameter("repartidorId", dto.getRepartidor_id())
+                    .addParameter("estado", dto.getEstado())
+                    .addParameter("productos", productosSql) // el objeto productos
+                    .addParameter("cantidades", cantidadesSql)
+                    .addParameter("medioPagoId", dto.getMedio_pago_id())
+                    .executeScalar();
 
-                long id_pedido = ((Number) result).longValue();
-                System.out.println("Pedido registrado con ID: " + id_pedido);
-                return true;
-            } catch (Exception e) {
-                System.err.println("Error al registrar el pedido: " + e.getMessage());
-                return false;
-            }
+            long id_pedido = ((Number) result).longValue();
+            System.out.println("Pedido registrado con ID: " + id_pedido);
+            return true;
+        } catch (Exception e) {
+            Throwable cause = e.getCause(); // toma la excepcion original y revisa si fue causada x una excepción interna
+            String mensaje = cause != null ? cause.getMessage() : e.getMessage(); // si la causa interna es null se muestra la excepcion principal, si no la especifica
+            System.err.println("Error al registrar el pedido: \n" + mensaje);// se imprime el mensaje de error
+            throw new RuntimeException(mensaje, e);// permite q el controlador devuelva el msj al frontend como postman x ej
         }
+    }
+
+    // 8. y 10 (trigger)
+    public void cambiarEstadoPedido(int pedidoId, String nuevoEstado) {
+        String sql = "SELECT cambiar_estado_pedido(:pedidoId, :nuevoEstado)";
+
+        try (Connection conn = sql2o.open()) {
+            conn.createQuery(sql)
+                    .addParameter("pedidoId", pedidoId)
+                    .addParameter("nuevoEstado", nuevoEstado)
+                    .executeScalar();
+        } catch (Exception e) {
+            System.err.println("Error al cambiar estado del pedido " + pedidoId + "\n" + e.getMessage());
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
 }

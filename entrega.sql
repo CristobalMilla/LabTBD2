@@ -314,7 +314,7 @@ BEGIN
     -- verficamos que el pedido exista
     IF NOT EXISTS (
             SELECT 1 FROM pedidos
-            WHERE pedido_id = pedido_id
+            WHERE pedido_id = p_pedido_id
     ) THEN
         RAISE EXCEPTION 'En la función cambiar_estado_pedido. Se ingresó un pedido de id % que no existe.', p_pedido_id;
     END IF;
