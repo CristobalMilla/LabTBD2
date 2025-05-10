@@ -87,7 +87,7 @@ public class RepartidorRepository {
 
     public List<RepartidorEntregaDTO> tiemposRepartidoresEntregaMinutos(){
         String sql = """
-        SELECT r.repartidor_id, r.nombre, r.telefono, r.disponible, AVG(EXTRACT(EPOCH FROM p.fecha_entrega - p.fecha) / 86400) as avg_tiempo_entrega_min 
+        SELECT r.nombre as repartidor, AVG(EXTRACT(EPOCH FROM p.fecha_entrega - p.fecha) / 86400) as avg_tiempo_entrega_min 
                                                                FROM repartidores as r
                                                                INNER JOIN pedidos as p ON r.repartidor_id = p.repartidor_id
                                                                WHERE p.estado = 'entregado'
@@ -102,6 +102,7 @@ public class RepartidorRepository {
 
     public List<RepartidorVistaDTO> repartidoresVista(){
         String sql = """
+        CREATE OR REPLACE VIEW repartidores_desempenios AS
         SELECT r.nombre as repartidor, COUNT(p.pedido_id) as pedidos, AVG(c.puntuacion) as calificacion_promedio
                                                                         FROM (repartidores as r
                                                                         INNER JOIN pedidos as p ON r.repartidor_id = p.repartidor_id)\s

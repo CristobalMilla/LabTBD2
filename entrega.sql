@@ -234,7 +234,7 @@ HAVING COUNT(p.pedido_id) > 0
 ORDER BY pedidos_cancelados_count DESC;
 
 -- 4. Calcular el tiempo promedio entre pedido y entrega por repartidor.
-SELECT r.repartidor_id, r.nombre, r.telefono, r.disponible, AVG(EXTRACT(EPOCH FROM p.fecha_entrega - p.fecha) / 86400) as avg_tiempo_entrega_min
+SELECT r.nombre as repartidor, AVG(EXTRACT(EPOCH FROM p.fecha_entrega - p.fecha) / 86400) as avg_tiempo_entrega_min
 FROM repartidores as r
 INNER JOIN pedidos as p ON r.repartidor_id = p.repartidor_id
 WHERE p.estado = 'entregado'
@@ -459,6 +459,7 @@ CREATE OR REPLACE VIEW resumen_pedidos_x_cliente AS
 	GROUP BY p.cliente_id, c.nombre;
 
 -- 14. Vista de desempeño por repartidor.
+CREATE OR REPLACE VIEW repartidores_desempenios AS
 SELECT r.nombre as repartidor, COUNT(p.pedido_id) as pedidos_entregados, AVG(c.puntuacion) as calificación_avg
 FROM (repartidores as r
     INNER JOIN pedidos as p ON r.repartidor_id = p.repartidor_id)
