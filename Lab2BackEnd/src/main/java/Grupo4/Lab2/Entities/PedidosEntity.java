@@ -1,6 +1,8 @@
 package Grupo4.Lab2.Entities;
 
-import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import java.sql.Timestamp;
 
 public class PedidosEntity {
 
@@ -8,11 +10,16 @@ public class PedidosEntity {
     private int cliente_id;
     private int empresa_id;
     private int repartidor_id;
-    private LocalDateTime fecha;
-    private LocalDateTime fecha_entrega;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private Timestamp fecha;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private Timestamp fecha_entrega;
+
     private String estado;
 
-    public PedidosEntity(long pedido_id, int cliente_id, int empresa_id, int repartidor_id, LocalDateTime fecha, LocalDateTime fecha_entrega, String estado) {
+    public PedidosEntity(long pedido_id, int cliente_id, int empresa_id, int repartidor_id, Timestamp fecha, Timestamp fecha_entrega, String estado) {
         this.pedido_id = pedido_id;
         this.cliente_id = cliente_id;
         this.empresa_id = empresa_id;
@@ -41,11 +48,11 @@ public class PedidosEntity {
         return repartidor_id;
     }
 
-    public LocalDateTime getFecha() {
+    public Timestamp getFecha() {
         return fecha;
     }
 
-    public LocalDateTime getFecha_entrega() {
+    public Timestamp getFecha_entrega() {
         return fecha_entrega;
     }
 
@@ -69,11 +76,11 @@ public class PedidosEntity {
         this.repartidor_id = repartidor_id;
     }
 
-    public void setFecha(LocalDateTime fecha) {
+    public void setFecha(Timestamp fecha) {
         this.fecha = fecha;
     }
 
-    public void setFecha_entrega(LocalDateTime fecha_entrega) {
+    public void setFecha_entrega(Timestamp fecha_entrega) {
         this.fecha_entrega = fecha_entrega;
     }
 
