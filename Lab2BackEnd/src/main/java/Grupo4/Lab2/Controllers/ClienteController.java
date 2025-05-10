@@ -1,5 +1,7 @@
 package Grupo4.Lab2.Controllers;
 
+import Grupo4.Lab2.DTO.ClienteQueMasAGastadoDTO;
+import Grupo4.Lab2.DTO.ResumenPedidosXClienteDTO;
 import Grupo4.Lab2.Entities.ClienteEntity;
 import Grupo4.Lab2.Services.ClienteService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,5 +52,17 @@ public class ClienteController {
         catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+    }
+
+    @GetMapping("/quienMasAGastado")
+    public ResponseEntity<ClienteQueMasAGastadoDTO> getQuienMasAGastado() {
+        ClienteQueMasAGastadoDTO cliente = clienteService.getClienteQueMasAGastado();
+        return ResponseEntity.ok(cliente);
+    }
+
+    @GetMapping("/resumenPedidosPorCliente")
+    public ResponseEntity<List<ResumenPedidosXClienteDTO>> getResumenPedidosPorCliente() {
+        List<ResumenPedidosXClienteDTO> resumenes = clienteService.getResumenPedidosXCliente();
+        return ResponseEntity.ok(resumenes);
     }
 }

@@ -1,5 +1,7 @@
 package Grupo4.Lab2.Services;
 
+import Grupo4.Lab2.DTO.ClienteQueMasAGastadoDTO;
+import Grupo4.Lab2.DTO.ResumenPedidosXClienteDTO;
 import Grupo4.Lab2.Entities.ClienteEntity;
 import Grupo4.Lab2.Repositories.ClienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,5 +32,13 @@ public class ClienteService {
 
     public void delete(long idCliente) {
         clienteRepo.deleteById(idCliente);
+    }
+
+    public ClienteQueMasAGastadoDTO getClienteQueMasAGastado(){
+        return clienteRepo.getClienteQueMasAGastado();
+    }
+
+    public List<ResumenPedidosXClienteDTO> getResumenPedidosXCliente(){
+        return clienteRepo.getResumenPedidosXCliente();
     }
 }

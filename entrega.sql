@@ -191,7 +191,7 @@ VALUES
 
 -- Consultas SQL complejas
 -- 1. ¿Qué cliente ha gastado más dinero en pedidos entregados?
-SELECT sp.id_cliente, c.nombre AS cliente, sp.num_pedidos AS num_pedidos_pagados, sp.suma_pagos
+SELECT sp.id_cliente, c.nombre AS nombre, sp.num_pedidos AS num_pedidos_pagados, sp.suma_pagos
 FROM clientes c
 INNER JOIN (SELECT p.cliente_id AS id_cliente, COUNT(*) AS num_pedidos, SUM(pa.monto) AS suma_pagos
 			FROM pedidos p
