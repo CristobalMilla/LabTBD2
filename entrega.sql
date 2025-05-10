@@ -234,6 +234,12 @@ HAVING COUNT(p.pedido_id) > 0
 ORDER BY pedidos_cancelados_count DESC;
 
 -- 4. Calcular el tiempo promedio entre pedido y entrega por repartidor.
+SELECT r.repartidor_id, r.nombre, r.telefono, r.disponible, AVG(EXTRACT(EPOCH FROM p.fecha_entrega - p.fecha) / 86400) as avg_tiempo_entrega_min
+FROM repartidores as r
+INNER JOIN pedidos as p ON r.repartidor_id = p.repartidor_id
+WHERE p.estado = 'entregado'
+GROUP BY r.repartidor_id;
+
 
 -- 5. Obtener los 3 repartidores con mejor rendimiento (basado en entregas y puntuación).
 SELECT r.nombre as repartidor, COUNT(p.pedido_id) as pedidos, AVG(c.puntuacion) as calificación_avg
@@ -453,7 +459,12 @@ CREATE OR REPLACE VIEW resumen_pedidos_x_cliente AS
 	GROUP BY p.cliente_id, c.nombre;
 
 -- 14. Vista de desempeño por repartidor.
-
+SELECT r.nombre as repartidor, COUNT(p.pedido_id) as pedidos_entregados, AVG(c.puntuacion) as calificación_avg
+FROM (repartidores as r
+    INNER JOIN pedidos as p ON r.repartidor_id = p.repartidor_id)
+         FULL JOIN calificaciones as c ON p.pedido_id = c.pedido_id
+WHERE p.estado = 'entregado'
+GROUP BY r.repartidor_id;
 -- 15. Vista de empresas asociadas con mayor volumen de paquetes entregados.
 CREATE OR REPLACE VIEW empresas_mas_pedidos_entregados AS
 SELECT e.empresa_id, e.nombre AS empresa_nombre, COUNT(p.pedido_id) AS total_pedidos_entregados
