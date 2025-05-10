@@ -1,5 +1,7 @@
 package Grupo4.Lab2.Repositories;
 
+import Grupo4.Lab2.DTO.ClienteQueMasAGastadoDTO;
+import Grupo4.Lab2.DTO.ResumenPedidosXClienteDTO;
 import Grupo4.Lab2.Entities.ClienteEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -86,6 +88,46 @@ public class ClienteRepository {
             conn.createQuery(query)
                     .addParameter("idCliente", idCliente)
                     .executeUpdate();
+        }
+    }
+
+    // Query 1
+    public ClienteQueMasAGastadoDTO getClienteQueMasAGastado(){
+        try (Connection conn = sql2o.open()) {
+            ClienteQueMasAGastadoDTO cliente;
+            String query =
+                    "SELECT sp.id_cliente, c.nombre AS nombre, sp.num_pedidos AS num_pedidos_pagados, sp.suma_pagos " +
+                    "FROM clientes c " +
+                    "INNER JOIN (SELECT p.cliente_id AS id_cliente, COUNT(*) AS num_pedidos, SUM(pa.monto) AS suma_pagos " +
+                        "FROM pedidos p " +
+                        "INNER JOIN pagos pa ON p.pedido_id = pa.pedido_id " +
+                        "WHERE p.estado = 'entregado' " +
+                        "GROUP BY p.cliente_id) AS sp " +
+                    "ON c.cliente_id = sp.id_cliente " +
+                    "WHERE sp.suma_pagos = (SELECT MAX(suma_pagos) AS max_pagos " +
+                                            "FROM (SELECT p.cliente_id, SUM(pa.monto) AS suma_pagos " +
+                                            "FROM pedidos p " +
+                                            "INNER JOIN pagos pa ON p.pedido_id = pa.pedido_id " +
+                                            "WHERE p.estado = 'entregado' " +
+                                            "GROUP BY p.cliente_id))";
+            cliente = conn.createQuery(query).executeAndFetchFirst(ClienteQueMasAGastadoDTO.class);
+            return cliente;
+        }
+        catch (Exception e){
+            return null;
+        }
+    }
+
+    // View 13
+    public List<ResumenPedidosXClienteDTO> getResumenPedidosXCliente() {
+        try (Connection conn = sql2o.open()) {
+            List<ResumenPedidosXClienteDTO> resumenes;
+            String query = "SELECT * FROM resumen_pedidos_x_cliente";
+            resumenes = conn.createQuery(query).executeAndFetch(ResumenPedidosXClienteDTO.class);
+            return resumenes;
+        }
+        catch (Exception e){
+            return null;
         }
     }
 }

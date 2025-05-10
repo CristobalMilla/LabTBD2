@@ -1,23 +1,23 @@
 package Grupo4.Lab2.Entities;
 
 public class EmpresaEntity {
-    private long empresaId;
+    private long empresa_id;
     private String nombre;
     private String direccion;
-    private String tipoServicio;
+    private String tipo_servicio;
 
-    public EmpresaEntity(String nombre, long empresaId, String direccion, String tipoServicio) {
+    public EmpresaEntity(String nombre, long empresa_id, String direccion, String tipo_servicio) {
         this.nombre = nombre;
-        this.empresaId = empresaId;
+        this.empresa_id = empresa_id;
         this.direccion = direccion;
-        this.tipoServicio = tipoServicio;
+        this.tipo_servicio = tipo_servicio;
     }
 
     public EmpresaEntity() {
     }
 
     public long getEmpresaId() {
-        return empresaId;
+        return empresa_id;
     }
 
     public String getNombre() {
@@ -29,11 +29,11 @@ public class EmpresaEntity {
     }
 
     public String getTipoServicio() {
-        return tipoServicio;
+        return tipo_servicio;
     }
 
-    public void setEmpresaId(long empresaId) {
-        this.empresaId = empresaId;
+    public void setEmpresaId(long empresa_id) {
+        this.empresa_id = empresa_id;
     }
 
     public void setNombre(String nombre) {
@@ -44,7 +44,7 @@ public class EmpresaEntity {
         this.direccion = direccion;
     }
 
-    public void setTipoServicio(String tipoServicio) {
-        this.tipoServicio = tipoServicio;
+    public void setTipoServicio(String tipo_servicio) {
+        this.tipo_servicio = tipo_servicio;
     }
 }
