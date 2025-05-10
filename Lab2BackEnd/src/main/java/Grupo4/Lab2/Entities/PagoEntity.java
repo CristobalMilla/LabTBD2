@@ -3,15 +3,15 @@ package Grupo4.Lab2.Entities;
 import java.math.BigDecimal;
 
 public class PagoEntity {
-    private long pagoId;
-    private long pedidoId;
-    private long medioId;
+    private long pago_id;
+    private long pedido_id;
+    private long medio_id;
     private BigDecimal monto;
 
-    public PagoEntity(long pagoId, long pedidoId, long medioId, BigDecimal monto) {
-        this.pagoId = pagoId;
-        this.pedidoId = pedidoId;
-        this.medioId = medioId;
+    public PagoEntity(long pago_id, long pedido_id, long medio_id, BigDecimal monto) {
+        this.pago_id = pago_id;
+        this.pedido_id = pedido_id;
+        this.medio_id = medio_id;
         this.monto = monto;
     }
 
@@ -19,31 +19,31 @@ public class PagoEntity {
     }
 
     public long getPagoId() {
-        return pagoId;
+        return pago_id;
     }
 
     public long getPedidoId() {
-        return pedidoId;
+        return pedido_id;
     }
 
     public long getMedioId() {
-        return medioId;
+        return medio_id;
     }
 
     public BigDecimal getMonto() {
         return monto;
     }
 
-    public void setPagoId(long pagoId) {
-        this.pagoId = pagoId;
+    public void setPagoId(long pago_id) {
+        this.pago_id = pago_id;
     }
 
-    public void setPedidoId(long pedidoId) {
-        this.pedidoId = pedidoId;
+    public void setPedidoId(long pedido_id) {
+        this.pedido_id = pedido_id;
     }
 
-    public void setMedioId(long medioId) {
-        this.medioId = medioId;
+    public void setMedioId(long medio_id) {
+        this.medio_id = medio_id;
     }
 
     public void setMonto(BigDecimal monto) {
