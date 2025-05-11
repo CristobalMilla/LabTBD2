@@ -102,13 +102,7 @@ public class RepartidorRepository {
 
     public List<RepartidorVistaDTO> repartidoresVista(){
         String sql = """
-        CREATE OR REPLACE VIEW repartidores_desempenios AS
-        SELECT r.nombre as repartidor, COUNT(p.pedido_id) as pedidos, AVG(c.puntuacion) as calificacion_promedio
-                                                                        FROM (repartidores as r
-                                                                        INNER JOIN pedidos as p ON r.repartidor_id = p.repartidor_id)\s
-                                                                        FULL JOIN calificaciones as c ON p.pedido_id = c.pedido_id
-                                                                        WHERE p.estado = 'entregado'
-                                                                        GROUP BY r.repartidor_id
+        SELECT * FROM repartidores_desempenios
         """;
         try (var con = sql2o.open()) {
             return con.createQuery(sql)
