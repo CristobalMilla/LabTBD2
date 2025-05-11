@@ -89,11 +89,22 @@ CREATE TABLE IF NOT EXISTS usuario (
 -- Insertar datos de ejemplo
 INSERT INTO clientes (nombre, direccion, email, telefono) VALUES
 ('Ana Torres', 'Av. Central 123', 'ana@example.com', '912345678'),
-('Luis Pérez', 'Calle Norte 456', 'luis@example.com', '987654321');
+('Luis Pérez', 'Calle Norte 456', 'luis@example.com', '987654321'),
+('María López', 'Calle Luna 123', 'maria@example.com', '911111111'),
+('Pedro Ramírez', 'Av. Sol 456', 'pedro@example.com', '922222222'),
+('Lucía Díaz', 'Jr. Estrella 789', 'lucia@example.com', '933333333'),
+('Cristobal Milla', 'Av. La Estrella 333', 'cristobal@gmail.com', '944444444'),
+('Alvaro Munoz', 'Las rosas 956', 'alvaro@hotmail.com', '956866328'),
+('Claudia Villa', 'Pajaritos 6563', 'claudia@gmail.cl', '956864646'),
+('Sebastian Espindola', 'Gabriela 635', 'sebastian@gmail.com', '987659856'),
+('Camila Reyes', 'Ruta 5 Sur km 102', 'camila.reyes@correo.com', '966666666');
 
 INSERT INTO repartidores (nombre, telefono) VALUES
 ('Carlos Gómez', '911112223'),
-('Sofía Rojas', '922223334');
+('Sofía Rojas', '922223334'),
+('Miguel Torres', '933445566'),
+('Elena Mendoza', '944556677'),
+('Raúl Vargas', '955667788');
 
 INSERT INTO empresas (nombre, direccion, tipo_servicio) VALUES
 ('Farmacia Salud', 'Av. Salud 101', 'medicamentos'),
@@ -106,33 +117,7 @@ INSERT INTO productos (empresa_id, nombre, descripcion, precio, requiere_receta,
 
 INSERT INTO pedidos (cliente_id, empresa_id, repartidor_id, fecha, estado) VALUES
 (1, 1, 1, '2025-05-20 09:00:00', 'entregado'),
-(2, 2, 2, '2025-05-21 14:00:00', 'cancelado');
-
-INSERT INTO detalle_pedidos (pedido_id, producto_id, cantidad) VALUES
-(1, 1, 2),
-(1, 2, 1),
-(2, 3, 1);
-
-INSERT INTO medios_pago (tipo) VALUES ('Tarjeta de crédito'), ('Efectivo');
-
-INSERT INTO pagos (pedido_id, medio_id, monto) VALUES
-(1, 1, 9200),
-(2, 2, 8000);
-
-INSERT INTO calificaciones (pedido_id, puntuacion, comentario) VALUES
-(1, 5, 'Muy buen servicio y rápido.');
-
--- Insertar datos adicionales
-INSERT INTO clientes (nombre, direccion, email, telefono) VALUES
-('María López', 'Calle Luna 123', 'maria@example.com', '911111111'),
-('Pedro Ramírez', 'Av. Sol 456', 'pedro@example.com', '922222222'),
-('Lucía Díaz', 'Jr. Estrella 789', 'lucia@example.com', '933333333');
-INSERT INTO repartidores (nombre, telefono) VALUES
-('Miguel Torres', '933445566'),
-('Elena Mendoza', '944556677'),
-('Raúl Vargas', '955667788');
-
-INSERT INTO pedidos (cliente_id, empresa_id, repartidor_id, fecha, estado) VALUES
+(2, 2, 2, '2025-05-21 14:00:00', 'cancelado'),
 (3, 1, 3, '2025-03-22 10:30:00', 'entregado'),
 (4, 2, 4, '2025-03-22 12:15:00', 'entregado'),
 (5, 1, 5, '2025-03-23 09:45:00', 'entregado'),
@@ -145,6 +130,9 @@ INSERT INTO pedidos (cliente_id, empresa_id, repartidor_id, fecha, estado) VALUE
 (2, 2, 2, '2025-03-30 17:30:00', 'entregado');
 
 INSERT INTO detalle_pedidos (pedido_id, producto_id, cantidad) VALUES
+(1, 1, 2),
+(1, 2, 1),
+(2, 3, 1),
 (3, 1, 1),
 (3, 2, 1),
 (4, 3, 1),
@@ -156,7 +144,11 @@ INSERT INTO detalle_pedidos (pedido_id, producto_id, cantidad) VALUES
 (10, 1, 1),
 (10, 2, 1);
 
+INSERT INTO medios_pago (tipo) VALUES ('Tarjeta de crédito'), ('Efectivo');
+
 INSERT INTO pagos (pedido_id, medio_id, monto) VALUES
+(1, 1, 9200),
+(2, 2, 8000),
 (3, 1, 6700),
 (4, 2, 8000),
 (5, 1, 5000),
@@ -167,6 +159,7 @@ INSERT INTO pagos (pedido_id, medio_id, monto) VALUES
 (10, 2, 6700);
 
 INSERT INTO calificaciones (pedido_id, puntuacion, comentario) VALUES
+(1, 5, 'Muy buen servicio y rápido.'),
 (3, 5, 'Muy amable y rápido.'),
 (4, 4, 'Buen servicio.'),
 (5, 3, 'Tardó un poco, pero correcto.'),
