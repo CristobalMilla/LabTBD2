@@ -47,17 +47,6 @@ public class PedidosRepository {
         }
     }
 
-    public void deleteById(long idPedido) {
-        try (Connection conn = sql2o.open()) {
-            String query = "DELETE FROM pedidos WHERE pedido_id = :idPedido";
-            conn.createQuery(query)
-                    .addParameter("idPedido", idPedido)
-                    .executeUpdate();
-        } catch (Exception e){
-            System.err.println("Error al borrar el pedido de id : "+ idPedido +".\n"+ e.getMessage());
-        }
-    }
-
     // 7.
     public boolean registrarPedido(RegistrarPedidoDTO dto) {
         String sql = "SELECT registrar_pedido(" +
@@ -111,6 +100,17 @@ public class PedidosRepository {
         } catch (Exception e) {
             System.err.println("Error al cambiar estado del pedido " + pedidoId + "\n" + e.getMessage());
             throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    public void deleteById(long idPedido) {
+        try (Connection conn = sql2o.open()) {
+            String query = "DELETE FROM pedidos WHERE pedido_id = :idPedido";
+            conn.createQuery(query)
+                    .addParameter("idPedido", idPedido)
+                    .executeUpdate();
+        } catch (Exception e){
+            System.err.println("Error al borrar el pedido de id : "+ idPedido +".\n"+ e.getMessage());
         }
     }
 }

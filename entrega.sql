@@ -32,13 +32,14 @@ CREATE TABLE IF NOT EXISTS productos (
     stock INT DEFAULT NULL
 );
 
+
 CREATE TABLE IF NOT EXISTS pedidos (
     pedido_id SERIAL PRIMARY KEY,
     cliente_id INT REFERENCES clientes(cliente_id),
     empresa_id INT REFERENCES empresas(empresa_id),
     repartidor_id INT REFERENCES repartidores(repartidor_id),
-    fecha TIMESTAMP,
-    fecha_entrega timestamp,
+    fecha TIMESTAMP(0),
+    fecha_entrega TIMESTAMP(0),
     estado VARCHAR(50)
 );
 

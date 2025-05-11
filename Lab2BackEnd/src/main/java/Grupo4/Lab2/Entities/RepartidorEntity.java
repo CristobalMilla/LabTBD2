@@ -1,12 +1,12 @@
 package Grupo4.Lab2.Entities;
 
-import jakarta.persistence.*;
 
-@Entity
+
+
 public class RepartidorEntity {
 
-    @Id
-    @Column(unique = true, nullable = false)
+
+
     private long repartidor_id;
     private String nombre;
     private String telefono;
