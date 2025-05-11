@@ -38,4 +38,8 @@ public class PedidosService {
     public void delete(long pedidoId) {
         pedidosRepository.deleteById(pedidoId);
     }
+
+    public void confirmarPedidoDescontar(int pedidoId) {
+        pedidosRepository.confirmarPedidoDescontar(pedidoId);
+    }
 }

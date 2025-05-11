@@ -113,4 +113,17 @@ public class PedidosRepository {
             System.err.println("Error al borrar el pedido de id : "+ idPedido +".\n"+ e.getMessage());
         }
     }
+
+    // Procedimiento 9.
+    public void confirmarPedidoDescontar(int pedidoId) {
+        String sql = "SELECT confirmar_pedido_descontar(:pedidoId)";
+        try (Connection conn = sql2o.open()) {
+            conn.createQuery(sql)
+                .addParameter("pedidoId", pedidoId)
+                .executeScalar();
+        } catch (Exception e) {
+            System.err.println("Error al confirmar y descontar el pedido " + pedidoId + "\n" + e.getMessage());
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
 }

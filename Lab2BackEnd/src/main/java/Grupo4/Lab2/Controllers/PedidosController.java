@@ -69,4 +69,13 @@ public class PedidosController {
         }
     }
 
+    @PostMapping("/confirmar-descontar/{pedidoId}")
+    public ResponseEntity<String> confirmarPedidoDescontar(@PathVariable("pedidoId") int pedidoId) {
+        try {
+            pedidosService.confirmarPedidoDescontar(pedidoId);
+            return ResponseEntity.ok("Pedido confirmado y stock descontado correctamente.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
 }
