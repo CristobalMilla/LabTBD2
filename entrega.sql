@@ -142,27 +142,27 @@ INSERT INTO productos (empresa_id, nombre, descripcion, precio, requiere_receta,
 (5, 'Recarga de Lapiz de pizarra negro', 'Envio de recarga de lapiz pizarra', 700, false, 'Recara de Lapiz Pizarra', 100);
 
 
-INSERT INTO pedidos (cliente_id, empresa_id, repartidor_id, fecha, estado) VALUES
-(1, 1, 1, '2025-05-20 09:00:00', 'entregado'),
-(2, 2, 2, '2025-05-21 14:00:00', 'cancelado'),
-(3, 1, 3, '2025-03-22 10:30:00', 'entregado'),
-(4, 2, 4, '2025-03-22 12:15:00', 'entregado'),
-(5, 1, 5, '2025-03-23 09:45:00', 'entregado'),
-(1, 2, 3, '2025-03-24 11:00:00', 'entregado'),
-(2, 1, 3, '2025-03-25 13:00:00', 'entregado'),
-(3, 2, 3, '2025-03-26 15:00:00', 'entregado'),
-(4, 1, 5, '2025-03-27 09:30:00', 'entregado'),
-(5, 2, 4, '2025-03-28 14:00:00', 'entregado'),
-(1, 1, 2, '2025-03-29 16:00:00', 'entregado'),
-(2, 5, 2, '2025-03-30 17:30:00', 'entregado'),
-(6, 4, 4, '2025-05-30 10:30:00', 'en camino'),
-(7, 3, 5, '2025-05-31 12:00:00', 'en camino'),
-(8, 5, 1, '2025-04-01 14:30:00', 'en camino'),
-(9, 3, 2, '2025-04-02 16:00:00', 'en camino'),
-(10, 4, 3, '2025-04-03 18:00:00', 'en camino'),
-(1, 1, 1, '2025-04-04 09:00:00', 'entregado'),
-(2, 3, 2, '2025-04-05 14:00:00', 'critico'),
-(3, 1, 3, '2025-04-06 10:30:00', 'critico');
+INSERT INTO pedidos (cliente_id, empresa_id, repartidor_id, fecha, fecha_entrega, estado) VALUES
+(1, 1, 1, '2025-05-20 09:00:00', '2025-05-31 09:00:00',  'entregado'),
+(2, 2, 2, '2025-05-21 14:00:00', null, 'cancelado'),
+(3, 1, 3, '2025-03-22 10:30:00', '2025-05-31 09:00:00', 'entregado'),
+(4, 2, 4, '2025-03-22 12:15:00', '2025-05-31 09:00:00', 'entregado'),
+(5, 1, 5, '2025-03-23 09:45:00', '2025-05-31 09:00:00', 'entregado'),
+(1, 2, 3, '2025-03-24 11:00:00', '2025-05-31 09:00:00', 'entregado'),
+(2, 1, 3, '2025-03-25 13:00:00', '2025-05-31 09:00:00', 'entregado'),
+(3, 2, 3, '2025-03-26 15:00:00', '2025-05-31 09:00:00', 'entregado'),
+(4, 1, 5, '2025-03-27 09:30:00', '2025-05-31 09:00:00', 'entregado'),
+(5, 2, 4, '2025-03-28 14:00:00', '2025-05-31 09:00:00', 'entregado'),
+(1, 1, 2, '2025-03-29 16:00:00', '2025-05-31 09:00:00', 'entregado'),
+(2, 5, 2, '2025-03-30 17:30:00', '2025-05-31 09:00:00', 'entregado'),
+(6, 4, 4, '2025-05-30 10:30:00', null,  'en camino'),
+(7, 3, 5, '2025-05-31 12:00:00', null, 'en camino'),
+(8, 5, 1, '2025-04-01 14:30:00', null, 'en camino'),
+(9, 3, 2, '2025-04-02 16:00:00', null, 'en camino'),
+(10, 4, 3, '2025-04-03 18:00:00', null, 'en camino'),
+(1, 1, 1, '2025-04-04 09:00:00', '2025-05-31 09:00:00', 'entregado'),
+(2, 3, 2, '2025-04-05 14:00:00', null, 'critico'),
+(3, 1, 3, '2025-04-06 10:30:00', null, 'critico');
 
 INSERT INTO detalle_pedidos (pedido_id, producto_id, cantidad) VALUES
 (1, 1, 2),
