@@ -108,7 +108,10 @@ INSERT INTO repartidores (nombre, telefono) VALUES
 
 INSERT INTO empresas (nombre, direccion, tipo_servicio) VALUES
 ('Farmacia Salud', 'Av. Salud 101', 'medicamentos'),
-('Express Documentos', 'Calle Oficina 22', 'documentos');
+('Express Documentos', 'Calle Oficina 22', 'documentos'),
+('Ropa Chula', 'La Flor 569', 'ropa'),
+('Productos de Aseo Personal', 'La esperanza 4785', 'desodorantes'),
+('Utiles escolares', 'Victor jara 856', 'cuadernos');
 
 INSERT INTO productos (empresa_id, nombre, descripcion, precio, requiere_receta, categoria, stock) VALUES
 (1, 'Paracetamol 500mg', 'Analgésico y antipirético', 2500, false, 'Medicamentos', 100),
