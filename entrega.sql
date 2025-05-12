@@ -154,7 +154,15 @@ INSERT INTO pedidos (cliente_id, empresa_id, repartidor_id, fecha, estado) VALUE
 (4, 1, 5, '2025-03-27 09:30:00', 'entregado'),
 (5, 2, 4, '2025-03-28 14:00:00', 'entregado'),
 (1, 1, 2, '2025-03-29 16:00:00', 'entregado'),
-(2, 2, 2, '2025-03-30 17:30:00', 'entregado');
+(2, 5, 2, '2025-03-30 17:30:00', 'entregado'),
+(6, 4, 4, '2025-05-30 10:30:00', 'en camino'),
+(7, 3, 5, '2025-05-31 12:00:00', 'en camino'),
+(8, 5, 1, '2025-04-01 14:30:00', 'en camino'),
+(9, 3, 2, '2025-04-02 16:00:00', 'en camino'),
+(10, 4, 3, '2025-04-03 18:00:00', 'en camino'),
+(1, 1, 1, '2025-04-04 09:00:00', 'entregado'),
+(2, 3, 2, '2025-04-05 14:00:00', 'critico'),
+(3, 1, 3, '2025-04-06 10:30:00', 'critico');
 
 INSERT INTO detalle_pedidos (pedido_id, producto_id, cantidad) VALUES
 (1, 1, 2),
@@ -169,7 +177,17 @@ INSERT INTO detalle_pedidos (pedido_id, producto_id, cantidad) VALUES
 (8, 2, 1),
 (9, 3, 2),
 (10, 1, 1),
-(10, 2, 1);
+(10, 2, 1),
+(11, 1, 1),
+(12, 23, 2),
+(13, 18, 1),
+(14, 10, 3),
+(15, 21, 1),
+(16, 3, 2),
+(17, 14, 1),
+(18, 2, 2),
+(19, 8, 1),
+(20, 1, 1);
 
 INSERT INTO medios_pago (tipo) VALUES ('Tarjeta de crédito'), ('Efectivo'), ('Débito');
 
