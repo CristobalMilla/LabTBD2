@@ -52,10 +52,12 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/usuarios/login", "/api/usuarios/register").permitAll()
-                        .requestMatchers("/api/**").permitAll()
+                        //.requestMatchers("/api/usuarios/login", "/api/usuarios/register").permitAll()
+                        //Se comenta o descomenta segun uso de autenticacion
+                        //.requestMatchers("/api/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/api/**").hasAnyRole("ADMIN", "TRABAJADOR", "CLIENTE")
+                        //Borrar o agregar "CLIENTE" para mostrar como ejemplo de CRUD (solo para ADMIN o TRABAJADOR
+                        .requestMatchers("/api/**").hasAnyRole("ADMIN", "TRABAJADOR")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS))

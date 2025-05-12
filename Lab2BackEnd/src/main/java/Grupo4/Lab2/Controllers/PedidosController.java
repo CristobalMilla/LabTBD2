@@ -5,6 +5,7 @@ import Grupo4.Lab2.DTO.RegistrarPedidoDTO;
 import Grupo4.Lab2.Services.PedidosService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +14,7 @@ import java.util.List;
 @Controller
 @RequestMapping("/api/pedidos")
 @CrossOrigin
+
 public class PedidosController {
 
     @Autowired
@@ -23,7 +25,7 @@ public class PedidosController {
         PedidosEntity pedido = pedidosService.getById(idPedido);
         return ResponseEntity.ok(pedido);
     }
-
+    //@PreAuthorize("hasRole('TRABAJADOR') or hasRole('ADMIN')")
     @GetMapping("/")
     public ResponseEntity<List<PedidosEntity>> getAll() {
         try {

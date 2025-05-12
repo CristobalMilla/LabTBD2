@@ -13,7 +13,7 @@ import Grupo4.Lab2.Config.JwtUtil;
  * UsuarioController es un controlador que maneja las solicitudes HTTP relacionadas con los usuarios.
  */
 @RestController
-@RequestMapping("/api/usuarios")
+@RequestMapping("/auth/usuarios") //Cambiar segun uso de autorizacion
 @CrossOrigin
 public class UsuarioController {
     @Autowired
