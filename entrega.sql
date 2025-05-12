@@ -147,7 +147,7 @@ INSERT INTO detalle_pedidos (pedido_id, producto_id, cantidad) VALUES
 (10, 1, 1),
 (10, 2, 1);
 
-INSERT INTO medios_pago (tipo) VALUES ('Tarjeta de crédito'), ('Efectivo');
+INSERT INTO medios_pago (tipo) VALUES ('Tarjeta de crédito'), ('Efectivo'), ('Débito');
 
 INSERT INTO pagos (pedido_id, medio_id, monto) VALUES
 (1, 1, 9200),
