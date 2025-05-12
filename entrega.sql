@@ -109,14 +109,38 @@ INSERT INTO repartidores (nombre, telefono) VALUES
 INSERT INTO empresas (nombre, direccion, tipo_servicio) VALUES
 ('Farmacia Salud', 'Av. Salud 101', 'medicamentos'),
 ('Express Documentos', 'Calle Oficina 22', 'documentos'),
-('Ropa Chula', 'La Flor 569', 'ropa'),
-('Productos de Aseo Personal', 'La esperanza 4785', 'desodorantes'),
-('Utiles escolares', 'Victor jara 856', 'cuadernos');
+('Ropa Chula Deportiva', 'La Flor 569', 'ropa'),
+('Productos de Aseo Personal', 'La esperanza 4785', 'utiles de aseo'),
+('Utiles escolares Geniales', 'Victor jara 856', 'utiles escolares');
 
 INSERT INTO productos (empresa_id, nombre, descripcion, precio, requiere_receta, categoria, stock) VALUES
 (1, 'Paracetamol 500mg', 'Analgésico y antipirético', 2500, false, 'Medicamentos', 100),
 (1, 'Amoxicilina 500mg', 'Antibiótico', 4200, true, 'Medicamentos', 200),
-(2, 'Envío carta notarial', 'Servicio de entrega certificada', 8000, false, 'Documentos', NULL);
+(2, 'Envío carta notarial', 'Servicio de entrega certificada', 8000, false, 'Documentos', NULL),
+(3, 'Polera del Colo-Colo talla S', 'Envio de polera de futbol', 15000, false, 'Poleras de futbol', 120),
+(3, 'Polera del Colo-Colo talla M', 'Envio de polera de futbol', 15000, false, 'Poleras de futbol', 120),
+(3, 'Polera del Colo-Colo talla L', 'Envio de polera de futbol', 15000, false, 'Poleras de futbol', 120),
+(3, 'Polera del Colo-Colo talla XL', 'Envio de polera de futbol', 15000, false, 'Poleras de futbol', 120),
+(3, 'Buzo deportivo Unisex', 'Envio de buzo deportivo Unisex talla 38', 15000, false, 'Buzo deportivo', 120),
+(3, 'Buzo deportivo Unisex', 'Envio de buzo deportivo Unisex talla 40', 15000, false, 'Buzo deportivo', 120),
+(3, 'Buzo deportivo Unisex', 'Envio de buzo deportivo Unisex talla 42', 15000, false, 'Buzo deportivo', 120),
+(3, 'Buzo deportivo Unisex', 'Envio de buzo deportivo Unisex talla 43', 15000, false, 'Buzo deportivo', 120),
+(3, 'Buzo deportivo Unisex', 'Envio de buzo deportivo Unisex talla 44', 15000, false, 'Buzo deportivo', 120),
+(3, 'Buzo deportivo Unisex', 'Envio de buzo deportivo Unisex talla 46', 15000, false, 'Buzo deportivo', 120),
+(4, 'Desodorante para mujer en barra', 'Desodorante en barra para mujer olor frambuesa', 2500, 'Desodorantes Mujer', 100),
+(4, 'Desodorante para mujer en barra', 'Desodorante en barra para mujer olor floral', 2500, 'Desodorantes Mujer', 100),
+(4, 'Desodorante para mujer en spray', 'Desodorante en spray para mujer anti manchas', 3700, 'Desodorantes Mujer', 100),
+(4, 'Desodorante para hombre en barra', 'Desodorante en barra para hombre olor chocolate', 2500, 'Desodorantes Hombre', 100),
+(4, 'Desodorante para hombre en barra', 'Desodorante en barra para hombre sin alchool ', 2500, 'Desodorantes Hombre', 100),
+(4, 'Desodorante para hombre en spray', 'Desodorante en spray para hombre fragancia masculina', 3700, 'Desodorantes Hombre', 100),
+(5, 'Cuaderno Hello Kitty', 'Envio de cuaderno', 2000, false, 'Cuadernos', 200),
+(5, 'Cuaderno Colo-Colo', 'Envio de cuaderno', 2500, false, 'Cuadernos', 200),
+(5, 'Cuaderno Cobreloa', 'Envio de cuaderno', 1800, false, 'Cuadernos', 200),
+(5, 'Lapiz de pizarra azul recargable', 'Envio de lapiz pizarra', 2500, false, 'Lapiz Pizarra Recargable', 100),
+(5, 'Lapiz de pizarra negro recargable', 'Envio de lapiz pizarra', 2500, false, 'Lapiz Pizarra Recargable', 100),
+(5, 'Recarga de Lapiz de pizarra azul', 'Envio de recarga de lapiz pizarra', 700, false, 'Recara de Lapiz Pizarra', 100),
+(5, 'Recarga de Lapiz de pizarra negro', 'Envio de recarga de lapiz pizarra', 700, false, 'Recara de Lapiz Pizarra', 100);
+
 
 INSERT INTO pedidos (cliente_id, empresa_id, repartidor_id, fecha, estado) VALUES
 (1, 1, 1, '2025-05-20 09:00:00', 'entregado'),
