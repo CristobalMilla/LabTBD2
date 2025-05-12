@@ -29,8 +29,7 @@ public class UsuarioController {
      * @param nuevo Los detalles del nuevo usuario.
      * @return La respuesta HTTP con el usuario registrado o un mensaje de error.
      */
-    @PreAuthorize("hasRole('TRABAJADOR') or hasRole('ADMIN')")
-    
+    //@PreAuthorize("hasRole('TRABAJADOR') or hasRole('ADMIN')")
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UsuarioEntity nuevo) {
         try {
@@ -50,10 +49,23 @@ public class UsuarioController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDTO loginDto) {
         int result = userservice.login(loginDto.getEmail(), loginDto.getPassword());
-        if(result == 1 /* o el valor que corresponda según el rol */) {
+        if(result == 1 ) {
+            System.out.println("Usuario logueado rol ADMIN");
             String token = jwtUtil.createToken(loginDto.getEmail());
             return ResponseEntity.ok(token);
+        } if (result == 2) {
+            System.out.println("Usuario logueado rol TRABAJADOR");
+            String token = jwtUtil.createToken(loginDto.getEmail());
+            return ResponseEntity.ok(token);
+        } if (result == 3) {
+            System.out.println("Usuario logueado rol CLIENTE");
+            String token = jwtUtil.createToken(loginDto.getEmail());
+            return ResponseEntity.ok(token);
+        } if (result > 3) {
+            System.out.println("Usuario no cuenta con los roles autorizados");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Rol no autorizado.");
         }
+        System.out.println("Credenciales incorrectas.\n");
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales incorrectas");
     }
 
