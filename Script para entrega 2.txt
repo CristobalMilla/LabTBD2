@@ -1,0 +1,131 @@
+-- Activar extensión PostGIS
+CREATE EXTENSION IF NOT EXISTS postgis;
+
+-- Agregar campos de ubicación geográfica
+ALTER TABLE clientes ADD COLUMN ubicacion GEOMETRY(Point, 4326);
+ALTER TABLE repartidores ADD COLUMN ubicacion_actual GEOMETRY(Point, 4326);
+ALTER TABLE empresas ADD COLUMN ubicacion GEOMETRY(Point, 4326);
+ALTER TABLE pedidos ADD COLUMN ruta_estimada GEOMETRY(LineString, 4326);
+
+-- Crear tabla de zonas de cobertura
+CREATE TABLE zonas_cobertura (
+    zona_id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100),
+    geom GEOMETRY(Polygon, 4326)
+);
+
+--Columnas auxiliares extras para pedidos
+ALTER TABLE pedidos ADD COLUMN punto_inicio GEOMETRY(Point, 4326);
+ALTER TABLE pedidos ADD COLUMN punto_final GEOMETRY(Point, 4326);
+--Columna auxliliar para zona de cobertura, relacionandola con una empresa
+ALTER TABLE zpnas_cobertura ADD COLUMN empresa_id INT;
+
+--Seccion poblar ubicaciones
+
+
+
+
+
+--Seccion extra para calculo ruta_estimada
+CREATE TABLE IF NOT EXISTS calles (
+    street_id SERIAL PRIMARY KEY,
+    fid INT,
+    shape_leng NUMERIC,
+    st_length_ NUMERIC,
+    nom_ruta VARCHAR(255),
+    comuna VARCHAR(100),
+    geom GEOMETRY(MultiLineString, 4326) -- SRID 4326 for WGS84
+);
+CREATE EXTENSION IF NOT EXISTS pgrouting;
+--Nueva tabla para filtrar las calles por secciones unicas, con nuevo Id
+--Esto se necesita por la base de datos que utilizamos
+CREATE TABLE calles_cleaned (
+    cleaned_street_id SERIAL PRIMARY KEY, -- New unique ID for each LineString segment
+    street_id INT, -- Keep the original ID for reference
+    fid INT,
+    shape_leng NUMERIC,
+    st_length_ NUMERIC,
+    nom_ruta VARCHAR(255),
+    comuna VARCHAR(100),
+    geom GEOMETRY(LineString, 4326)
+);
+INSERT INTO calles_cleaned (street_id, fid, shape_leng, st_length_, nom_ruta, comuna, geom)
+SELECT
+    c.ogc_fid,
+    c.fid,
+    c.shape_leng,
+    c.st_length_,
+    c.nom_ruta,
+    c.comuna,
+    ST_GeometryN((ST_Dump(ST_LineMerge(c.geom))).geom, 1) --Hace un LineMerge al MultiLine de calles, Realiza un Dump a distintas filas en una tabla, .geom accede a la parte de geom de esa tabla, y GeometryN asegura que la operacion siempre devuelva LineString
+FROM
+    calles AS c;
+
+-- Añadir int para el id del vertice de inicio, final y el valor de costo (usaremos largo del segmento/calle)
+ALTER TABLE calles_cleaned ADD COLUMN source INTEGER;
+ALTER TABLE calles_cleaned ADD COLUMN target INTEGER;
+ALTER TABLE calles_cleaned ADD COLUMN cost DOUBLE PRECISION;
+
+-- Cea la red topologica usando pgr_createTopology
+-- Usar 0.0001 como tolerancia para el "snapeo"; ajustar si los segmentos no se conectan correctamente
+SELECT pgr_createTopology('calles_cleaned', 0.0001, 'geom', 'cleaned_street_id');
+--Tabla se llama calles_cleaned_vertices_pgr
+--Crea el source y target en calles_cleaned
+
+-- Calcula el costo usando el largo del segmento para cada calle
+UPDATE calles_cleaned SET cost = ST_Length(geom::geography);
+
+--Funcion para "snapear" un punto de entrada a el nodo mas cercano de la topologia
+--Devuelve el punto/nodo
+CREATE OR REPLACE FUNCTION find_nearest_node(input_point GEOMETRY(Point, 4326))
+RETURNS BIGINT AS $$
+DECLARE
+    nearest_node_id BIGINT;
+BEGIN
+    SELECT
+        id
+    INTO
+        nearest_node_id
+    FROM
+        calles_cleaned_vertices_pgr
+    ORDER BY
+        ST_Distance(the_geom, input_point)
+    LIMIT 1;
+
+    -- Opcional: Añadir error handling si no se encuentra un nodo cercano (por ejemplo, si el nodo inicial esta muy lejos de la red/topologia)
+    IF nearest_node_id IS NULL THEN
+        RAISE EXCEPTION 'No network node found near the input point.';
+    END IF;
+
+    RETURN nearest_node_id;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- Calculo de ruta, utilizando UPDATE. Utilizar esto en backend.
+-- Reemplazar [YOUR_PEDIDO_ID] con el id del pedido a actualizar/calcular la ruta.
+-- Tambien se podria utilizar al momento de crearse el pedido, con la query de INSERT conteniendo el SELECT de abajo
+-- Podria tambien ser un trigger, al momento de actualizar o crear un pedido
+
+UPDATE pedidos AS p
+-- ruta_estimada siendo la columna en pedidos
+SET ruta_estimada = (
+    SELECT
+        ST_LineMerge(ST_Collect(seg.geom)) -- Collecciona la tabla seg, de multiples segmentos de la ruta, en una sola linea
+    FROM
+        pgr_dijkstra(
+            'SELECT cleaned_street_id AS id, source, target, cost FROM calles_cleaned',
+            find_nearest_node(e.ubicacion), -- Start node from empresa's location
+            find_nearest_node(cl.ubicacion), -- End node from client's location
+            directed := FALSE --Se asume que las calles son en ambas direcciones
+        ) AS route -- Crea tabla temporal, con atributos seq, path_seq, node, edge, cost, agg_cost; edge es el id del segmento de calle en cleaned_street
+    JOIN
+        calles_cleaned AS seg ON route.edge = seg.cleaned_street_id 
+)
+FROM
+    empresas AS e,
+    clientes AS cl
+WHERE
+    p.empresa_id = e.empresa_id
+    AND p.cliente_id = cl.cliente_id
+    AND p.pedido_id = [YOUR_PEDIDO_ID]; -- Cambiar por el pedido a actualizar
