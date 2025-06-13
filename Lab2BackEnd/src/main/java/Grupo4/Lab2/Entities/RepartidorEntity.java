@@ -1,7 +1,7 @@
 package Grupo4.Lab2.Entities;
 
 
-
+import org.locationtech.jts.geom.Point;
 
 public class RepartidorEntity {
 
@@ -11,12 +11,14 @@ public class RepartidorEntity {
     private String nombre;
     private String telefono;
     private Boolean disponible;
+    private Point ubicacion_actual;
 
-    public RepartidorEntity(long repartidor_id, String nombre, String telefono, Boolean disponible) {
+    public RepartidorEntity(long repartidor_id, String nombre, String telefono, Boolean disponible, Point ubicacion_actual) {
         this.repartidor_id = repartidor_id;
         this.nombre = nombre;
         this.telefono = telefono;
         this.disponible = disponible;
+        this.ubicacion_actual = ubicacion_actual;
     }
 
     public RepartidorEntity() {
@@ -53,5 +55,12 @@ public class RepartidorEntity {
 
     public void setDisponible(Boolean disponible) {
         this.disponible = disponible;
+    }
+
+    public Point getUbicacion_actual() {
+        return ubicacion_actual;
+    }
+    public void setUbicacion_actual(Point ubicacion_actual) {
+        this.ubicacion_actual = ubicacion_actual;
     }
 }

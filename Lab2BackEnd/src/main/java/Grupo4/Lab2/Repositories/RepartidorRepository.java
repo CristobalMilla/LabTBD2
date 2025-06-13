@@ -35,7 +35,7 @@ public class RepartidorRepository {
                     .executeAndFetchFirst(RepartidorEntity.class);
         }
     }
-
+    //AGREGAR COLUMA UBICACION
     public void save(RepartidorEntity repartidor){
         String sql = "INSERT INTO repartidores (repartidor_id, nombre, telefono, disponible) " +
                 "VALUES (:repartidor_id, :nombre, :telefono, :disponible)";
@@ -56,6 +56,7 @@ public class RepartidorRepository {
                     .executeUpdate();
         }
     }
+    //AGREGAR COLUMA UBICACION
     public void update(RepartidorEntity repartidor){
         String sql = "UPDATE repartidores SET nombre = :nombre, telefono = :telefono, " +
                 "disponible = :disponible WHERE repartidor_id = :repartidor_id";

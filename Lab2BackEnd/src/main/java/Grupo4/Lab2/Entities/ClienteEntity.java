@@ -1,18 +1,23 @@
 package Grupo4.Lab2.Entities;
 
+
+import org.locationtech.jts.geom.Point;
+
 public class ClienteEntity {
     private long cliente_id;
     private String nombre;
     private String direccion;
     private String email;
     private String telefono;
+    private Point ubicacion;
 
-    public ClienteEntity(long cliente_id, String nombre, String direccion, String email, String telefono) {
+    public ClienteEntity(long cliente_id, String nombre, String direccion, String email, String telefono, Point ubicacion) {
         this.cliente_id = cliente_id;
         this.nombre = nombre;
         this.direccion = direccion;
         this.email = email;
         this.telefono = telefono;
+        this.ubicacion = ubicacion;
     }
 
     public ClienteEntity() {
@@ -56,5 +61,12 @@ public class ClienteEntity {
 
     public void setTelefono(String telefono) {
         this.telefono = telefono;
+    }
+
+    public Point getUbicacion() {
+        return ubicacion;
+    }
+    public void setUbicacion(Point ubicacion) {
+        this.ubicacion = ubicacion;
     }
 }

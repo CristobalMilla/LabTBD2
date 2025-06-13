@@ -1,6 +1,8 @@
 package Grupo4.Lab2.Entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.Point;
 
 import java.sql.Timestamp;
 
@@ -10,6 +12,9 @@ public class PedidosEntity {
     private int cliente_id;
     private int empresa_id;
     private int repartidor_id;
+    private Point punto_inicio;
+    private Point punto_final;
+    private LineString ruta_estimada;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private Timestamp fecha;
@@ -19,7 +24,7 @@ public class PedidosEntity {
 
     private String estado;
 
-    public PedidosEntity(long pedido_id, int cliente_id, int empresa_id, int repartidor_id, Timestamp fecha, Timestamp fecha_entrega, String estado) {
+    public PedidosEntity(long pedido_id, int cliente_id, int empresa_id, int repartidor_id, Timestamp fecha, Timestamp fecha_entrega, String estado, Point punto_inicio, Point punto_final, LineString ruta_estimada) {
         this.pedido_id = pedido_id;
         this.cliente_id = cliente_id;
         this.empresa_id = empresa_id;
@@ -27,6 +32,9 @@ public class PedidosEntity {
         this.fecha = fecha;
         this.fecha_entrega = fecha_entrega;
         this.estado = estado;
+        this.punto_inicio = punto_inicio;
+        this.punto_final = punto_final;
+        this.ruta_estimada = ruta_estimada;
     }
 
     public PedidosEntity() {
@@ -86,5 +94,24 @@ public class PedidosEntity {
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+
+    public Point getPunto_inicio() {
+        return punto_inicio;
+    }
+    public void setPunto_inicio(Point punto_inicio) {
+        this.punto_inicio = punto_inicio;
+    }
+    public Point getPunto_final() {
+        return punto_final;
+    }
+    public void setPunto_final(Point punto_final) {
+        this.punto_final = punto_final;
+    }
+    public LineString getRuta_estimada() {
+        return ruta_estimada;
+    }
+    public void setRuta_estimada(LineString ruta_estimada) {
+        this.ruta_estimada = ruta_estimada;
     }
 }

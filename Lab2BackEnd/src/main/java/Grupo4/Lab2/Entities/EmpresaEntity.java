@@ -1,16 +1,20 @@
 package Grupo4.Lab2.Entities;
 
+import org.locationtech.jts.geom.Point;
+
 public class EmpresaEntity {
     private long empresa_id;
     private String nombre;
     private String direccion;
     private String tipo_servicio;
+    private Point ubicacion;
 
-    public EmpresaEntity(String nombre, long empresa_id, String direccion, String tipo_servicio) {
+    public EmpresaEntity(String nombre, long empresa_id, String direccion, String tipo_servicio, Point ubicacion) {
         this.nombre = nombre;
         this.empresa_id = empresa_id;
         this.direccion = direccion;
         this.tipo_servicio = tipo_servicio;
+        this.ubicacion = ubicacion;
     }
 
     public EmpresaEntity() {
@@ -46,5 +50,12 @@ public class EmpresaEntity {
 
     public void setTipoServicio(String tipo_servicio) {
         this.tipo_servicio = tipo_servicio;
+    }
+
+    public Point getUbicacion() {
+        return ubicacion;
+    }
+    public void setUbicacion(Point ubicacion) {
+        this.ubicacion = ubicacion;
     }
 }

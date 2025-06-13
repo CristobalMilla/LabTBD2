@@ -46,7 +46,7 @@ public class ClienteRepository {
             return null;
         }
     }
-
+    //AGREGAR COLUMA UBICACION
     public void save(ClienteEntity cliente) {
         try (Connection conn = sql2o.open()) {
             String query = "INSERT INTO clientes (nombre, direccion, email, telefono) " +
@@ -64,7 +64,7 @@ public class ClienteRepository {
             System.out.println("Error al guardar el cliente");
         }
     }
-
+    //AGREGAR COLUMA UBICACION
     public void update(ClienteEntity cliente) {
         try (Connection conn = sql2o.open()) {
             String query = "UPDATE clientes SET nommbre = :nombre, direccion = :direccion, " +

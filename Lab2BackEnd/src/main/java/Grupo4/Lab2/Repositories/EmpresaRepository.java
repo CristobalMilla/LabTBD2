@@ -35,7 +35,7 @@ public class EmpresaRepository {
                     .executeAndFetchFirst(EmpresaEntity.class);
         }
     }
-
+    //AGREGAR COLUMA UBICACION
     public void save(EmpresaEntity empresa){
         String sql = "INSERT INTO empresas (nombre, direccion, tipo_servicio) VALUES (:nombre, :direccion, :tipo_servicio)";
         try (Connection con = sql2o.beginTransaction()){
@@ -49,6 +49,7 @@ public class EmpresaRepository {
             con.commit();
         }
     }
+    //AGREGAR COLUMA UBICACION
     public void update(EmpresaEntity empresa) {
         String sql = "UPDATE empresas SET nombre = :nombre, direccion = :direccion, tipo_servicio = :tipo_servicio WHERE empresa_id = :empresa_id";
         try (Connection con = sql2o.beginTransaction()) {
