@@ -53,11 +53,8 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))
                 .authorizeHttpRequests(authorize -> authorize
                         //.requestMatchers("/api/usuarios/login", "/api/usuarios/register").permitAll()
-                        //Se comenta o descomenta segun uso de autenticacion
-                        //.requestMatchers("/api/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
-                        //Borrar o agregar "CLIENTE" para mostrar como ejemplo de CRUD (solo para ADMIN o TRABAJADOR
-                        .requestMatchers("/api/**").hasAnyRole("ADMIN", "TRABAJADOR")
+                        .requestMatchers("/api/**").permitAll() //Cambiar a hasAnyRole("ADMIN", "TRABAJADOR") si se desea restringir el acceso a los endpoints de la API
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS))
