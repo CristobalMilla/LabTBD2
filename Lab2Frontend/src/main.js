@@ -11,6 +11,9 @@ import * as directives from 'vuetify/directives'
 import { aliases, mdi } from 'vuetify/iconsets/mdi'
 import '@mdi/font/css/materialdesignicons.css'
 
+// Leaflet
+import 'leaflet/dist/leaflet.css';
+
 const vuetify = createVuetify({
   components,
   directives,
