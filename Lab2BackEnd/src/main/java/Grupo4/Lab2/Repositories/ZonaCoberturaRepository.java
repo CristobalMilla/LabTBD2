@@ -65,4 +65,27 @@ public class ZonaCoberturaRepository {
                     .executeUpdate();
         }
     }
+
+    // Query 8
+    // Detectar zonas con alta densidad de pedidos mediante agregación de puntos.
+     // cambiar por un dto
+    public List<ZonaCoberturaEntity> getZonasConAltaDensidad(){
+        try (Connection conn = sql2o.open()) {
+            String query = "WITH agrupacion_pedidos AS ( " +
+                        "SELECT z.zona_id, ST_Collect(p.punto_final) AS puntos_agrupados_x_zona " +
+                        "FROM zonas_cobertura z " +
+                        "INNER JOIN pedidos p ON ST_Within(p.punto_final, z.geom) " +
+                        "GROUP BY z.zona_id) " +
+                    "SELECT ap.zona_id, (ST_NPoints(ap.puntos_agrupados_x_zona)/(ST_Area(geom::geography)/1000000)) AS densidad_pedidos_x_km2 " +
+                    "FROM agrupacion_pedidos ap " +
+                    "INNER JOIN zonas_cobertura z ON ap.zona_id = z.zona_id " +
+                    "GROUP BY ap.zona_id, ap.puntos_agrupados_x_zona, z.geom " +
+                    "HAVING (ST_NPoints(ap.puntos_agrupados_x_zona)/(ST_Area(geom::geography)/1000000)) > 1"; // cambiar por alguna densidad
+            return conn.createQuery(query).executeAndFetch(ZonaCoberturaEntity.class);
+        }
+        catch (Exception e){
+            System.out.println("Error al obtener las zonas con alta densidad");
+            return null;
+        }
+    }
 }

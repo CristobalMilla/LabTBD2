@@ -24,4 +24,11 @@ public class ZonaCoberturaService {
     public void update(ZonaCoberturaEntity zona) {
         zonaRepository.update(zona);
     }
+
+    // Query 8
+    // Detectar zonas con alta densidad de pedidos mediante agregación de puntos.
+    // cambiar por un dto
+    public List<ZonaCoberturaEntity> getZonasConAltaDensidad(){
+        return zonaRepository.getZonasConAltaDensidad();
+    }
 }

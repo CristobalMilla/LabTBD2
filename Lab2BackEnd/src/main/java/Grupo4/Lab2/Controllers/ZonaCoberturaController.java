@@ -36,4 +36,10 @@ public class ZonaCoberturaController {
         zonaCoberturaService.update(zona);
         return ResponseEntity.ok(zona);
     }
+
+    @GetMapping("/zonasConAltaDensidad")
+    public ResponseEntity<List<ZonaCoberturaEntity>> getZonasConAltaDensidad(){
+        List<ZonaCoberturaEntity> zonasConAltaDensidad = zonaCoberturaService.getZonasConAltaDensidad();
+        return ResponseEntity.ok(zonasConAltaDensidad);
+    }
 }
