@@ -126,4 +126,23 @@ public class PedidosRepository {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
+
+    // Query 5
+    // Listar todos los pedidos cuya ruta estimada cruce más de 2 zonas de reparto.
+    public List<PedidosEntity> getPedidosQueCruzanMasDe2Zonas(){
+        try (Connection conn = sql2o.open()) {
+            List<PedidosEntity> pedidos;
+            String query = "SELECT p.* " +
+                           "FROM pedidos p " +
+                           "INNER JOIN zonas_cobertura z ON ST_Intersects(p.ruta_estimada, z.geom) " +
+                           "GROUP BY p.pedido_id " +
+                           "HAVING COUNT(z.zona_id) > 2";
+            pedidos = conn.createQuery(query).executeAndFetch(PedidosEntity.class);
+            return pedidos;
+
+        } catch (Exception e) {
+            System.err.println("Error al obtener los pedidos.\n " + e.getMessage());
+            return null;
+        }
+    }
 }

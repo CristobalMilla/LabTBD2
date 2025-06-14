@@ -18,7 +18,7 @@ CREATE TABLE zonas_cobertura (
 ALTER TABLE pedidos ADD COLUMN punto_inicio GEOMETRY(Point, 4326);
 ALTER TABLE pedidos ADD COLUMN punto_final GEOMETRY(Point, 4326);
 --Columna auxliliar para zona de cobertura, relacionandola con una empresa
-ALTER TABLE zpnas_cobertura ADD COLUMN empresa_id INT;
+ALTER TABLE zonas_cobertura ADD COLUMN empresa_id INT;
 
 --Seccion poblar ubicaciones
 

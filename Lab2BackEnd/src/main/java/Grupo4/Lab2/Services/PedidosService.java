@@ -42,4 +42,10 @@ public class PedidosService {
     public void confirmarPedidoDescontar(int pedidoId) {
         pedidosRepository.confirmarPedidoDescontar(pedidoId);
     }
+
+    // Query 5
+    // Listar todos los pedidos cuya ruta estimada cruce más de 2 zonas de reparto.
+    public List<PedidosEntity> pedidosQueCruzanMasDe2Zonas(){
+        return pedidosRepository.getPedidosQueCruzanMasDe2Zonas();
+    }
 }

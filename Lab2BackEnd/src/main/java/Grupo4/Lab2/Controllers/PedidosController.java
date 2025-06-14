@@ -80,4 +80,17 @@ public class PedidosController {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
+
+    // Query 5
+    // Listar todos los pedidos cuya ruta estimada cruce más de 2 zonas de reparto.
+    @GetMapping("/pedidos-que-cruzan-mas-de-2-zonas")
+    public ResponseEntity<List<PedidosEntity>> getPedidosQueCruzanMasDe2Zonas() {
+        try {
+            List<PedidosEntity> pedidos = pedidosService.pedidosQueCruzanMasDe2Zonas();
+            return ResponseEntity.ok(pedidos);
+        }
+        catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
 }
