@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import org.sql2o.Connection;
 import org.sql2o.Sql2o;
 
+import java.awt.*;
 import java.util.List;
 @Repository
 public class EmpresaRepository {
@@ -35,29 +36,33 @@ public class EmpresaRepository {
                     .executeAndFetchFirst(EmpresaEntity.class);
         }
     }
-    //AGREGAR COLUMA UBICACION
+
     public void save(EmpresaEntity empresa){
-        String sql = "INSERT INTO empresas (nombre, direccion, tipo_servicio) VALUES (:nombre, :direccion, :tipo_servicio)";
+        String sql = "INSERT INTO empresas (nombre, direccion, tipo_servicio,ubicacion) " +
+                "VALUES (:nombre, :direccion, :tipo_servicio, :ubicacion)";
         try (Connection con = sql2o.beginTransaction()){
             Long generatedId = con.createQuery(sql, true)
                     .addParameter("nombre", empresa.getNombre())
                     .addParameter("direccion", empresa.getDireccion())
                     .addParameter("tipo_servicio", empresa.getTipoServicio())
+                    .addParameter("ubicacion", empresa.getUbicacion())
                     .executeUpdate()
                     .getKey(Long.class);
             empresa.setEmpresaId(generatedId);
             con.commit();
         }
     }
-    //AGREGAR COLUMA UBICACION
+
     public void update(EmpresaEntity empresa) {
-        String sql = "UPDATE empresas SET nombre = :nombre, direccion = :direccion, tipo_servicio = :tipo_servicio WHERE empresa_id = :empresa_id";
+        String sql = "UPDATE empresas SET nombre = :nombre, direccion = :direccion" +
+                ", tipo_servicio = :tipo_servicio, ubicacion = :ubicacion WHERE empresa_id=:empresa_id";
         try (Connection con = sql2o.beginTransaction()) {
             con.createQuery(sql)
                     .addParameter("nombre", empresa.getNombre())
                     .addParameter("direccion", empresa.getDireccion())
                     .addParameter("tipo_servicio", empresa.getTipoServicio())
                     .addParameter("empresa_id", empresa.getEmpresaId())
+                    .addParameter("ubicacion", empresa.getUbicacion())
                     .executeUpdate();
             con.commit();
         }
@@ -69,6 +74,24 @@ public class EmpresaRepository {
             con.createQuery(sql)
                     .addParameter("empresa_id", empresa_id)
                     .executeUpdate();
+        }
+    }
+
+    /*
+    1. Encontrar los 5 puntos de entrega más
+    cercanos a una farmacia o empresa asociada
+     */
+    public List<Point> findNearby(long empresa_id){
+        String sql = "SELECT p.punto_final AS punto_cercano \n" +
+                "FROM pedidos p\n" +
+                "JOIN empresas e on e.empresa_id = p.empresa_id\n" +
+                "WHERE e.empresa_id =:empresa_id\n" +
+                "ORDER BY ST_Distance(p.punto_final::geography, e.ubicacion::geography) ASC\n" +
+                "LIMIT 5";
+        try (Connection con = sql2o.open()){
+            return con.createQuery(sql)
+                    .addParameter("empresa_id", empresa_id)
+                    .executeAndFetch(Point.class);
         }
     }
 

@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.awt.*;
 import java.util.List;
 
 @Controller
@@ -46,5 +47,13 @@ public class EmpresaController {
         catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+    }
+    @GetMapping("/entregascercanas/{id}")
+    public ResponseEntity<List<Point>> getEntregasCercanas(@PathVariable Long id){
+        List<Point> puntos = empresaService.getEntregasCercanas(id);
+        if (puntos == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok(puntos);
     }
 }

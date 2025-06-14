@@ -5,6 +5,7 @@ import Grupo4.Lab2.Repositories.EmpresaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
 import java.util.List;
 
 @Service
@@ -27,4 +28,6 @@ public class EmpresaService {
     public void deleteById(long id) {
         empresaRepository.deleteById(id);
     }
+
+    public List<Point> getEntregasCercanas(Long id){return empresaRepository.findNearby(id);}
 }
