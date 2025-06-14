@@ -1,6 +1,6 @@
 package Grupo4.Lab2.Repositories;
 
-import Grupo4.Lab2.Entities.ProductoEntity;
+
 import Grupo4.Lab2.Entities.PuntoInteresEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -20,7 +20,7 @@ public class PuntoInteresRepository {
     public PuntoInteresEntity findById(long idInteres) {
         try (Connection conn = sql2o.open()) {
             PuntoInteresEntity interes;
-            String query = "SELECT * FROM pedidos WHERE interes_id = :idInteres";
+            String query = "SELECT * FROM puntos_interes WHERE interes_id = :idInteres";
             interes = conn.createQuery(query)
                     .addParameter("idInteres", idInteres)
                     .executeAndFetchFirst(PuntoInteresEntity.class);
