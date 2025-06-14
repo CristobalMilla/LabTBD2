@@ -30,120 +30,16 @@
           </p>
         </div>
 
-        <v-row class="mt-6">
-          <v-col cols="12" sm="6" md="4">
-            <v-card class="stat-card" elevation="2">
-              <v-card-item class="pa-6">
-                <div class="d-flex align-center">
-                  <v-avatar color="primary" size="64" class="mr-6">
-                    <v-icon size="32" color="white">mdi-clock-outline</v-icon>
-                  </v-avatar>
-                  <div>
-                    <div class="text-subtitle-1 text-grey mb-1">Tareas Pendientes</div>
-                    <div class="text-h3">{{ pendingTasks }}</div>
-                  </div>
-                </div>
-              </v-card-item>
-            </v-card>
-          </v-col>
-
-          <v-col cols="12" sm="6" md="4">
-            <v-card class="stat-card" elevation="2">
-              <v-card-item class="pa-6">
-                <div class="d-flex align-center">
-                  <v-avatar color="success" size="64" class="mr-6">
-                    <v-icon size="32" color="white">mdi-check-circle</v-icon>
-                  </v-avatar>
-                  <div>
-                    <div class="text-subtitle-1 text-grey mb-1">Completadas</div>
-                    <div class="text-h3">{{ completedTasks }}</div>
-                  </div>
-                </div>
-              </v-card-item>
-            </v-card>
-          </v-col>
-
-          <v-col cols="12" sm="6" md="4">
-            <v-card class="stat-card" elevation="2">
-              <v-card-item class="pa-6">
-                <div class="d-flex align-center">
-                  <v-avatar color="info" size="64" class="mr-6">
-                    <v-icon size="32" color="white">mdi-chart-box</v-icon>
-                  </v-avatar>
-                  <div>
-                    <div class="text-subtitle-1 text-grey mb-1">Total</div>
-                    <div class="text-h3">{{ totalTasks }}</div>
-                  </div>
-                </div>
-              </v-card-item>
-            </v-card>
-          </v-col>
-        </v-row>
-
-        <!-- Se eliminaron los botones "Nueva Tarea" y "Ver Todas" -->
-
-        <v-card class="recent-tasks-section mt-8" elevation="2">
+        <!-- Se elimina la sección de tareas y se reemplaza por el mapa de Calles -->
+        <v-card class="mt-8" elevation="2">
           <v-card-title class="d-flex align-center pa-6 bg-grey-lighten-4">
-            <v-icon size="28" color="primary" class="mr-3">mdi-clipboard-text</v-icon>
-            <span class="text-h5">Tus tareas</span>
+            <v-icon size="28" color="primary" class="mr-3">mdi-map</v-icon>
+            <span class="text-h5">Mapa de comuna Estación Central</span>
           </v-card-title>
           <v-card-text class="pa-0">
-            <div v-if="recentTasks.length > 0" class="task-list">
-              <TaskCard 
-                v-for="task in recentTasks" 
-                :key="task.id_tarea" 
-                :tarea="task" 
-                @task-updated="handleTaskUpdated" 
-                @task-completed="handleTaskCompleted" 
-                @task-deleted="handleTaskDeleted"
-              />
-            </div>
-            <v-card-text v-else class="text-center pa-12">
-              <v-icon size="72" color="grey-lighten-1" class="mb-4">
-                mdi-clipboard-text-outline
-              </v-icon>
-              <div class="text-grey text-h6">No hay tareas disponibles</div>
-            </v-card-text>
+            <div id="map" style="height: 500px;"></div>
           </v-card-text>
         </v-card>
-
-      <!--
-      <v-container>
-        <v-card class="sector-tasks-section mt-8" elevation="2">
-          <v-card-title class="d-flex align-center pa-6 bg-grey-lighten-4">
-            <v-icon size="28" color="primary" class="mr-3">mdi-format-list-bulleted</v-icon>
-            <span class="text-h5">Tareas por Sector</span>
-          </v-card-title>
-          <v-card-text>
-            <Question7 :tasks="sectorTasks" />
-          </v-card-text>
-        </v-card>
-      </v-container>
-      -->
-      <!-- Card de la Pregunta 8 
-      <v-container>
-        <v-card class="mt-8">
-          <v-card-title>
-            <span class="text-h5">Sector con Más Tareas Completadas</span>
-          </v-card-title>
-          <v-card-text>
-            <Question8 :sectorId="sectorMostCompleted" />
-          </v-card-text>
-        </v-card>
-      </v-container>
-      -->
-      <!-- Card de la pregunta 9 
-      <v-container>
-        <v-card class="mt-8">
-          <v-card-title>
-            <span class="text-h5">Promedio de Distancia a Tareas Completadas</span>
-          </v-card-title>
-          <v-card-text>
-            <Question9 :averageDistance="averageCompletedDistance" />
-          </v-card-text>
-        </v-card>
-      </v-container>
-      -->
 
       </v-container>
     </v-main>
@@ -153,26 +49,16 @@
 <script>
 import { logoutUser } from "@/services/auth";
 import NotificationBadge from '@/components/NotificationBadge.vue';
-import TaskCard from '@/components/TaskCard.vue'; // Importa el TaskCard
-// Pregunta 7
-import Question7 from "@/components/QuestionCards/Question7.vue";
-import { getAllTasksPerUserPerSector, getSectorMostCompletedByUser, getAverageCompletedDistance, getUserTasks } from "@/api/tasks";
-// Pregunta 8 y 9
-import Question8 from "@/components/QuestionCards/Question8.vue";
-import Question9 from "@/components/QuestionCards/Question9.vue";
 
 export default {
   name: 'HomePage',
   components: {
     NotificationBadge,
-    TaskCard,
   },
   data() {
     return {
       nickname: 'Usuario',
-      pendingTasks: 0,
-      completedTasks: 0,
-      recentTasks: [],
+      map: null,
     }
   },
   computed: {
@@ -183,9 +69,6 @@ export default {
         month: 'long',
         day: 'numeric'
       })
-    },
-    totalTasks() {
-      return this.pendingTasks + this.completedTasks
     }
   },
   methods: {
@@ -196,66 +79,45 @@ export default {
     goToTaskDetails() {
       this.$router.push('/taskdetails')
     },
-    createTask() {
-      this.$router.push('/create-task')
+    initMap() {
+      // Inicializa el mapa centrado en unas coordenadas (ajusta según tu necesidad)
+      this.map = L.map('map').setView([-33.47, -70.70], 13);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      }).addTo(this.map);
     },
-    handleTaskUpdated(updatedTask) {
-      // Actualiza la tarea en recentTasks según sea necesario
-      const index = this.recentTasks.findIndex(task => task.id_tarea === updatedTask.id_tarea);
-      if (index !== -1) {
-        this.$set(this.recentTasks, index, updatedTask);
-      }
-    },
-    handleTaskCompleted(taskId) {
-      // Lógica para actualizar el estado de la tarea completada
-      const index = this.recentTasks.findIndex(task => task.id_tarea === taskId);
-      if (index !== -1) {
-        this.recentTasks[index].estado = 'completada';
-      }
-    },
-    handleTaskDeleted(taskId) {
-      // Remueve la tarea de recentTasks
-      this.recentTasks = this.recentTasks.filter(task => task.id_tarea !== taskId);
-    },
-    async fetchDashboardData() {
-      const userString = localStorage.getItem("user");
-      if (!userString) return;
-      const user = JSON.parse(userString);
-      if (!user?.id_usuario) return;
-      const userId = user.id_usuario;
-      
+    async fetchCalles() {
       try {
-        const userTasks = await getUserTasks(userId);
-        if (Array.isArray(userTasks)) {
-          this.recentTasks = userTasks;
-          this.pendingTasks = userTasks.filter(task => task.estado?.toLowerCase() === 'pendiente').length;
-          this.completedTasks = userTasks.filter(task => task.estado?.toLowerCase() === 'completada').length;
+        const response = await fetch("http://localhost:8080/api/calles/all");
+        if (!response.ok) {
+          throw new Error('Error al obtener las calles');
         }
+        const calles = await response.json();
+        this.renderCallesOnMap(calles);
       } catch (error) {
-        console.error('Error al obtener tareas del usuario:', error);
+        console.error("Error en fetchCalles:", error);
       }
-      
-      try {
-        const tasksPerSector = await getAllTasksPerUserPerSector();
-        this.sectorTasks = tasksPerSector;
-      } catch (error) {
-        console.error('Error al obtener tareas por sector:', error);
-        this.sectorTasks = [];
-      }
-      
-      try {
-        this.sectorMostCompleted = await getSectorMostCompletedByUser(userId);
-      } catch (error) {
-        console.error('Error al obtener sector más completado:', error);
-        this.sectorMostCompleted = null;
-      }
-      
-      try {
-        this.averageCompletedDistance = await getAverageCompletedDistance(userId);
-      } catch (error) {
-        console.error('Error al obtener promedio de distancia:', error);
-        this.averageCompletedDistance = null;
-      }
+    },
+    renderCallesOnMap(calles) {
+      calles.forEach(calle => {
+        if (calle.geomWkt) {
+          // Convierte la cadena WKT (LINESTRING) en un arreglo de coordenadas para Leaflet:
+          const latLngs = this.parseLineStringWKT(calle.geomWkt);
+          if (latLngs.length > 0) {
+            L.polyline(latLngs, { color: 'blue' }).addTo(this.map);
+          }
+        }
+      });
+    },
+    parseLineStringWKT(wkt) {
+      // Se espera un formato: "LINESTRING(lng lat,lng lat,...)"
+      if (!wkt.startsWith("LINESTRING(")) return [];
+      const coordsText = wkt.substring(11, wkt.length - 1);
+      const points = coordsText.split(",").map(pair => {
+        const [lng, lat] = pair.trim().split(" ").map(Number);
+        return [lat, lng]; // Leaflet usa [lat, lng]
+      });
+      return points;
     }
   },
   mounted() {
@@ -266,7 +128,9 @@ export default {
         this.nickname = storedUser.nickname;
       }
     }
-    this.fetchDashboardData();
+    // Inicializa el mapa y luego carga las calles
+    this.initMap();
+    this.fetchCalles();
   }
 }
 </script>
@@ -285,19 +149,6 @@ export default {
 
 .date {
   font-size: 1.1rem;
-}
-
-.actions-section {
-  display: flex;
-  gap: 1.5rem;
-}
-
-.stat-card {
-  transition: transform 0.2s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-4px);
 }
 
 @media (max-width: 600px) {
