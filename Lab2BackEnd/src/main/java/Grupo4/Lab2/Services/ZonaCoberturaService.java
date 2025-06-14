@@ -1,0 +1,27 @@
+package Grupo4.Lab2.Services;
+
+import Grupo4.Lab2.Entities.ZonaCoberturaEntity;
+import Grupo4.Lab2.Repositories.ZonaCoberturaRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class ZonaCoberturaService {
+    @Autowired
+    private ZonaCoberturaRepository zonaRepository;
+
+    public List<ZonaCoberturaEntity> getAll() {
+        return zonaRepository.findAll();
+    }
+    public ZonaCoberturaEntity getById(long id) {
+        return zonaRepository.findById(id);
+    }
+    public void save(ZonaCoberturaEntity zona) {
+        zonaRepository.save(zona);
+    }
+    public void update(ZonaCoberturaEntity zona) {
+        zonaRepository.update(zona);
+    }
+}
