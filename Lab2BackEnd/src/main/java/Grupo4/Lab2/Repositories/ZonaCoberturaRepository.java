@@ -1,5 +1,6 @@
 package Grupo4.Lab2.Repositories;
 
+import Grupo4.Lab2.Entities.ClienteEntity;
 import Grupo4.Lab2.Entities.ZonaCoberturaEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -86,6 +87,31 @@ public class ZonaCoberturaRepository {
         catch (Exception e){
             System.out.println("Error al obtener las zonas con alta densidad");
             return null;
+        }
+    }
+
+    //Consulta especial 2
+    //Determinar si un cliente se encuentra dentro de una zona de cobertura
+    //Se devolvera la lista zonas de cobertura en las que el cliente se encuentra
+    public List<ZonaCoberturaEntity> findZonasCoberturaByClienteId(long cliente_id){
+        String sql = "SELECT zc.zona_id, zc.nombre, zc.geom " +
+                "FROM zona_coberturas zc, cliente c" +
+                "WHERE c.cliente_id = cliente_id = :cliente_id " +
+                        "AND ST_Contains(zc.geom, c.ubicacion)";
+        try (Connection con = sql2o.open()) {
+            return con.createQuery(sql)
+                    .addParameter("cliente_id", cliente_id)
+                    .executeAndFetch(ZonaCoberturaEntity.class);
+        }
+    }
+    //Consulta especial 6
+    //Determinar la lista de clientes que se encuentren dentro a lo mas 5km de una empresa
+    public List<ClienteEntity> findClientesNotWithin5KM(){
+        String sql = "SELECT c.* FROM cliente c WHERE NOT EXISTS" +
+                    "(SELECT 1 FROM empresa e WHERE ST_DWithin(c.ubicacion::geography, e.ubicacion::geography, 5000))";
+        try (Connection con = sql2o.open()) {
+            return con.createQuery(sql)
+                  .executeAndFetch(ClienteEntity.class);
         }
     }
 }
