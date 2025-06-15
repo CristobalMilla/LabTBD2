@@ -62,11 +62,5 @@ public class ZonaCoberturaController {
             return ResponseEntity.ok(true);
         }
     }
-    //Consulta especial 6
-    //Determinar la lista de clientes que se encuentren dentro a lo mas 5km de una empresa
-    @GetMapping("/clientesNoCercanosAEmpresas")
-    public ResponseEntity<List<ClienteEntity>> getClientesNotWithin5KM(){
-        List<ClienteEntity> clientes = zonaCoberturaService.getClientesNotWithin5KM();
-        return ResponseEntity.ok(clientes);
-    }
+
 }

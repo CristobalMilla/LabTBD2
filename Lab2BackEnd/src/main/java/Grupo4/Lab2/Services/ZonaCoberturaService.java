@@ -31,11 +31,6 @@ public class ZonaCoberturaService {
     public List<ZonaCoberturaEntity> getZonasCoberturaByClienteId(long cliente_id){
         return zonaRepository.findZonasCoberturaByClienteId( cliente_id);
     }
-    //Consulta especial 6
-    //Determinar la lista de clientes que se encuentren dentro a lo mas 5km de una empresa
-    public List<ClienteEntity> getClientesNotWithin5KM(){
-        return zonaRepository.findClientesNotWithin5KM();
-    }
 
     // Query 8
     // Detectar zonas con alta densidad de pedidos mediante agregación de puntos.

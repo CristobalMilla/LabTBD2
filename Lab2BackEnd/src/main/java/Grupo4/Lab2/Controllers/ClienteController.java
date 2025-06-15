@@ -65,4 +65,11 @@ public class ClienteController {
         List<ResumenPedidosXClienteDTO> resumenes = clienteService.getResumenPedidosXCliente();
         return ResponseEntity.ok(resumenes);
     }
+    //Consulta especial 6
+    //Determinar la lista de clientes que se encuentren dentro a lo mas 5km de una empresa
+    @GetMapping("/clientesNoCercanosAEmpresas")
+    public ResponseEntity<List<ClienteEntity>> getClientesNotWithin5KM(){
+        List<ClienteEntity> clientes = clienteService.getClientesNotWithin5KM();
+        return ResponseEntity.ok(clientes);
+    }
 }

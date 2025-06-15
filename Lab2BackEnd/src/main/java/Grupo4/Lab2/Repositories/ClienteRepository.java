@@ -29,7 +29,7 @@ public class ClienteRepository {
         this.geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
     }
 
-    private ClienteEntity mapRowToClienteEntity(Map<String, Object> row) {
+    public ClienteEntity mapRowToClienteEntity(Map<String, Object> row) {
         if (row == null) {
             return null;
         }
@@ -170,6 +170,19 @@ public class ClienteRepository {
         }
         catch (Exception e){
             return null;
+        }
+    }
+    //Consulta especial 6
+    //Determinar la lista de clientes que se encuentren dentro a lo mas 5km de una empresa
+    public List<ClienteEntity> findClientesNotWithin5KM(){
+        String sql = "SELECT c.cliente_id as cliente_id, c.nombre as nombre, c.direccion as direccion, c.email as email, c.telefono as telefono, ST_AsText(c.ubicacion) as ubicacion_wkt " +
+                "FROM cliente c WHERE NOT EXISTS" +
+                "(SELECT 1 FROM empresa e WHERE ST_DWithin(c.ubicacion::geography, e.ubicacion::geography, 5000))";
+        try (Connection con = sql2o.open()) {
+            List<Map<String, Object>> results = con.createQuery(sql)
+                    .executeAndFetchTable()
+                    .asList();
+            return results.stream().map(this::mapRowToClienteEntity).toList();
         }
     }
 }

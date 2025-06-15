@@ -21,7 +21,6 @@ public class ZonaCoberturaRepository {
     private final Sql2o sql2o;
     private final GeometryFactory geometryFactory;
     private final WKTReader wktReader;
-
     @Autowired
     public ZonaCoberturaRepository(Sql2o sql2o) {
         this.sql2o = sql2o;
@@ -148,19 +147,6 @@ public class ZonaCoberturaRepository {
                     .executeAndFetchTable()
                     .asList();
             return results.stream().map(this::mapToZonaCoberturaEntity).toList();
-        }
-    }
-    //Consulta especial 6
-    //Determinar la lista de clientes que se encuentren dentro a lo mas 5km de una empresa
-    public List<ClienteEntity> findClientesNotWithin5KM(){
-        String sql = "SELECT c.cliente_id as cliente_id, c.nombre as nombre, c.direccion as direccion, c.email as email, c.telefono as telefono, ST_AsText(c.ubicacion) as ubicacion_wkt " +
-                "FROM cliente c WHERE NOT EXISTS" +
-                "(SELECT 1 FROM empresa e WHERE ST_DWithin(c.ubicacion::geography, e.ubicacion::geography, 5000))";
-        try (Connection con = sql2o.open()) {
-            List<Map<String, Object>> results = con.createQuery(sql)
-                    .executeAndFetchTable()
-                    .asList();
-            return results.stream().map(this::mapRowToClienteEntity).toList();
         }
     }
 }
