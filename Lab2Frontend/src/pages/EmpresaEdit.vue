@@ -22,7 +22,7 @@
             <v-form ref="formRef" lazy-validation>
               <v-text-field label="Nombre" v-model="editForm.nombre" required></v-text-field>
               <v-textarea label="Dirección" v-model="editForm.direccion" required></v-textarea>
-              <v-text-field label="Tipo Servicio" v-model="editForm.tipo_servicio" required></v-text-field>
+              <v-text-field label="Tipo Servicio" v-model="editForm.tipoServicio" required></v-text-field>
               <v-divider class="my-4"></v-divider>
               <div>
                 <div>
@@ -67,7 +67,7 @@ const editForm = ref({
   empresa_id: null,
   nombre: '',
   direccion: '',
-  tipo_servicio: '',  // nombre tal y como maneja el backend
+  tipoServicio: '',   // <-- camelCase
   ubicacion: null     // se espera que sea un WKT (por ejemplo, "POINT(-70.685 -33.455)")
 })
 
@@ -156,7 +156,8 @@ async function fetchEmpresa() {
       empresa_id: empresa.empresaId || empresa.empresa_id,
       nombre: empresa.nombre,
       direccion: empresa.direccion,
-      tipo_servicio: empresa.tipoServicio || empresa.tipo_servicio,
+      // backend te devuelve JSON con clave "tipoServicio" (o "tipo_servicio"):
+      tipoServicio: empresa.tipoServicio ?? empresa.tipo_servicio,
       ubicacion: empresa.ubicacion  // WKT en formato "POINT(lng lat)"
     }
   } catch (error) {
@@ -172,7 +173,7 @@ async function saveChanges() {
     const payload = {
       nombre:       editForm.value.nombre,
       direccion:    editForm.value.direccion,
-      tipo_servicio:editForm.value.tipo_servicio,
+      tipoServicio: editForm.value.tipoServicio, // <-- camelCase aquí
       ubicacion:    editForm.value.ubicacion
     }
     await updateEmpresa(editForm.value.empresa_id, payload)

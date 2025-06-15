@@ -20,8 +20,8 @@ export async function updateEmpresa(id, empresa) {
   const response = await fetch(`${API_BASE_URL}/api/empresas/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(empresa)
-  });
-  if (!response.ok) throw new Error('Error updating empresa');
-  return response.json();
+    body: JSON.stringify(empresa)   // empresa.tipoServicio estará en camelCase
+  })
+  if (!response.ok) throw new Error('Error updating empresa')
+  return response.json()
 }

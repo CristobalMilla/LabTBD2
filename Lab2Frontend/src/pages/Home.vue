@@ -9,7 +9,7 @@
       </v-app-bar-title>
       <v-spacer></v-spacer>
       <v-btn variant="text" @click="goToTaskDetails" class="mr-2" prepend-icon="mdi-clipboard-text">
-        Detalles de Tareas
+        Empresas
       </v-btn>
       <notification-badge class="mr-2" />
       <v-btn @click="logout" variant="text" prepend-icon="mdi-logout">
