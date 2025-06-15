@@ -34,7 +34,7 @@ public class ClienteRepository {
             return null;
         }
         ClienteEntity client = new ClienteEntity();
-        client.setCliente_id((Long) row.get("cliente_id"));
+        client.setCliente_id((Integer) row.get("cliente_id"));
         client.setNombre((String) row.get("nombre"));
         client.setDireccion((String) row.get("direccion"));
         client.setEmail((String) row.get("email"));

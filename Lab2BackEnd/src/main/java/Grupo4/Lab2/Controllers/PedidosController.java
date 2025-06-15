@@ -1,5 +1,6 @@
 package Grupo4.Lab2.Controllers;
 
+import Grupo4.Lab2.DTO.PedidoYZonasQueCruzaDTO;
 import Grupo4.Lab2.Entities.PedidosEntity;
 import Grupo4.Lab2.DTO.RegistrarPedidoDTO;
 import Grupo4.Lab2.Services.PedidosService;
@@ -84,9 +85,9 @@ public class PedidosController {
     // Query 5
     // Listar todos los pedidos cuya ruta estimada cruce más de 2 zonas de reparto.
     @GetMapping("/pedidos-que-cruzan-mas-de-2-zonas")
-    public ResponseEntity<List<PedidosEntity>> getPedidosQueCruzanMasDe2Zonas() {
+    public ResponseEntity<List<PedidoYZonasQueCruzaDTO>> getPedidosQueCruzanMasDe2Zonas() {
         try {
-            List<PedidosEntity> pedidos = pedidosService.pedidosQueCruzanMasDe2Zonas();
+            List<PedidoYZonasQueCruzaDTO> pedidos = pedidosService.pedidosQueCruzanMasDe2Zonas();
             return ResponseEntity.ok(pedidos);
         }
         catch (Exception e) {

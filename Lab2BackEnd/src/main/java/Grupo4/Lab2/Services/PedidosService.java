@@ -1,5 +1,6 @@
 package Grupo4.Lab2.Services;
 
+import Grupo4.Lab2.DTO.PedidoYZonasQueCruzaDTO;
 import Grupo4.Lab2.DTO.RegistrarPedidoDTO;
 import Grupo4.Lab2.Entities.PedidosEntity;
 import Grupo4.Lab2.Repositories.PedidosRepository;
@@ -45,7 +46,16 @@ public class PedidosService {
 
     // Query 5
     // Listar todos los pedidos cuya ruta estimada cruce más de 2 zonas de reparto.
-    public List<PedidosEntity> pedidosQueCruzanMasDe2Zonas(){
-        return pedidosRepository.getPedidosQueCruzanMasDe2Zonas();
+    public List<PedidoYZonasQueCruzaDTO> pedidosQueCruzanMasDe2Zonas(){
+        List<PedidoYZonasQueCruzaDTO> pedidos = pedidosRepository.getPedidosQueCruzanMasDe2Zonas();
+        for(PedidoYZonasQueCruzaDTO pedido : pedidos){
+            try{
+                pedido.setIds_zonas(pedidosRepository.getListaIdsZonasCruzadasById(pedido.getPedido_id()));
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+        return pedidos;
     }
 }
