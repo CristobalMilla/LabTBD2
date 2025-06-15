@@ -15,6 +15,11 @@ public class ZonaCoberturaEntity {
         this.nombre = nombre;
         this.geom = geom;
     }
+
+    public ZonaCoberturaEntity() {
+
+    }
+
     public long getZona_id() {
         return zona_id;
     }
