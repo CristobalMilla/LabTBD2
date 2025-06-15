@@ -37,6 +37,11 @@ public class ClienteService {
     public ClienteQueMasAGastadoDTO getClienteQueMasAGastado(){
         return clienteRepo.getClienteQueMasAGastado();
     }
+    //Consulta especial 6
+    //Determinar la lista de clientes que se encuentren dentro a lo mas 5km de una empresa
+    public List<ClienteEntity> getClientesNotWithin5KM(){
+        return clienteRepo.findClientesNotWithin5KM();
+    }
 
     public List<ResumenPedidosXClienteDTO> getResumenPedidosXCliente(){
         return clienteRepo.getResumenPedidosXCliente();
