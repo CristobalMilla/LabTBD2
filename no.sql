@@ -167,11 +167,11 @@ INSERT INTO medios_pago (tipo) VALUES
 
 -- Usuarios
 INSERT INTO usuario (rut, nameParam, email, phone, birthdate, password, role) VALUES
-('12.345.678-9', 'admin', 'admin@delivery.cl', '+56912345678', '1990-01-01', 'admin123', 'admin'),
-('11.111.111-1', 'cliente1', 'cliente1@delivery.cl', '+56911112222', '1995-05-05', 'pass1', 'cliente'),
-('22.222.222-2', 'cliente2', 'cliente2@delivery.cl', '+56922223333', '1992-02-02', 'pass2', 'cliente'),
-('33.333.333-3', 'repartidor1', 'repartidor1@delivery.cl', '+56933334444', '1993-03-03', 'pass3', 'repartidor'),
-('44.444.444-4', 'empresa1', 'empresa1@delivery.cl', '+56944445555', '1988-08-08', 'pass4', 'empresa');
+('12.345.678-9', 'admin', 'admin@delivery.cl', '+56912345678', '1990-01-01', 'admin123', 'ADMIN'),
+('11.111.111-1', 'cliente1', 'cliente1@delivery.cl', '+56911112222', '1995-05-05', 'pass1', 'CLIENTE'),
+('22.222.222-2', 'cliente2', 'cliente2@delivery.cl', '+56922223333', '1992-02-02', 'pass2', 'CLIENTE'),
+('33.333.333-3', 'repartidor1', 'repartidor1@delivery.cl', '+56933334444', '1993-03-03', 'pass3', 'REPARTIDOR'),
+('44.444.444-4', 'empresa1', 'empresa1@delivery.cl', '+56944445555', '1988-08-08', 'pass4', 'EMPRESA');
 
 -- Productos
 INSERT INTO productos (empresa_id, nombre, descripcion, precio, requiere_receta, categoria, stock) VALUES
