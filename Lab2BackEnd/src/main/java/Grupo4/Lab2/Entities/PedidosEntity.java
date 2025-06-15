@@ -9,9 +9,9 @@ import java.sql.Timestamp;
 public class PedidosEntity {
 
     private long pedido_id;
-    private int cliente_id;
-    private int empresa_id;
-    private int repartidor_id;
+    private Long cliente_id;
+    private Long empresa_id;
+    private Long repartidor_id;
     private Point punto_inicio;
     private Point punto_final;
     private LineString ruta_estimada;
@@ -24,7 +24,7 @@ public class PedidosEntity {
 
     private String estado;
 
-    public PedidosEntity(long pedido_id, int cliente_id, int empresa_id, int repartidor_id, Timestamp fecha, Timestamp fecha_entrega, String estado, Point punto_inicio, Point punto_final, LineString ruta_estimada) {
+    public PedidosEntity(long pedido_id, Long cliente_id, Long empresa_id, Long repartidor_id, Timestamp fecha, Timestamp fecha_entrega, String estado, Point punto_inicio, Point punto_final, LineString ruta_estimada) {
         this.pedido_id = pedido_id;
         this.cliente_id = cliente_id;
         this.empresa_id = empresa_id;
@@ -44,15 +44,15 @@ public class PedidosEntity {
         return pedido_id;
     }
 
-    public int getCliente_id() {
+    public Long getCliente_id() {
         return cliente_id;
     }
 
-    public int getEmpresa_id() {
+    public Long getEmpresa_id() {
         return empresa_id;
     }
 
-    public int getRepartidor_id() {
+    public Long getRepartidor_id() {
         return repartidor_id;
     }
 
@@ -72,15 +72,15 @@ public class PedidosEntity {
         this.pedido_id = pedido_id;
     }
 
-    public void setCliente_id(int cliente_id) {
+    public void setCliente_id(Long cliente_id) {
         this.cliente_id = cliente_id;
     }
 
-    public void setEmpresa_id(int empresa_id) {
+    public void setEmpresa_id(Long empresa_id) {
         this.empresa_id = empresa_id;
     }
 
-    public void setRepartidor_id(int repartidor_id) {
+    public void setRepartidor_id(Long repartidor_id) {
         this.repartidor_id = repartidor_id;
     }
 
