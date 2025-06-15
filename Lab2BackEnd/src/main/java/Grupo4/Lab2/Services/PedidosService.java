@@ -23,7 +23,7 @@ public class PedidosService {
         return pedidosRepository.findAll();
     }
 
-    public boolean registrarPedido(RegistrarPedidoDTO dto) {
+    public long registrarPedido(RegistrarPedidoDTO dto) {
         if (dto.getProductos() == null || dto.getCantidades() == null ||
                 dto.getProductos().length != dto.getCantidades().length) {
             throw new IllegalArgumentException("Los arrays de productos y cantidades deben tener la misma longitud y no ser nulos.");
@@ -57,5 +57,24 @@ public class PedidosService {
             }
         }
         return pedidos;
+    }
+
+    //Funciones de actualizar pedido
+    public PedidosEntity updatePedidoPuntos(PedidosEntity pedido) {
+        return pedidosRepository.updatePedidoPuntos(pedido);
+    }
+    public boolean updatePedidoRuta(PedidosEntity pedido) {
+        return pedidosRepository.updatePedidoRuta(pedido);
+    }
+    //Funcion de crear pedido por completo
+    public PedidosEntity crearPedidoCompleto(RegistrarPedidoDTO pedido){
+        long pedido_id = registrarPedido(pedido);
+        PedidosEntity pedido_registrado = pedidosRepository.findById(pedido_id);
+        PedidosEntity pedido_actualizado = updatePedidoPuntos(pedido_registrado);
+        boolean ruta_actualizada = updatePedidoRuta(pedido_actualizado);
+        if(!ruta_actualizada){
+            System.out.println("Error al actualizar la ruta del pedido con ID: " + pedido_id);
+        }
+        return pedido_actualizado;
     }
 }
