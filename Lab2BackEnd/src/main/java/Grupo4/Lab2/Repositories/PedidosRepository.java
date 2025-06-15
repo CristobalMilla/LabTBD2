@@ -1,5 +1,6 @@
 package Grupo4.Lab2.Repositories;
 
+import Grupo4.Lab2.DTO.PedidoYZonasQueCruzaDTO;
 import Grupo4.Lab2.DTO.RegistrarPedidoDTO;
 import Grupo4.Lab2.Entities.PedidosEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +9,10 @@ import org.sql2o.Connection;
 import org.sql2o.Sql2o;
 
 import java.sql.Array;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 public class PedidosRepository {
@@ -129,19 +133,41 @@ public class PedidosRepository {
 
     // Query 5
     // Listar todos los pedidos cuya ruta estimada cruce más de 2 zonas de reparto.
-    public List<PedidosEntity> getPedidosQueCruzanMasDe2Zonas(){
+    public List<Long> getListaIdsZonasCruzadasById(long pedido_id) {
         try (Connection conn = sql2o.open()) {
-            List<PedidosEntity> pedidos;
-            String query = "SELECT p.* " +
+            String query = "SELECT z.zona_id " +
+                           "FROM pedidos p " +
+                           "INNER JOIN zonas_cobertura z ON ST_Intersects(p.ruta_estimada, z.geom) " +
+                           "WHERE p.pedido_id = :pedido_id " +
+                           "GROUP BY p.pedido_id, z.zona_id";
+            List<Map<String, Object>> result = conn.createQuery(query)
+                    .addParameter("pedido_id", pedido_id)
+                    .executeAndFetchTable()
+                    .asList();
+            List<Long> ids = new ArrayList<>();
+            for(Map<String, Object> id : result){
+                ids.add(((Integer) id.get("zona_id")).longValue());
+            }
+            return ids;
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public List<PedidoYZonasQueCruzaDTO> getPedidosQueCruzanMasDe2Zonas() {
+        try (Connection conn = sql2o.open()) {
+            String query = "SELECT p.pedido_id, p.cliente_id, p.empresa_id, p.repartidor_id, COUNT(z.zona_id) AS zonas_que_cruza " +
                            "FROM pedidos p " +
                            "INNER JOIN zonas_cobertura z ON ST_Intersects(p.ruta_estimada, z.geom) " +
                            "GROUP BY p.pedido_id " +
-                           "HAVING COUNT(z.zona_id) > 2";
-            pedidos = conn.createQuery(query).executeAndFetch(PedidosEntity.class);
-            return pedidos;
+                           "HAVING COUNT(z.zona_id) > 0";
+            return conn.createQuery(query).executeAndFetch(PedidoYZonasQueCruzaDTO.class);
 
         } catch (Exception e) {
-            System.err.println("Error al obtener los pedidos.\n " + e.getMessage());
+            System.err.println("Error al obtener los pedidos.");
+            e.printStackTrace();
             return null;
         }
     }
