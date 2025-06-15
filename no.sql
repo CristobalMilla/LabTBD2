@@ -105,25 +105,7 @@ CREATE TABLE zonas_cobertura (
 --Columnas auxiliares extras para pedidos
 ALTER TABLE pedidos ADD COLUMN punto_inicio GEOMETRY(Point, 4326);
 ALTER TABLE pedidos ADD COLUMN punto_final GEOMETRY(Point, 4326);
---Columna auxliliar para zona de cobertura, relacionandola con una empresa
-ALTER TABLE zonas_cobertura ADD COLUMN empresa_id INT;
 
---Seccion poblar ubicaciones
-
-
-
-
-
---Seccion extra para calculo ruta_estimada
-CREATE TABLE IF NOT EXISTS calles (
-    street_id SERIAL PRIMARY KEY,
-    fid INT,
-    shape_leng NUMERIC,
-    st_length_ NUMERIC,
-    nom_ruta VARCHAR(255),
-    comuna VARCHAR(100),
-    geom GEOMETRY(MultiLineString, 4326) -- SRID 4326 for WGS84
-);
 CREATE EXTENSION IF NOT EXISTS pgrouting;
 --Nueva tabla para filtrar las calles por secciones unicas, con nuevo Id
 --Esto se necesita por la base de datos que utilizamos
@@ -142,6 +124,36 @@ CREATE TABLE calles_cleaned (
 ALTER TABLE calles_cleaned ADD COLUMN source INTEGER;
 ALTER TABLE calles_cleaned ADD COLUMN target INTEGER;
 ALTER TABLE calles_cleaned ADD COLUMN cost DOUBLE PRECISION;
+
+--Funcion para "snapear" un punto de entrada a el nodo mas cercano de la topologia
+--Devuelve el punto/nodo
+CREATE OR REPLACE FUNCTION find_nearest_node(input_point GEOMETRY(Point, 4326))
+RETURNS BIGINT AS $$
+DECLARE
+    nearest_node_id BIGINT;
+BEGIN
+    SELECT
+        id
+    INTO
+        nearest_node_id
+    FROM
+        calles_cleaned_vertices_pgr -- This table holds the nodes created by pgr_createTopology
+    ORDER BY
+        ST_Distance(the_geom, input_point)
+    LIMIT 1;
+
+    -- Optional: Add error handling if no node is found nearby (e.g., input_point is far from network)
+    IF nearest_node_id IS NULL THEN
+        RAISE EXCEPTION 'No network node found near the input point.';
+    END IF;
+
+    RETURN nearest_node_id;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+--Poblar
 
 -- Clientes
 INSERT INTO clientes (nombre, direccion, email, telefono, ubicacion) VALUES
@@ -243,9 +255,9 @@ INSERT INTO urgencias (pedido_id, nivel) VALUES
 (5, 'no urgente');
 
 -- Zonas de cobertura
-INSERT INTO zonas_cobertura (nombre, geom, empresa_id) VALUES
-('Zona Norte', ST_GeomFromText('POLYGON((-70.688 -33.454, -70.688 -33.452, -70.684 -33.452, -70.684 -33.454, -70.688 -33.454))', 4326), 1),
-('Zona Sur', ST_GeomFromText('POLYGON((-70.688 -33.460, -70.688 -33.462, -70.684 -33.462, -70.684 -33.460, -70.688 -33.460))', 4326), 2),
-('Zona Este', ST_GeomFromText('POLYGON((-70.680 -33.456, -70.680 -33.454, -70.676 -33.454, -70.676 -33.456, -70.680 -33.456))', 4326), 3),
-('Zona Oeste', ST_GeomFromText('POLYGON((-70.692 -33.456, -70.692 -33.454, -70.688 -33.454, -70.688 -33.456, -70.692 -33.456))', 4326), 4),
-('Zona Centro', ST_GeomFromText('POLYGON((-70.686 -33.458, -70.686 -33.456, -70.682 -33.456, -70.682 -33.458, -70.686 -33.458))', 4326), 5);
+INSERT INTO zonas_cobertura (nombre, geom) VALUES
+('Zona Norte', ST_GeomFromText('POLYGON((-70.688 -33.454, -70.688 -33.452, -70.684 -33.452, -70.684 -33.454, -70.688 -33.454))', 4326)),
+('Zona Sur', ST_GeomFromText('POLYGON((-70.688 -33.460, -70.688 -33.462, -70.684 -33.462, -70.684 -33.460, -70.688 -33.460))', 4326)),
+('Zona Este', ST_GeomFromText('POLYGON((-70.680 -33.456, -70.680 -33.454, -70.676 -33.454, -70.676 -33.456, -70.680 -33.456))', 4326)),
+('Zona Oeste', ST_GeomFromText('POLYGON((-70.692 -33.456, -70.692 -33.454, -70.688 -33.454, -70.688 -33.456, -70.692 -33.456))', 4326)),
+('Zona Centro', ST_GeomFromText('POLYGON((-70.686 -33.458, -70.686 -33.456, -70.682 -33.456, -70.682 -33.458, -70.686 -33.458))', 4326));
