@@ -25,3 +25,14 @@ export async function updateEmpresa(id, empresa) {
   if (!response.ok) throw new Error('Error updating empresa')
   return response.json()
 }
+
+// 4.
+export async function getEntregaMasLejana(empresa_id) {
+  const response = await fetch(`${API_BASE_URL}/api/empresas/entrega-mas-lejana/${empresa_id}`);
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => null); // Try to parse JSON error, but don't fail if not JSON
+    console.error(`Error de la API al obtener entrega más lejana: Estado ${response.status}, Mensaje:`, errorBody);
+    throw new Error(`Error al obtener la entrega más lejana para la empresa con ID ${empresa_id}. Código: ${response.status}`);
+  }
+  return response.json();
+}

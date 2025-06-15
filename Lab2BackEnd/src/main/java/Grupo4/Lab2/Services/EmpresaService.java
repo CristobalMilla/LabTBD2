@@ -1,5 +1,6 @@
 package Grupo4.Lab2.Services;
 
+import Grupo4.Lab2.DTO.CoordenadaDTO;
 import Grupo4.Lab2.Entities.EmpresaEntity;
 import Grupo4.Lab2.Repositories.EmpresaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,4 +31,9 @@ public class EmpresaService {
     }
 
     public List<Point> getEntregasCercanas(Long id){return empresaRepository.findNearby(id);}
+
+    // 4.
+    public CoordenadaDTO getEntregaMasLejana(long empresaId) {
+        return empresaRepository.findFurthest(empresaId);
+    }
 }

@@ -1,13 +1,12 @@
 package Grupo4.Lab2.Config;
 
-
+import Grupo4.Lab2.Services.UsuarioDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -28,18 +27,17 @@ public class JwtFilter extends OncePerRequestFilter {
     // el filtro intercepta todas las solicitudes entrantes y verifica si el token es valido
 
     private final JwtUtil jwtUtil;
-    private final UserDetailsService userDetailsService;
-
+    private final UsuarioDetailsService usuarioDetailsService;
 
     /**
      * Constructor para JwtFilter.
      *
      * @param jwtUtil Utilidad para manejo de tokens JWT.
-     * @param userDetailsService Servicio para obtener detalles del usuario.
+     * @param usuarioDetailsService Servicio para obtener detalles del usuario.
      */    @Autowired
-    public JwtFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
+    public JwtFilter(JwtUtil jwtUtil, UsuarioDetailsService usuarioDetailsService) {
         this.jwtUtil = jwtUtil;
-        this.userDetailsService = userDetailsService;
+        this.usuarioDetailsService = usuarioDetailsService;
     }
 
     /**
@@ -86,7 +84,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String email = this.jwtUtil.getEmail(jwt);
 
         //4 se busca por email
-        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+        UserDetails userDetails = usuarioDetailsService.loadUserByUsername(email);
 
 
         // 5. Cargar al usuario en el contexto de seguridad
