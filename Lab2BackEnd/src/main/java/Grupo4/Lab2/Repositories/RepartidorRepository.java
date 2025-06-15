@@ -64,11 +64,12 @@ public class RepartidorRepository {
     }
 
     public RepartidorEntity findById(long id){
-        String sql = "SELECT * FROM repartidores WHERE repartidor_id = :id";
+        String sql = "SELECT repartidor_id, nombre, telefono, disponible, ST_AsText(ubicacion_actual) as ubicacion_wkt FROM repartidores WHERE repartidor_id = :id";
         try(var con = sql2o.open()){
-            return con.createQuery(sql)
+            List<Map<String, Object>> rows = con.createQuery(sql)
                     .addParameter("id", id)
-                    .executeAndFetchFirst(RepartidorEntity.class);
+                    .executeAndFetchTable().asList();
+            return mapRowToRepartidorEntity(rows.get(0));
         }
     }
 
