@@ -1,8 +1,7 @@
 package Grupo4.Lab2.Entities;
 
 import jakarta.persistence.Column;
-
-import java.awt.*;
+import org.locationtech.jts.geom.Point;
 
 public class PuntoInteresEntity {
 
