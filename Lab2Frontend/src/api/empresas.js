@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 export async function getAllEmpresas() {
   const response = await fetch(`${API_BASE_URL}/api/empresas/all`);
@@ -16,16 +16,12 @@ export async function getEmpresaById(id) {
   return response.json();
 }
 
-export async function updateEmpresa(id, empresaData) {
+export async function updateEmpresa(id, empresa) {
   const response = await fetch(`${API_BASE_URL}/api/empresas/${id}`, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(empresaData),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(empresa)
   });
-  if (!response.ok) {
-    throw new Error('Error al actualizar la empresa');
-  }
+  if (!response.ok) throw new Error('Error updating empresa');
   return response.json();
 }
