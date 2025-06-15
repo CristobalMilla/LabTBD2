@@ -112,4 +112,16 @@ public class RepartidorRepository {
 
     }
 
+    public double calcularDistanciaMensual(long repartidorId) {
+        String sql = ""
+          + "SELECT COALESCE(SUM(ST_Length(ruta_estimada::geography)),0) "
+          + "FROM pedidos "
+          + "WHERE repartidor_id = :id "
+          +   "AND fecha_entrega >= now() - INTERVAL '1 month'";
+        try (var con = sql2o.open()) {
+            return con.createQuery(sql)
+                      .addParameter("id", repartidorId)
+                      .executeScalar(Double.class);
+        }
+    }
 }
