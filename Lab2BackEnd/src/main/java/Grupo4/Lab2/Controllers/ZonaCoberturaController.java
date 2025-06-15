@@ -1,5 +1,6 @@
 package Grupo4.Lab2.Controllers;
 
+import Grupo4.Lab2.DTO.PedidoYZonasQueCruzaDTO;
 import Grupo4.Lab2.Entities.ClienteEntity;
 import Grupo4.Lab2.Entities.ZonaCoberturaEntity;
 import Grupo4.Lab2.Services.ZonaCoberturaService;
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("/api/zonasCobertura")
 @CrossOrigin
 public class ZonaCoberturaController {
@@ -63,4 +64,9 @@ public class ZonaCoberturaController {
         }
     }
 
+    @PutMapping("/byListIds")
+    public List<ZonaCoberturaEntity> getZonasCoberturaByListIds(@RequestBody PedidoYZonasQueCruzaDTO pedido){
+        System.out.println("aaaaa");
+        return zonaCoberturaService.getZonasCoberturaByPedido(pedido);
+    }
 }

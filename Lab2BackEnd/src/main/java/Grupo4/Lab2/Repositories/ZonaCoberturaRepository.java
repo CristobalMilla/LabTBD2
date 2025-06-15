@@ -30,7 +30,7 @@ public class ZonaCoberturaRepository {
 
     private ZonaCoberturaEntity mapToZonaCoberturaEntity(Map<String, Object> row) {
         ZonaCoberturaEntity zona = new ZonaCoberturaEntity();
-        zona.setZona_id((Long) row.get("zona_id"));
+        zona.setZona_id((Integer) row.get("zona_id"));
         zona.setNombre((String) row.get("nombre"));
         String wkt = (String) row.get("geom_wkt");
         if (wkt != null) {
