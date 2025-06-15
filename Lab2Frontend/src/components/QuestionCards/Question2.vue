@@ -1,142 +1,79 @@
+<template>
+  <v-card>
+    <v-card-title>
+      Zonas de Cobertura por Cliente
+    </v-card-title>
+    <v-card-text>
+      <v-select
+        v-model="selectedClienteId"
+        :items="clientes"
+        item-title="nombre"
+        item-value="cliente_id"
+        label="Selecciona un cliente"
+        @change="fetchZonasCobertura"
+        class="mb-4"
+      />
+      <v-list v-if="zonas.length">
+        <v-list-item v-for="zona in zonas" :key="zona.zona_id">
+          <v-list-item-title>{{ zona.nombre }}</v-list-item-title>
+        </v-list-item>
+      </v-list>
+      <div id="map" style="height: 400px; margin-top: 16px;"></div>
+    </v-card-text>
+  </v-card>
+</template>
+
 <script setup>
-import { ref, watch, onMounted, nextTick } from 'vue'
-import axios from 'axios'
+import { ref, onMounted, watch } from "vue";
+import { getByClienteId } from "@/api/zonasCobertura";
+import { getClientes } from "@/api/clientes";
+import wellknown from "wellknown";
+import L from "leaflet";
 
-const masCercana = ref({})
-const sector = ref([])
-const map = ref(null)
-const tienePendientes = ref(false)
+const clientes = ref([]);
+const selectedClienteId = ref(null);
+const zonas = ref([]);
+let map = null;
+let drawnLayers = [];
 
-const getTareasMasCercana = async () => {
-  try {
-    const usuario = JSON.parse(localStorage.getItem("user"))
-    const response = await axios.get("http://localhost:8000/api/tareas/masCercana/" + usuario.id_usuario, {
-      headers: {
-        Authorization: `Bearer ${usuario.token}`,
-      },
-    })
-    if(response.data != ""){
-        masCercana.value = response.data;
-        tienePendientes.value = true;
+const fetchClientes = async () => {
+  clientes.value = await getClientes();
+};
+
+const fetchZonasCobertura = async () => {
+  if (!selectedClienteId.value) return;
+  zonas.value = await getByClienteId(selectedClienteId.value);
+  drawPolygons();
+};
+
+const drawPolygons = () => {
+  if (!map) return;
+  drawnLayers.forEach(layer => map.removeLayer(layer));
+  drawnLayers = [];
+  zonas.value.forEach(zona => {
+    const geojson = wellknown.parse(zona.geom);
+    if (geojson) {
+      const layer = L.geoJSON(geojson).addTo(map);
+      drawnLayers.push(layer);
     }
-    
-  } catch (error) {
-    console.error("Error obteniendo tarea más cercana", error)
-  }
-}
-
-const getSector = async (sectorId) => {
-  try {
-    const usuario = JSON.parse(localStorage.getItem("user"))
-
-    const response = await axios.get("http://localhost:8000/api/sectores/" + sectorId, {
-      headers: {
-        Authorization: `Bearer ${usuario.token}`,
-      },
-    })
-    sector.value = response.data
-  } catch (error) {
-    console.error("Error obteniendo sector", error)
-  }
-}
-
-const initMap = async () => {
-    await nextTick();
-
-    const usuario_local = JSON.parse(localStorage.getItem("user"));
-    const response = await axios.get("http://localhost:8000/api/usuarios/" + usuario_local.id_usuario, {
-        headers: {
-        Authorization: `Bearer ${usuario_local.token}`,
-        },
-    });
-    const usuario = response.data;
-    const center = [usuario.ubicacion.coordinates[1], usuario.ubicacion.coordinates[0]];
-
-    map.value = L.map("map").setView(center, 15);
-
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "&copy; OpenStreetMap contributors",
-    }).addTo(map.value);
-
-    if (sector.value.ubicacion) {
-        const sectorCenter = [
-        sector.value.ubicacion.coordinates[0][0][1],
-        sector.value.ubicacion.coordinates[0][0][0],
-        ];
-        map.value.setView(sectorCenter, 14);
-
-        const geoJSON = {
-        type: "Feature",
-        geometry: {
-            type: "Polygon",
-            coordinates: [sector.value.ubicacion.coordinates[0]],
-        },
-        properties: {},
-        };
-        L.geoJSON(geoJSON).addTo(map.value);
-    }
+  });
 };
 
 onMounted(async () => {
-  await getTareasMasCercana()
-})
+  await fetchClientes();
+  map = L.map("map").setView([-33.45, -70.68], 13);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap contributors"
+  }).addTo(map);
+});
 
-watch(() => masCercana.value.id_sector, async (newVal) => {
-  if (newVal) {
-    await getSector(newVal)
-    await initMap()
-  }
-})
+watch(zonas, () => {
+  drawPolygons();
+});
 </script>
-    <template>
-    <v-container>
-        <v-row>
-        <v-col v-if="tienePendientes" cols="12" md="4">
-            <div class="text-h4">
-                {{masCercana.titulo}}
-            </div>
-            <div class="text-body-1">
-                {{masCercana.descripcion}}
-            </div>
-            <div class="text-body-1">
-                {{masCercana.fecha_vencimiento}}
-            </div>
-            <div class="text-body-1">
-                Sector: {{masCercana.id_sector}}
-            </div>
-        </v-col> 
-        <v-col v-else>
-            <div class="text-h4">
-                No tienes tareas pendientes
-            </div>
-        </v-col>
-        <v-col cols="12" md="8">
-            mapa: 
-            <div id="map" class="rounded mb-2"></div>
-        </v-col>
-        </v-row>
-    </v-container>
-    </template>
 
-    <script>
-    export default {
-        name: "Query2",
-    };
-    </script>
-
-    <style>
-    table {
-        width: 100%;
-        margin-top: 1rem;
-    }
-    td,
-    th {
-        border: 1px solid black;
-    }
-    #map {
-    height: 400px;
-    width: 100%;
-    border: 1px solid black;
-    }
-
-    </style>
+<style scoped>
+#map {
+  width: 100%;
+}
+</style>
