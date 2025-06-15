@@ -15,7 +15,7 @@ public class CallesEntity {
     private Integer source;
     private Integer target;
     private Double cost;
-    private String geomWkt;
+    private String geomWkt; 
 
     public CallesEntity() { }
     public CallesEntity(Integer cleanedStreetId, Integer streetId, Integer fid, BigDecimal shapeLeng, BigDecimal stLength,

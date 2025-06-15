@@ -33,8 +33,13 @@ public class EmpresaController {
         empresaService.save(empresa);
         return ResponseEntity.ok(empresa);
     }
-    @PutMapping("/")
-    public ResponseEntity<EmpresaEntity> update(@RequestBody EmpresaEntity empresa) {
+    @PutMapping("/{id}")
+    public ResponseEntity<EmpresaEntity> update(
+        @PathVariable Long id,
+        @RequestBody EmpresaEntity empresa
+    ) {
+        // Aseguramos que el ID del body coincide con el path
+        empresa.setEmpresaId(id);
         empresaService.update(empresa);
         return ResponseEntity.ok(empresa);
     }

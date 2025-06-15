@@ -5,8 +5,6 @@ import org.locationtech.jts.geom.Point;
 
 public class RepartidorEntity {
 
-
-
     private long repartidor_id;
     private String nombre;
     private String telefono;

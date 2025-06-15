@@ -15,14 +15,14 @@
         <v-card elevation="2" class="pa-6">
           <v-card-title>
             <span class="text-h5">
-              Editar Información de {{ editForm.nombre || '' }}
+              Editar Información de {{ editForm.nombre }}
             </span>
           </v-card-title>
           <v-card-text>
             <v-form ref="formRef" lazy-validation>
               <v-text-field label="Nombre" v-model="editForm.nombre" required></v-text-field>
               <v-textarea label="Dirección" v-model="editForm.direccion" required></v-textarea>
-              <v-text-field label="Tipo Servicio" v-model="editForm.tipoServicio" required></v-text-field>
+              <v-text-field label="Tipo Servicio" v-model="editForm.tipo_servicio" required></v-text-field>
               <v-divider class="my-4"></v-divider>
               <div>
                 <div>
@@ -64,11 +64,11 @@ const empresaId = route.params.id
 
 const loading = ref(false)
 const editForm = ref({
-  empresaId: null,
+  empresa_id: null,
   nombre: '',
   direccion: '',
-  tipoServicio: '',    // <-- aquí
-  ubicacion: null
+  tipo_servicio: '',  // nombre tal y como maneja el backend
+  ubicacion: null     // se espera que sea un WKT (por ejemplo, "POINT(-70.685 -33.455)")
 })
 
 const formRef = ref(null)
@@ -77,7 +77,7 @@ const verticesLayer = ref(null)
 const vertices = ref([])
 const selectedMarker = ref(null)
 
-function initMap(){
+function initMap() {
   if(map.value) map.value.remove()
   map.value = L.map('edit-map').setView([-33.455, -70.685], 13)
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -85,10 +85,9 @@ function initMap(){
   }).addTo(map.value)
   verticesLayer.value = L.layerGroup().addTo(map.value)
   drawVertices()
-  // Si la empresa tiene ubicación, mostrar marcador
-  if(editForm.value.ubicacion){
+  if(editForm.value.ubicacion) {
     const point = parsePointWKT(editForm.value.ubicacion)
-    if(point){
+    if(point) {
       selectedMarker.value = L.marker(point, {
         icon: L.icon({
           iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
@@ -100,13 +99,13 @@ function initMap(){
   }
 }
 
-async function drawVertices(){
+async function drawVertices() {
   try {
     vertices.value = await getAllVertices()
     verticesLayer.value.clearLayers()
-    vertices.value.forEach(v => {
-      if (v.theGeomWkt) {
-        const point = parsePointWKT(v.theGeomWkt)
+    vertices.value.forEach(vertex => {
+      if (vertex.theGeomWkt) {
+        const point = parsePointWKT(vertex.theGeomWkt)
         if(point){
           const marker = L.circleMarker(point, {
             radius: 3,
@@ -115,79 +114,79 @@ async function drawVertices(){
             fillOpacity: 0.5
           }).addTo(verticesLayer.value)
           marker.on('click', () => {
-            handleVertexSelection(v, point)
+            handleVertexSelection(vertex, point)
           })
         }
       }
     })
-  } catch (error){
+  } catch (error) {
     console.error("Error fetching vertices:", error)
   }
 }
 
-function parsePointWKT(wkt){
+function parsePointWKT(wkt) {
   if(!wkt || !wkt.startsWith("POINT")) return null
-  const match = wkt.match(/POINT\s*\(\s*(-?\d+\.?\d*)\s+(-?\d+\.?\d*)\s*\)/i)
-  if(match && match.length === 3){
-    return [parseFloat(match[2]), parseFloat(match[1])] // [lat, lng]
+  const match = wkt.match(/POINT\s*\(\s*(-?\d+\.?\d*)\s+(-?\d+\.?\d*)\s*\)/)
+  if (match && match.length === 3) {
+    return [parseFloat(match[2]), parseFloat(match[1])] // Leaflet utiliza [lat, lng]
   }
   return null
 }
 
-function handleVertexSelection(vertex, point){
+function handleVertexSelection(vertex, point) {
   editForm.value.ubicacion = vertex.theGeomWkt
-  if(selectedMarker.value){
+  if(selectedMarker.value) {
     map.value.removeLayer(selectedMarker.value)
   }
   selectedMarker.value = L.marker(point, {
     icon: L.icon({
       iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
       shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-      iconSize: [25,41],
-      iconAnchor: [12,41]
+      iconSize: [25, 41],
+      iconAnchor: [12, 41]
     })
   }).addTo(map.value).bindPopup("Ubicación Seleccionada").openPopup()
 }
 
-async function fetchEmpresa(){
+async function fetchEmpresa() {
   loading.value = true
   try {
     const empresa = await getEmpresaById(empresaId)
     editForm.value = {
-      empresaId: empresa.empresaId || empresa.empresa_id,
+      empresa_id: empresa.empresaId || empresa.empresa_id,
       nombre: empresa.nombre,
       direccion: empresa.direccion,
-      tipoServicio: empresa.tipoServicio || empresa.tipo_servicio, // <-- aquí
-      ubicacion: empresa.ubicacion  // valor WKT (puede ser nulo)
+      tipo_servicio: empresa.tipoServicio || empresa.tipo_servicio,
+      ubicacion: empresa.ubicacion  // WKT en formato "POINT(lng lat)"
     }
-  } catch (error){
+  } catch (error) {
     console.error("Error fetching empresa:", error)
   } finally {
     loading.value = false
   }
 }
 
-async function saveChanges(){
+async function saveChanges() {
   loading.value = true
   try {
     const payload = {
-      nombre: editForm.value.nombre,
-      direccion: editForm.value.direccion,
-      tipoServicio: editForm.value.tipoServicio,  // <-- camelCase
-      ubicacion: editForm.value.ubicacion
+      nombre:       editForm.value.nombre,
+      direccion:    editForm.value.direccion,
+      tipo_servicio:editForm.value.tipo_servicio,
+      ubicacion:    editForm.value.ubicacion
     }
-    await updateEmpresa(editForm.value.empresaId, payload)
-    alert("Empresa actualizada correctamente")
+    await updateEmpresa(editForm.value.empresa_id, payload)
+    alert("Empresa actualizada correctamente!")
     router.push('/taskdetails')
   } catch (error) {
-    console.error("Error updating empresa:", error)
+    console.error(error)
     alert("Error actualizando la empresa")
   } finally {
     loading.value = false
   }
 }
 
-function goBack(){
+function goBack() {
   router.push('/taskdetails')
 }
 
