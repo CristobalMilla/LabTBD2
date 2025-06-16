@@ -34,7 +34,6 @@ const initMap = async () => {
 
 onMounted(async () => {
   await getpedidos()
-  await initMap()
 })
 
 const verMapa = async (index) => {
