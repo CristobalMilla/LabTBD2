@@ -173,6 +173,26 @@ INSERT INTO clientes (nombre, direccion, email, telefono, ubicacion) VALUES
 ('Pedro González', 'San Alfonso 321', 'pedro.g@example.com', '+56944444444', ST_SetSRID(ST_MakePoint(-70.682, -33.458), 4326)),
 ('Lucía Herrera', 'Av. Las Rejas 654', 'lucia.h@example.com', '+56955555555', ST_SetSRID(ST_MakePoint(-70.680, -33.459), 4326));
 
+-- Cliente 1 → Zona Norte
+UPDATE clientes
+SET ubicacion = ST_SetSRID(ST_MakePoint(-70.686, -33.453), 4326)
+WHERE cliente_id = 1;
+-- Cliente 3 → Zona Sur
+UPDATE clientes
+SET ubicacion = ST_SetSRID(ST_MakePoint(-70.686, -33.461), 4326)
+WHERE cliente_id = 3;
+
+-- Cliente 4 → Zona Oeste
+UPDATE clientes
+SET ubicacion = ST_SetSRID(ST_MakePoint(-70.690, -33.455), 4326)
+WHERE cliente_id = 4;
+
+-- Cliente 5 → Zona Este
+UPDATE clientes
+SET ubicacion = ST_SetSRID(ST_MakePoint(-70.678, -33.455), 4326)
+WHERE cliente_id = 5;
+
+
 -- Repartidores
 INSERT INTO repartidores (nombre, telefono, disponible, ubicacion_actual) VALUES
 ('Jorge Silva', '+56966666666', true, ST_SetSRID(ST_MakePoint(-70.681, -33.456), 4326)),
