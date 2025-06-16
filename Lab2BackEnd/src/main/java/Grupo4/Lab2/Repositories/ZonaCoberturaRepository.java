@@ -141,7 +141,6 @@ public class ZonaCoberturaRepository {
 
     // Query 8
     // Detectar zonas con alta densidad de pedidos mediante agregación de puntos.
-     // cambiar por un dto
     public List<ZonaYDensidadXkm2DTO> getZonasConAltaDensidad(){
         try (Connection conn = sql2o.open()) {
             String query = "WITH agrupacion_pedidos AS ( " +
@@ -149,14 +148,15 @@ public class ZonaCoberturaRepository {
                         "FROM zonas_cobertura z " +
                         "INNER JOIN pedidos p ON ST_Within(p.punto_final, z.geom) " +
                         "GROUP BY z.zona_id) " +
-                    "SELECT ap.zona_id, (ST_NPoints(ap.puntos_agrupados_x_zona)/(ST_Area(geom::geography)/1000000)) AS densidad_pedidos_x_km2 " +
+                    "SELECT ap.zona_id, ST_AsText(z.geom) AS geom, (ST_NPoints(ap.puntos_agrupados_x_zona)/(ST_Area(geom::geography)/1000000)) AS densidad_x_km2 "  +
                     "FROM agrupacion_pedidos ap " +
                     "INNER JOIN zonas_cobertura z ON ap.zona_id = z.zona_id " +
                     "GROUP BY ap.zona_id, ap.puntos_agrupados_x_zona, z.geom " +
-                    "HAVING (ST_NPoints(ap.puntos_agrupados_x_zona)/(ST_Area(geom::geography)/1000000)) > 100"; // cambiar por alguna densidad
+                    "HAVING (ST_NPoints(ap.puntos_agrupados_x_zona)/(ST_Area(geom::geography)/1000000)) > 20"; // cambiar por alguna densidad
             return conn.createQuery(query).executeAndFetch(ZonaYDensidadXkm2DTO.class);
         }
         catch (Exception e){
+            e.printStackTrace();
             System.out.println("Error al obtener las zonas con alta densidad");
             return null;
         }

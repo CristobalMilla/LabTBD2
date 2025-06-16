@@ -277,17 +277,87 @@ INSERT INTO pedidos (cliente_id, empresa_id, repartidor_id, fecha, fecha_entrega
    ST_MakePoint(-70.688, -33.460)
  ]), 4326));
 
+INSERT INTO pedidos (cliente_id, empresa_id, repartidor_id, fecha, fecha_entrega, estado, punto_inicio, punto_final, ruta_estimada) 
+VALUES 
+(1, 1, 1, NOW(), NOW() + INTERVAL '30 minutes', 'Entregado', 
+    ST_SetSRID(ST_MakePoint(-70.681, -33.456), 4326), 
+    ST_SetSRID(ST_MakePoint(-70.676787, -33.455711), 4326), -- Ajustado para Zona Este
+    ST_SetSRID(ST_MakeLine(ST_MakePoint(-70.681, -33.456), ST_MakePoint(-70.676787, -33.455711)), 4326)),
+
+(2, 2, 2, NOW(), NOW() + INTERVAL '40 minutes', 'En camino', 
+    ST_SetSRID(ST_MakePoint(-70.682, -33.457), 4326), 
+    ST_SetSRID(ST_MakePoint(-70.676787, -33.455711), 4326), -- Ajustado para Zona Este
+    ST_SetSRID(ST_MakeLine(ST_MakePoint(-70.682, -33.457), ST_MakePoint(-70.676787, -33.455711)), 4326)),
+
+(3, 3, 3, NOW(), NOW() + INTERVAL '25 minutes', 'Entregado', 
+    ST_SetSRID(ST_MakePoint(-70.683, -33.458), 4326),  
+    ST_SetSRID(ST_MakePoint(-70.687664, -33.452142), 4326), -- Ajustado para Zona Norte
+    ST_SetSRID(ST_MakeLine(ST_MakePoint(-70.683, -33.458), ST_MakePoint(-70.687664, -33.452142)), 4326)),
+
+(4, 4, 4, NOW(), NOW() + INTERVAL '35 minutes', 'Pendiente', 
+    ST_SetSRID(ST_MakePoint(-70.684, -33.459), 4326), 
+    ST_SetSRID(ST_MakePoint(-70.684255, -33.460171), 4326), -- Ajustado para Zona Sur
+    ST_SetSRID(ST_MakeLine(ST_MakePoint(-70.684, -33.459), ST_MakePoint(-70.684255, -33.460171)), 4326)),
+
+(5, 5, 5, NOW(), NOW() + INTERVAL '20 minutes', 'Entregado', 
+    ST_SetSRID(ST_MakePoint(-70.685, -33.460), 4326), 
+    ST_SetSRID(ST_MakePoint(-70.684255, -33.460171), 4326), -- Ajustado para Zona Sur
+    ST_SetSRID(ST_MakeLine(ST_MakePoint(-70.685, -33.460), ST_MakePoint(-70.684255, -33.460171)), 4326));
+
+INSERT INTO pedidos (cliente_id, empresa_id, repartidor_id, fecha, fecha_entrega, estado, punto_inicio, punto_final, ruta_estimada) 
+VALUES 
+(1, 1, 1, NOW(), NOW() + INTERVAL '30 minutes', 'En camino', 
+    ST_SetSRID(ST_MakePoint(-70.688, -33.454), 4326), 
+    ST_SetSRID(ST_MakePoint(-70.676787, -33.455711), 4326), -- Ajuste final en Zona Este
+    ST_SetSRID(ST_MakeLine(ARRAY[ 
+        ST_MakePoint(-70.688, -33.454), 
+        ST_MakePoint(-70.686, -33.458), 
+        ST_MakePoint(-70.676787, -33.455711) ]), 4326)),
+
+(2, 2, 2, NOW(), NOW() + INTERVAL '40 minutes', 'Pendiente', 
+    ST_SetSRID(ST_MakePoint(-70.688, -33.460), 4326),
+    ST_SetSRID(ST_MakePoint(-70.691591, -33.455425), 4326), -- Ajuste final en Zona Oeste
+    ST_SetSRID(ST_MakeLine(ARRAY[ 
+        ST_MakePoint(-70.688, -33.460), 
+        ST_MakePoint(-70.686, -33.458), 
+        ST_MakePoint(-70.691591, -33.455425) ]), 4326)),
+
+(3, 3, 3, NOW(), NOW() + INTERVAL '25 minutes', 'Entregado', 
+    ST_SetSRID(ST_MakePoint(-70.676, -33.454), 4326), 
+    ST_SetSRID(ST_MakePoint(-70.687664, -33.452142), 4326), -- Ajuste final en Zona Norte
+    ST_SetSRID(ST_MakeLine(ARRAY[ 
+        ST_MakePoint(-70.676, -33.454), 
+        ST_MakePoint(-70.686, -33.458), 
+        ST_MakePoint(-70.687664, -33.452142) ]), 4326)),
+
+(4, 4, 4, NOW(), NOW() + INTERVAL '35 minutes', 'En camino', 
+    ST_SetSRID(ST_MakePoint(-70.692, -33.456), 4326), 
+    ST_SetSRID(ST_MakePoint(-70.684255, -33.460171), 4326), -- Ajuste final en Zona Sur
+    ST_SetSRID(ST_MakeLine(ARRAY[ 
+        ST_MakePoint(-70.692, -33.456), 
+        ST_MakePoint(-70.686, -33.458), 
+        ST_MakePoint(-70.684255, -33.460171) ]), 4326));
+
 -- Detalle de pedidos
 INSERT INTO detalle_pedidos (pedido_id, producto_id, cantidad) VALUES
 (1, 1, 2),
 (2, 2, 1),
 (3, 3, 1),
 (4, 4, 3),
-(5, 5, 2)
+(5, 5, 2),
 (6, 1, 2),
 (7, 2, 1),
 (8, 3, 1),
-(9, 4, 3);
+(9, 4, 3),
+(10, 1, 2),
+(11, 2, 1),
+(12, 3, 1),
+(13, 4, 3),
+(14, 5, 2),
+(15, 1, 2),
+(16, 2, 1),
+(17, 3, 1),
+(18, 4, 3);
 
 -- Pagos
 INSERT INTO pagos (pedido_id, medio_id, monto) VALUES
@@ -299,7 +369,16 @@ INSERT INTO pagos (pedido_id, medio_id, monto) VALUES
 (6, 2, 7990),
 (7, 3, 2500),
 (8, 3, 5400),
-(9, 4, 13800);
+(9, 4, 13800),
+(10, 1, 9000),
+(11, 2, 7990),
+(12, 3, 2500),
+(13, 3, 5400),
+(14, 4, 13800),
+(15, 2, 7990),
+(16, 3, 2500),
+(17, 3, 5400),
+(18, 4, 13800);
 
 -- Calificaciones
 INSERT INTO calificaciones (pedido_id, puntuacion, comentario) VALUES
@@ -307,11 +386,20 @@ INSERT INTO calificaciones (pedido_id, puntuacion, comentario) VALUES
 (2, 4, 'Buena pizza, pero llegó tibia'),
 (3, 5, 'Excelente servicio'),
 (4, 3, 'Demoró un poco'),
-(5, 5, '¡Sushi fresco y delicioso!')
+(5, 5, '¡Sushi fresco y delicioso!'),
 (6, 5, 'Muy rápido y sabroso'),
 (7, 4, 'Buena pizza, pero llegó tibia'),
 (8, 5, 'Excelente servicio'),
-(9, 3, 'Demoró un poco');
+(9, 3, 'Demoró un poco'),
+(10, 5, 'Muy rápido y sabroso'),
+(11, 4, 'Buena pizza, pero llegó tibia'),
+(12, 5, 'Excelente servicio'),
+(13, 3, 'Demoró un poco'),
+(14, 5, '¡Sushi fresco y delicioso!'),
+(15, 5, 'Muy rápido y sabroso'),
+(16, 4, 'Buena pizza, pero llegó tibia'),
+(17, 5, 'Excelente servicio'),
+(18, 3, 'Demoró un poco');
 
 -- Urgencias
 INSERT INTO urgencias (pedido_id, nivel) VALUES
@@ -323,13 +411,22 @@ INSERT INTO urgencias (pedido_id, nivel) VALUES
 (6, 'no urgente'),
 (7, 'urgente'),
 (8, 'urgente'),
-(9, 'no urgente');
+(9, 'no urgente'),
+(10, 'no urgente'),
+(11, 'urgente'),
+(12, 'urgente'),
+(13, 'no urgente'),
+(14, 'no urgente'),
+(15, 'no urgente'),
+(16, 'urgente'),
+(17, 'urgente'),
+(18, 'no urgente');
 
 -- Zonas de cobertura
-INSERT INTO zonas_cobertura (nombre, geom, empresa_id) VALUES
-('Zona Norte', ST_GeomFromText('POLYGON((-70.688 -33.454, -70.688 -33.452, -70.684 -33.452, -70.684 -33.454, -70.688 -33.454))', 4326)),
-('Zona Sur', ST_GeomFromText('POLYGON((-70.688 -33.460, -70.688 -33.462, -70.684 -33.462, -70.684 -33.460, -70.688 -33.460))', 4326)),
-('Zona Este', ST_GeomFromText('POLYGON((-70.680 -33.456, -70.680 -33.454, -70.676 -33.454, -70.676 -33.456, -70.680 -33.456))', 4326)),
-('Zona Oeste', ST_GeomFromText('POLYGON((-70.692 -33.456, -70.692 -33.454, -70.688 -33.454, -70.688 -33.456, -70.692 -33.456))', 4326)),
-('Zona Centro', ST_GeomFromText('POLYGON((-70.686 -33.458, -70.686 -33.456, -70.682 -33.456, -70.682 -33.458, -70.686 -33.458))', 4326));
+INSERT INTO zonas_cobertura (nombre, geom) VALUES
+('Zona Norte', ST_GeomFromText('POLYGON((-70.688 -33.454, -70.688 -33.452, -70.684 -33.452, -70.684 -33.454, -70.688 -33.454))')),
+('Zona Sur', ST_GeomFromText('POLYGON((-70.688 -33.460, -70.688 -33.462, -70.684 -33.462, -70.684 -33.460, -70.688 -33.460))')),
+('Zona Este', ST_GeomFromText('POLYGON((-70.680 -33.456, -70.680 -33.454, -70.676 -33.454, -70.676 -33.456, -70.680 -33.456))')),
+('Zona Oeste', ST_GeomFromText('POLYGON((-70.692 -33.456, -70.692 -33.454, -70.688 -33.454, -70.688 -33.456, -70.692 -33.456))')),
+('Zona Centro', ST_GeomFromText('POLYGON((-70.686 -33.458, -70.686 -33.456, -70.682 -33.456, -70.682 -33.458, -70.686 -33.458))'));
 

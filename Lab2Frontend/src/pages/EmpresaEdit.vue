@@ -178,7 +178,7 @@ async function saveChanges() {
     }
     await updateEmpresa(editForm.value.empresa_id, payload)
     alert("Empresa actualizada correctamente!")
-    router.push('/taskdetails')
+    router.push('/empresasdetails')
   } catch (error) {
     console.error(error)
     alert("Error actualizando la empresa")
@@ -188,7 +188,7 @@ async function saveChanges() {
 }
 
 function goBack() {
-  router.push('/taskdetails')
+  router.push('/empresasdetails')
 }
 
 onMounted(async () => {

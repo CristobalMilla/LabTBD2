@@ -156,7 +156,7 @@ watch(zonas, async () => {
 
 <script>
 export default {
-    name: "Query1",
+    name: "Query5",
 };
 </script>
 

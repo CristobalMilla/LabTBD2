@@ -52,7 +52,6 @@ public class ZonaCoberturaService {
 
     // Query 8
     // Detectar zonas con alta densidad de pedidos mediante agregación de puntos.
-    // cambiar por un dto
     public List<ZonaYDensidadXkm2DTO> getZonasConAltaDensidad(){
         return zonaRepository.getZonasConAltaDensidad();
     }
