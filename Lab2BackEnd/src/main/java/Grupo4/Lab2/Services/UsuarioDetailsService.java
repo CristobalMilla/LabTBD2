@@ -1,36 +1,35 @@
 package Grupo4.Lab2.Services;
+
+import Grupo4.Lab2.Entities.UsuarioEntity;
+import Grupo4.Lab2.Repositories.UsuarioRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import Grupo4.Lab2.Entities.UsuarioEntity;
-import Grupo4.Lab2.Repositories.UsuarioRepository;
 
-/**
- * CustomUserDetailsService es una clase de servicio que implementa la interfaz UserDetailsService necesaria para integrar Spring Security.
- */
 @Service
-public class CustomUserDetailsService implements UserDetailsService {
-
+public class UsuarioDetailsService implements UserDetailsService {
     // Dependencia para interactuar con la base de datos y recuperar información del usuario.
-    private final UsuarioRepository usuarioRepository;
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     /**
      * Constructor que recibe el repositorio como dependencia (inyección de dependencia).
      *
      * @param usuarioRepository El repositorio de usuarios.
-     */
+
     public CustomUserDetailsService(UsuarioRepository usuarioRepository) {
-        this.usuarioRepository = usuarioRepository;
-    }
+    this.usuarioRepository = usuarioRepository;
+    }*/
 
     /**
-     * Carga los detalles del usuario por su email.
+     * Carga los detalles del usuario por su nick.
      *
-     * @param email El email del usuario.
+     * @param email El nick del usuario.
      * @return Los detalles del usuario.
-     * @throws UsernameNotFoundException Si el email no se encuentra en el sistema.
+     * @throws UsernameNotFoundException Si el nick no se encuentra en el sistema.
      */
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -50,5 +49,6 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .password(usuario.getPassword())
                 .roles(usuario.getRole())
                 .build();
+
     }
 }

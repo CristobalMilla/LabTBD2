@@ -1,24 +1,32 @@
+-- Activar extensión PostGIS
+CREATE EXTENSION IF NOT EXISTS postgis;
+-- Activar pgRouting
+CREATE EXTENSION IF NOT EXISTS pgrouting;
+
 -- Crear tablas principales para el sistema de delivery
 CREATE TABLE IF NOT EXISTS clientes (
     cliente_id SERIAL PRIMARY KEY,
     nombre VARCHAR(100),
     direccion TEXT,
     email VARCHAR(100),
-    telefono VARCHAR(20)
+    telefono VARCHAR(20),
+    ubicacion GEOMETRY(Point, 4326)
 );
 
 CREATE TABLE IF NOT EXISTS repartidores (
     repartidor_id SERIAL PRIMARY KEY,
     nombre VARCHAR(100),
     telefono VARCHAR(20),
-    disponible BOOLEAN DEFAULT true
+    disponible BOOLEAN DEFAULT true,
+    ubicacion_actual GEOMETRY(Point, 4326)
 );
 
 CREATE TABLE IF NOT EXISTS empresas (
     empresa_id SERIAL PRIMARY KEY,
     nombre VARCHAR(100),
     direccion TEXT,
-    tipo_servicio VARCHAR(50)
+    tipo_servicio VARCHAR(50),
+    ubicacion GEOMETRY(Point, 4326)
 );
 
 CREATE TABLE IF NOT EXISTS productos (
@@ -32,7 +40,6 @@ CREATE TABLE IF NOT EXISTS productos (
     stock INT DEFAULT NULL
 );
 
-
 CREATE TABLE IF NOT EXISTS pedidos (
     pedido_id SERIAL PRIMARY KEY,
     cliente_id INT REFERENCES clientes(cliente_id),
@@ -40,7 +47,10 @@ CREATE TABLE IF NOT EXISTS pedidos (
     repartidor_id INT REFERENCES repartidores(repartidor_id),
     fecha TIMESTAMP(0),
     fecha_entrega TIMESTAMP(0),
-    estado VARCHAR(50)
+    estado VARCHAR(50),
+    ruta_estimada GEOMETRY(LineString, 4326),
+    punto_inicio GEOMETRY(Point, 4326),
+    punto_final GEOMETRY(Point, 4326)
 );
 
 CREATE TABLE IF NOT EXISTS detalle_pedidos (
@@ -86,27 +96,13 @@ CREATE TABLE IF NOT EXISTS usuario (
     role VARCHAR(50) NOT NULL
 );
 
--- Activar extensión PostGIS
-CREATE EXTENSION IF NOT EXISTS postgis;
-
--- Agregar campos de ubicación geográfica
-ALTER TABLE clientes ADD COLUMN ubicacion GEOMETRY(Point, 4326);
-ALTER TABLE repartidores ADD COLUMN ubicacion_actual GEOMETRY(Point, 4326);
-ALTER TABLE empresas ADD COLUMN ubicacion GEOMETRY(Point, 4326);
-ALTER TABLE pedidos ADD COLUMN ruta_estimada GEOMETRY(LineString, 4326);
-
 -- Crear tabla de zonas de cobertura
 CREATE TABLE zonas_cobertura (
     zona_id SERIAL PRIMARY KEY,
+    empresa_id INT,
     nombre VARCHAR(100),
     geom GEOMETRY(Polygon, 4326)
 );
-
---Columnas auxiliares extras para pedidos
-ALTER TABLE pedidos ADD COLUMN punto_inicio GEOMETRY(Point, 4326);
-ALTER TABLE pedidos ADD COLUMN punto_final GEOMETRY(Point, 4326);
---Columna auxliliar para zona de cobertura, relacionandola con una empresa
-ALTER TABLE zonas_cobertura ADD COLUMN empresa_id INT;
 
 --Seccion poblar ubicaciones
 
@@ -124,7 +120,7 @@ CREATE TABLE IF NOT EXISTS calles (
     comuna VARCHAR(100),
     geom GEOMETRY(MultiLineString, 4326) -- SRID 4326 for WGS84
 );
-CREATE EXTENSION IF NOT EXISTS pgrouting;
+
 --Nueva tabla para filtrar las calles por secciones unicas, con nuevo Id
 --Esto se necesita por la base de datos que utilizamos
 CREATE TABLE calles_cleaned (
@@ -135,13 +131,11 @@ CREATE TABLE calles_cleaned (
     st_length_ NUMERIC,
     nom_ruta VARCHAR(255),
     comuna VARCHAR(100),
-    geom GEOMETRY(LineString, 4326)
+    geom GEOMETRY(LineString, 4326),
+    source INTEGER,                        
+    target INTEGER,                        
+    cost DOUBLE PRECISION
 );
-
--- Añadir int para el id del vertice de inicio, final y el valor de costo (usaremos largo del segmento/calle)
-ALTER TABLE calles_cleaned ADD COLUMN source INTEGER;
-ALTER TABLE calles_cleaned ADD COLUMN target INTEGER;
-ALTER TABLE calles_cleaned ADD COLUMN cost DOUBLE PRECISION;
 
 -- Clientes
 INSERT INTO clientes (nombre, direccion, email, telefono, ubicacion) VALUES
@@ -241,6 +235,19 @@ INSERT INTO urgencias (pedido_id, nivel) VALUES
 (3, 'urgente'),
 (4, 'no urgente'),
 (5, 'no urgente');
+
+-- Calles
+INSERT INTO calles_cleaned (street_id, fid, shape_leng, st_length_, nom_ruta, comuna, geom)
+SELECT
+    c.ogc_fid,
+    c.fid,
+    c.shape_leng,
+    c.st_length_,
+    c.nom_ruta,
+    c.comuna,
+    ST_GeometryN((ST_Dump(ST_LineMerge(c.geom))).geom, 1) --Hace un LineMerge al MultiLine de calles, Realiza un Dump a distintas filas en una tabla, .geom accede a la parte de geom de esa tabla, y GeometryN asegura que la operacion siempre devuelva LineString
+FROM
+    calles AS c;
 
 -- Zonas de cobertura
 INSERT INTO zonas_cobertura (nombre, geom, empresa_id) VALUES

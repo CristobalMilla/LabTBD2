@@ -1,6 +1,6 @@
 package Grupo4.Lab2.Repositories;
 
-
+import Grupo4.Lab2.DTO.CoordenadaDTO;
 import Grupo4.Lab2.Entities.EmpresaEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -111,6 +111,22 @@ public class EmpresaRepository {
             return con.createQuery(sql)
                     .addParameter("empresa_id", empresa_id)
                     .executeAndFetch(Point.class);
+        }
+    }
+
+    // 4. Identificar el punto de entrega más lejano desde cada empresa asociada.
+    public CoordenadaDTO findFurthest(long empresa_id){
+        String sql = "SELECT ST_X(p.punto_final) AS longitude, ST_Y(p.punto_final) AS latitude"+
+                "FROM pedidos p "+
+                "JOIN empresas e ON e.empresa_id = p.empresa_id "+
+                "WHERE e.empresa_id = :empresa_id "+
+                "ORDER BY ST_Distance(p.punto_final::geography, e.ubicacion::geography) DESC "+
+                "LIMIT 1  ";
+
+        try (Connection con = sql2o.open()) {
+            return con.createQuery(sql)
+                    .addParameter("empresa_id", empresa_id)
+                    .executeAndFetchFirst(CoordenadaDTO.class);
         }
     }
 

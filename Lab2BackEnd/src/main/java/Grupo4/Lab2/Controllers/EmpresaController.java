@@ -1,5 +1,6 @@
 package Grupo4.Lab2.Controllers;
 
+import Grupo4.Lab2.DTO.CoordenadaDTO;
 import Grupo4.Lab2.Entities.EmpresaEntity;
 import Grupo4.Lab2.Services.EmpresaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,5 +61,15 @@ public class EmpresaController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
         return ResponseEntity.ok(puntos);
+    }
+
+    // 4.
+    @GetMapping("/entrega-mas-lejana/{empresa_id}")
+    public ResponseEntity<CoordenadaDTO> getPuntoMasLejano(@PathVariable("empresa_id") long empresa_id) {
+        CoordenadaDTO coordenada = empresaService.getEntregaMasLejana(empresa_id);
+        if (coordenada == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(coordenada);
     }
 }
