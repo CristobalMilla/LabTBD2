@@ -38,6 +38,9 @@ public class PedidosRepository {
                     "cliente_id, " +
                     "empresa_id, " +
                     "repartidor_id, " +
+                    "estado," +
+                    "fecha," +
+                    "fecha_entrega," +
                     "ST_AsText(punto_inicio) AS puntoInicioWkt, " +
                     "ST_AsText(punto_final) AS puntoFinalWkt, " +
                     "ST_AsText(ruta_estimada) AS rutaEstimadaWkt " +
@@ -58,7 +61,10 @@ public class PedidosRepository {
             String query = "SELECT pedido_id, " +
                     "cliente_id, " +
                     "empresa_id, " +
-                    "repartidor_id, " +
+                    "repartidor_id," +
+                    "estado," +
+                    "fecha, " +
+                    "fecha_entrega," +
                     "ST_AsText(punto_inicio) AS puntoInicioWkt, " +
                     "ST_AsText(punto_final) AS puntoFinalWkt, " +
                     "ST_AsText(ruta_estimada) AS rutaEstimadaWkt " +
