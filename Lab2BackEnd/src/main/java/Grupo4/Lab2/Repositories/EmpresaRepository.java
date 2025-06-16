@@ -1,6 +1,6 @@
 package Grupo4.Lab2.Repositories;
 
-
+import Grupo4.Lab2.DTO.CoordenadaDTO;
 import Grupo4.Lab2.Entities.EmpresaEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -20,49 +20,68 @@ public class EmpresaRepository {
     }
 
     public List<EmpresaEntity> findAll(){
-        String sql = "SELECT * FROM empresas";
+        String sql =
+                "SELECT " +
+                "  empresa_id, " +
+                "  nombre, " +
+                "  direccion, " +
+                "  tipo_servicio, " +
+                "  ST_AsText(ubicacion) AS ubicacionWkt " +   // <-- convertimos a WKT
+                "FROM empresas";
         try (Connection con = sql2o.open()){
-            List<EmpresaEntity> empresas = con.createQuery(sql)
+            return con.createQuery(sql)
                     .executeAndFetch(EmpresaEntity.class);
-            return empresas;
         }
     }
 
-    public EmpresaEntity findById(long empresa_id){
-        String sql = "SELECT * FROM empresas WHERE empresa_id = :id";
+    public EmpresaEntity findById(long id){
+        String sql =
+                "SELECT " +
+                "  empresa_id, " +
+                "  nombre, " +
+                "  direccion, " +
+                "  tipo_servicio, " +
+                "  ST_AsText(ubicacion) AS ubicacionWkt " +   // <-- idem
+                "FROM empresas WHERE empresa_id = :id";
         try (Connection con = sql2o.open()){
             return con.createQuery(sql)
-                    .addParameter("empresa_id", empresa_id)
+                    .addParameter("id", id)
                     .executeAndFetchFirst(EmpresaEntity.class);
         }
     }
 
-    public void save(EmpresaEntity empresa){
-        String sql = "INSERT INTO empresas (nombre, direccion, tipo_servicio,ubicacion) " +
-                "VALUES (:nombre, :direccion, :tipo_servicio, :ubicacion)";
+    public void save(EmpresaEntity e){
+        String sql =
+                "INSERT INTO empresas (nombre, direccion, tipo_servicio, ubicacion) " +
+                "VALUES (:nombre, :direccion, :tipo_servicio, ST_GeomFromText(:ubicacionWkt,4326))";
         try (Connection con = sql2o.beginTransaction()){
-            Long generatedId = con.createQuery(sql, true)
-                    .addParameter("nombre", empresa.getNombre())
-                    .addParameter("direccion", empresa.getDireccion())
-                    .addParameter("tipo_servicio", empresa.getTipoServicio())
-                    .addParameter("ubicacion", empresa.getUbicacion())
+            Long key = con.createQuery(sql, true)
+                    .addParameter("nombre", e.getNombre())
+                    .addParameter("direccion", e.getDireccion())
+                    .addParameter("tipo_servicio", e.getTipoServicio())
+                    .addParameter("ubicacionWkt", e.getUbicacionWkt())
                     .executeUpdate()
                     .getKey(Long.class);
-            empresa.setEmpresaId(generatedId);
+            e.setEmpresaId(key);
             con.commit();
         }
     }
 
-    public void update(EmpresaEntity empresa) {
-        String sql = "UPDATE empresas SET nombre = :nombre, direccion = :direccion" +
-                ", tipo_servicio = :tipo_servicio, ubicacion = :ubicacion WHERE empresa_id=:empresa_id";
-        try (Connection con = sql2o.beginTransaction()) {
+    public void update(EmpresaEntity e){
+        String sql =
+                "UPDATE empresas SET " +
+                "  nombre = :nombre, " +
+                "  direccion = :direccion, " +
+                "  tipo_servicio = :tipo_servicio, " +
+                "  ubicacion = ST_GeomFromText(:ubicacionWkt,4326) " +
+                "WHERE empresa_id = :empresa_id";
+        try (Connection con = sql2o.beginTransaction()){
             con.createQuery(sql)
-                    .addParameter("nombre", empresa.getNombre())
-                    .addParameter("direccion", empresa.getDireccion())
-                    .addParameter("tipo_servicio", empresa.getTipoServicio())
-                    .addParameter("empresa_id", empresa.getEmpresaId())
-                    .addParameter("ubicacion", empresa.getUbicacion())
+                    .addParameter("nombre", e.getNombre())
+                    .addParameter("direccion", e.getDireccion())
+                    .addParameter("tipo_servicio", e.getTipoServicio())
+                    .addParameter("ubicacionWkt", e.getUbicacionWkt())
+                    .addParameter("empresa_id", e.getEmpresaId())
                     .executeUpdate();
             con.commit();
         }
@@ -92,6 +111,22 @@ public class EmpresaRepository {
             return con.createQuery(sql)
                     .addParameter("empresa_id", empresa_id)
                     .executeAndFetch(Point.class);
+        }
+    }
+
+    // 4. Identificar el punto de entrega más lejano desde cada empresa asociada.
+    public CoordenadaDTO findFurthest(long empresa_id){
+        String sql = "SELECT ST_X(p.punto_final) AS longitude, ST_Y(p.punto_final) AS latitude"+
+                "FROM pedidos p "+
+                "JOIN empresas e ON e.empresa_id = p.empresa_id "+
+                "WHERE e.empresa_id = :empresa_id "+
+                "ORDER BY ST_Distance(p.punto_final::geography, e.ubicacion::geography) DESC "+
+                "LIMIT 1  ";
+
+        try (Connection con = sql2o.open()) {
+            return con.createQuery(sql)
+                    .addParameter("empresa_id", empresa_id)
+                    .executeAndFetchFirst(CoordenadaDTO.class);
         }
     }
 

@@ -24,7 +24,11 @@ const questions = ref([
                   {name: "3. Calcular la distancia total recorrida por un repartidor en el último mes.", opt: 3},
                   {name: "4. Identificar el punto de entrega más lejano desde cada empresa asociada.", opt: 4},
                   {name: "5. Listar todos los pedidos cuya ruta estimada cruce más de 2 zonas de reparto.", opt: 5},
-                  {name: "6. Determinar los clientes que están a más de 5km de cualquier empresa o farmacia.", opt: 6}
+                  {name: "6. Determinar los clientes que están a más de 5km de cualquier empresa o farmacia.", opt: 6},
+                  {name: "7. Calcular automáticamente la zona a la que pertenece un cliente.", opt: 7},
+                  {name: "8. Detectar zonas con alta densidad de pedidos mediante agregación de puntos.", opt: 8},
+                  {name: "9. Tabla de puntos de interés cercanos (hospitales, centros logísticos, etc.)", opt: 9}
+                  
                 ]);
 
 const logout = () => {
@@ -48,7 +52,7 @@ const goToTaskDetails = () => {
       </v-app-bar-title>
       <v-spacer></v-spacer>
       <v-btn variant="text" @click="goToTaskDetails" class="mr-2" prepend-icon="mdi-clipboard-text">
-        Detalles de Tareas
+        Empresas
       </v-btn>
       <NotificationBadge class="mr-2" />
       <v-btn @click="logout" variant="text" prepend-icon="mdi-logout">

@@ -39,4 +39,7 @@ public class RepartidorService {
     public List<RepartidorVistaDTO> repartidoresVista(){
         return repo.repartidoresVista();
     }
+    public double getDistanciaMensual(long repartidorId) {
+        return repo.calcularDistanciaMensual(repartidorId);
+    }
 }

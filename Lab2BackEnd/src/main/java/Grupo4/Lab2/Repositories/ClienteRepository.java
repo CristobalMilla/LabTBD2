@@ -3,31 +3,67 @@ package Grupo4.Lab2.Repositories;
 import Grupo4.Lab2.DTO.ClienteQueMasAGastadoDTO;
 import Grupo4.Lab2.DTO.ResumenPedidosXClienteDTO;
 import Grupo4.Lab2.Entities.ClienteEntity;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKTReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.sql2o.Connection;
 import org.sql2o.Sql2o;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 public class ClienteRepository {
 
     private final Sql2o sql2o;
+    private final GeometryFactory geometryFactory;
 
     @Autowired
     public ClienteRepository(Sql2o sql2o) {
         this.sql2o = sql2o;
+        this.geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+    }
+
+    public ClienteEntity mapRowToClienteEntity(Map<String, Object> row) {
+        if (row == null) {
+            return null;
+        }
+        ClienteEntity client = new ClienteEntity();
+        client.setCliente_id((Integer) row.get("cliente_id"));
+        client.setNombre((String) row.get("nombre"));
+        client.setDireccion((String) row.get("direccion"));
+        client.setEmail((String) row.get("email"));
+        client.setTelefono((String) row.get("telefono"));
+        String ubicacionWkt = (String) row.get("ubicacion_wkt");
+
+        if (ubicacionWkt != null && !ubicacionWkt.isEmpty()) {
+            try {
+                WKTReader reader = new WKTReader(this.geometryFactory);
+                client.setUbicacion((Point) reader.read(ubicacionWkt));
+            } catch (ParseException e) {
+                System.err.println("Error al parsear WKT de ubicación: " + e.getMessage());
+                client.setUbicacion(null);
+            }
+        } else {
+            client.setUbicacion(null);
+        }
+        return client;
     }
 
     public ClienteEntity findById(long idCliente) {
-        try (Connection conn = sql2o.open()) {
-            ClienteEntity cliente;
-            String query = "SELECT * FROM clientes WHERE cliente_id = :idCliente";
-            cliente = conn.createQuery(query)
-                    .addParameter("idCliente", idCliente)
+        String sql = ""
+                + "SELECT cliente_id, nombre, direccion, email, telefono, "
+                + "       ST_AsText(ubicacion) AS ubicacionWkt "
+                + "FROM clientes WHERE cliente_id = :id";
+        try (Connection con = sql2o.open()) {
+            return con.createQuery(sql)
+                    .addParameter("id", idCliente)
                     .executeAndFetchFirst(ClienteEntity.class);
-            return cliente;
         }
         catch (Exception e){
             return null;
@@ -35,27 +71,30 @@ public class ClienteRepository {
     }
 
     public List<ClienteEntity> findAll() {
-        try (Connection conn = sql2o.open()) {
-            List<ClienteEntity> clientes;
-            String query = "SELECT * FROM clientes";
-            clientes = conn.createQuery(query)
+        String sql = ""
+                + "SELECT cliente_id, nombre, direccion, email, telefono, "
+                + "       ST_AsText(ubicacion) AS ubicacionWkt "
+                + "FROM clientes";
+        try (Connection con = sql2o.open()) {
+            return con.createQuery(sql)
                     .executeAndFetch(ClienteEntity.class);
-            return clientes;
         }
         catch (Exception e){
             return null;
         }
     }
-    //AGREGAR COLUMA UBICACION
+
     public void save(ClienteEntity cliente) {
+        String ubicacionWkt = (cliente.getUbicacion() != null) ? cliente.getUbicacion().toText() : null;
         try (Connection conn = sql2o.open()) {
-            String query = "INSERT INTO clientes (nombre, direccion, email, telefono) " +
-                           "VALUES (:nombre, :direccion, :email, :telefono)";
+            String query = "INSERT INTO clientes (nombre, direccion, email, telefono, ubicacion) " +
+                           "VALUES (:nombre, :direccion, :email, :telefono, ST_GeomFromText(:ubicacionWkt, 4326))";
             long cliente_id = conn.createQuery(query)
                     .addParameter("nombre", cliente.getNombre())
                     .addParameter("direccion", cliente.getDireccion())
                     .addParameter("email", cliente.getEmail())
                     .addParameter("telefono", cliente.getTelefono())
+                    .addParameter("ubicacionWkt", ubicacionWkt)
                     .executeUpdate()
                     .getKey(Long.class);
             cliente.setCliente_id(cliente_id);
@@ -64,17 +103,19 @@ public class ClienteRepository {
             System.out.println("Error al guardar el cliente");
         }
     }
-    //AGREGAR COLUMA UBICACION
+
     public void update(ClienteEntity cliente) {
+        String ubicacionWkt = (cliente.getUbicacion() != null) ? cliente.getUbicacion().toText() : null;
         try (Connection conn = sql2o.open()) {
             String query = "UPDATE clientes SET nommbre = :nombre, direccion = :direccion, " +
-                           "email = :email, telefono = :telefono WHERE cliente_id = :idCliente";
+                           "email = :email, telefono = :telefono, ubicacion = ST_GeomFromText(:ubicacionWkt, 4326) WHERE cliente_id = :idCliente";
             conn.createQuery(query)
                     .addParameter("nombre", cliente.getNombre())
                     .addParameter("direccion", cliente.getDireccion())
                     .addParameter("email", cliente.getEmail())
                     .addParameter("telefono", cliente.getTelefono())
                     .addParameter("idCliente", cliente.getCliente_id())
+                    .addParameter("ubicacionWkt", ubicacionWkt)
                     .executeUpdate();
         }
         catch (Exception e){
@@ -128,6 +169,19 @@ public class ClienteRepository {
         }
         catch (Exception e){
             return null;
+        }
+    }
+    //Consulta especial 6
+    //Determinar la lista de clientes que se encuentren dentro a lo mas 5km de una empresa
+    public List<ClienteEntity> findClientesNotWithin5KM(){
+        String sql = "SELECT c.cliente_id as cliente_id, c.nombre as nombre, c.direccion as direccion, c.email as email, c.telefono as telefono, ST_AsText(c.ubicacion) as ubicacion_wkt " +
+                "FROM clientes c WHERE NOT EXISTS" +
+                "(SELECT 1 FROM empresas e WHERE ST_DWithin(c.ubicacion::geography, e.ubicacion::geography, 5000))";
+        try (Connection con = sql2o.open()) {
+            List<Map<String, Object>> results = con.createQuery(sql)
+                    .executeAndFetchTable()
+                    .asList();
+            return results.stream().map(this::mapRowToClienteEntity).toList();
         }
     }
 }

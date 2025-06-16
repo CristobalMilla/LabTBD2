@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("/api/clientes")
 @CrossOrigin
 public class ClienteController {
@@ -64,5 +64,12 @@ public class ClienteController {
     public ResponseEntity<List<ResumenPedidosXClienteDTO>> getResumenPedidosPorCliente() {
         List<ResumenPedidosXClienteDTO> resumenes = clienteService.getResumenPedidosXCliente();
         return ResponseEntity.ok(resumenes);
+    }
+    //Consulta especial 6
+    //Determinar la lista de clientes que se a mas de 5km de una empresa
+    @GetMapping("/clientesNoCercanosAEmpresas")
+    public ResponseEntity<List<ClienteEntity>> getClientesNotWithin5KM(){
+        List<ClienteEntity> clientes = clienteService.getClientesNotWithin5KM();
+        return ResponseEntity.ok(clientes);
     }
 }

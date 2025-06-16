@@ -1,46 +1,45 @@
 package Grupo4.Lab2.Repositories;
 
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.io.ParseException;
-import org.locationtech.jts.io.WKTReader;
+import Grupo4.Lab2.DTO.PedidoYZonasQueCruzaDTO;
 import Grupo4.Lab2.DTO.RegistrarPedidoDTO;
 import Grupo4.Lab2.Entities.PedidosEntity;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.sql2o.Connection;
 import org.sql2o.Sql2o;
 
 import java.sql.Array;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 public class PedidosRepository {
 
-    @Autowired
     private final Sql2o sql2o;
-    private final GeometryFactory geometryFactory;
-    private final WKTReader wktReader;
+    private final RepartidorRepository repartidorRepository;
+    private final ClienteRepository clienteRepository;
+    private final EmpresaRepository empresaRepository;
 
     @Autowired
-    public PedidosRepository(Sql2o sql2o) {
+    public PedidosRepository(Sql2o sql2o, RepartidorRepository repartidorRepository, ClienteRepository clienteRepository, EmpresaRepository empresaRepository) {
         this.sql2o = sql2o;
-        this.geometryFactory = new GeometryFactory();
-        this.wktReader = new WKTReader(this.geometryFactory);
+        this.repartidorRepository = repartidorRepository;
+        this.clienteRepository = clienteRepository;
+        this.empresaRepository = empresaRepository;
     }
 
     public PedidosEntity findById(long idPedido) {
         try (Connection conn = sql2o.open()) {
-            List<Map<String, Object>> pedido;
-            String query = "SELECT pedido_id, cliente_id, empresa_id, repartidor_id, ST_AsText(punto_inicio), ST_AsText(punto_final), ST_AsText(ruta_estimada) " +
-                    "FROM pedidos WHERE pedido_id = :idPedido";
+            PedidosEntity pedido;
+            String query = "SELECT * FROM pedidos WHERE pedido_id = :idPedido";
             pedido = conn.createQuery(query)
                     .addParameter("idPedido", idPedido)
-                    .executeAndFetchTable()
-                    .asList();
-            return mapToPedidosEntity(pedido.get(0));
+                    .executeAndFetchFirst(PedidosEntity.class);
+            return pedido;
         } catch (Exception e){
             System.err.println("Error al obtener el pedido de id : "+ idPedido +".\n"+ e.getMessage());
             return null;
@@ -49,51 +48,19 @@ public class PedidosRepository {
 
     public List<PedidosEntity> findAll() {
         try (Connection conn = sql2o.open()) {
-            List<Map<String, Object>> pedidos;
-            String query = "SELECT pedido_id, cliente_id, empresa_id, repartidor_id, ST_AsText(punto_inicio), ST_AsText(punto_final), ST_AsText(ruta_estimada)" +
-                    " FROM pedidos ORDER BY pedido_id";
+            List<PedidosEntity> pedidos;
+            String query = "SELECT * FROM pedidos ORDER BY pedido_id";
             pedidos = conn.createQuery(query)
-                    .executeAndFetchTable()
-                    .asList();
-            return pedidos.stream().map(this::mapToPedidosEntity).toList();
+                    .executeAndFetch(PedidosEntity.class);
+            return pedidos;
         } catch (Exception e){
             System.err.println("Error al obtener los pedidos.\n " + e.getMessage());
             return null;
         }
     }
 
-    private PedidosEntity mapToPedidosEntity(Map<String, Object> row){
-        PedidosEntity pedido = new PedidosEntity();
-        pedido.setPedido_id((Long) row.get("pedido_id"));
-        pedido.setCliente_id((Long) row.get("cliente_id"));
-        pedido.setEmpresa_id((Long) row.get("empresa_id"));
-        pedido.setRepartidor_id((Long) row.get("repartidor_id"));
-        pedido.setEstado((String) row.get("estado"));
-
-        String punto_inicio = (String) row.get("punto_inicio");
-        String punto_final = (String) row.get("punto_final");
-        String ruta_estimada = (String) row.get("ruta_estimada");
-        if (punto_inicio != null && punto_final != null && ruta_estimada != null) {
-            try {
-                Point punto1 = (Point) wktReader.read(punto_inicio);
-                punto1.setSRID(4326);
-                pedido.setPunto_inicio(punto1);
-                Point punto2 = (Point) wktReader.read(punto_final);
-                punto2.setSRID(4326);
-                pedido.setPunto_final(punto2);
-                LineString linea = (LineString) wktReader.read(ruta_estimada);
-                linea.setSRID(4326);
-                pedido.setRuta_estimada(linea);
-            } catch (ParseException e) {
-                System.err.println("Error al leer el punto de inicio o final o la ruta estimada del pedido " + pedido.getPedido_id() + "\n" + e.getMessage());
-                throw new RuntimeException(e);
-            }
-        }
-        return pedido;
-    }
-
     // 7.
-    public boolean registrarPedido(RegistrarPedidoDTO dto) {
+    public long registrarPedido(RegistrarPedidoDTO dto) {
         String sql = "SELECT registrar_pedido(" +
                     ":clienteId," +
                     ":empresaId," +
@@ -124,7 +91,7 @@ public class PedidosRepository {
 
             long id_pedido = ((Number) result).longValue();
             System.out.println("Pedido registrado con ID: " + id_pedido);
-            return true;
+            return id_pedido;
         } catch (Exception e) {
             Throwable cause = e.getCause(); // toma la excepcion original y revisa si fue causada x una excepción interna
             String mensaje = cause != null ? cause.getMessage() : e.getMessage(); // si la causa interna es null se muestra la excepcion principal, si no la especifica
@@ -169,6 +136,109 @@ public class PedidosRepository {
         } catch (Exception e) {
             System.err.println("Error al confirmar y descontar el pedido " + pedidoId + "\n" + e.getMessage());
             throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    // Query 5
+    // Listar todos los pedidos cuya ruta estimada cruce más de 2 zonas de reparto.
+    public List<Long> getListaIdsZonasCruzadasById(long pedido_id) {
+        try (Connection conn = sql2o.open()) {
+            String query = "SELECT z.zona_id " +
+                           "FROM pedidos p " +
+                           "INNER JOIN zonas_cobertura z ON ST_Intersects(p.ruta_estimada, z.geom) " +
+                           "WHERE p.pedido_id = :pedido_id " +
+                           "GROUP BY p.pedido_id, z.zona_id";
+            List<Map<String, Object>> result = conn.createQuery(query)
+                    .addParameter("pedido_id", pedido_id)
+                    .executeAndFetchTable()
+                    .asList();
+            List<Long> ids = new ArrayList<>();
+            for(Map<String, Object> id : result){
+                ids.add(((Integer) id.get("zona_id")).longValue());
+            }
+            return ids;
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public List<PedidoYZonasQueCruzaDTO> getPedidosQueCruzanMasDe2Zonas() {
+        try (Connection conn = sql2o.open()) {
+            String query = "SELECT p.pedido_id, p.cliente_id, p.empresa_id, p.repartidor_id, COUNT(z.zona_id) AS zonas_que_cruza " +
+                           "FROM pedidos p " +
+                           "INNER JOIN zonas_cobertura z ON ST_Intersects(p.ruta_estimada, z.geom) " +
+                           "GROUP BY p.pedido_id " +
+                           "HAVING COUNT(z.zona_id) > 0";
+            return conn.createQuery(query).executeAndFetch(PedidoYZonasQueCruzaDTO.class);
+
+        } catch (Exception e) {
+            System.err.println("Error al obtener los pedidos.");
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    //Hacer update al pedido, agregando punto_inicio y punto_final
+    public PedidosEntity updatePedidoPuntos(PedidosEntity pedido) {
+        Point punto_inicio = empresaRepository.findById(pedido.getRepartidor_id()).getUbicacion();
+        Point punto_final = clienteRepository.findById(pedido.getCliente_id()).getUbicacion();
+        String sql = "UPDATE pedidos " +
+                "SET punto_inicio = ST_GeomFromText(:punto_inicio, 4326), punto_final = ST_GeomFromText(:punto_final, 4326) " +
+                "WHERE pedido_id = :pedido_id";
+        try (Connection conn = sql2o.beginTransaction()) {
+            conn.createQuery(sql)
+                    .addParameter("punto_inicio", punto_inicio.toString())
+                    .addParameter("punto_final", punto_final.toString())
+                    .addParameter("pedido_id", pedido.getPedido_id())
+                    .executeUpdate();
+            conn.commit();
+        }
+        pedido.setPunto_inicio(punto_inicio);
+        pedido.setPunto_final(punto_final);
+        return pedido;
+    }
+
+    //Hacer update al pedido, agregando ruta
+    public boolean updatePedidoRuta(PedidosEntity pedido) {
+        String sql = "UPDATE pedidos AS p " +
+                "SET ruta_estimada = (" +
+                    "SELECT ST_LineMerge(ST_Collect(seg.geom)) " +
+                    "FROM pgr_dijkstra(" +
+                        "'SELECT cleaned_street_id AS id, source, target, cost FROM calles_cleaned', " +
+                        "find_nearest_node(e.ubicacion), " +
+                        "find_nearest_node(cl.ubicacion), " +
+                        "directed := FALSE " +
+                    ") AS route " +
+                    "JOIN calles_cleaned AS seg ON route.edge = seg.cleaned_street_id) " +
+                "FROM empresas AS e, clientes AS cl " +
+                "WHERE p.empresa_id = e.empresa_id " +
+                    "AND p.cliente_id = cl.cliente_id " +
+                    "AND p.pedido_id = :pedido_id";
+        try (Connection conn = sql2o.beginTransaction()) {
+            conn.createQuery(sql)
+                    .addParameter("pedido_id", pedido.getPedido_id())
+                    .executeUpdate();
+            conn.commit();
+            return true;
+        }
+        catch (Exception e){
+            System.err.println("Error al actualizar la ruta del pedido " + pedido.getPedido_id() + "\n" + e.getMessage());
+            return false;
+        }
+    }
+    public PedidosEntity setPedidoRuta(PedidosEntity pedido){
+        String sql = "SELECT ST_AsText(p.ruta_estimada) AS ruta_estimada " +
+                "FROM pedidos AS p" +
+                "WHERE p.pedido_id = :pedido_id";
+        try (Connection conn = sql2o.beginTransaction()){
+            LineString ruta = (LineString) conn.createQuery(sql)
+                    .addParameter("pedido_id", pedido.getPedido_id())
+                    .executeScalar();
+            conn.commit();
+            pedido.setRuta_estimada(ruta);
+            return pedido;
         }
     }
 }

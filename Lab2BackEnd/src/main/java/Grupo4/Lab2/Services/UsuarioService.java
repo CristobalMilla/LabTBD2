@@ -40,30 +40,6 @@ public class UsuarioService {
     }
 
     /**
-     * Realiza el login del usuario.
-     *
-     * @param email El email del usuario.
-     * @param password La contraseña del usuario.
-     * @return Un código indicando el resultado de la operación de login.
-     */
-    public int login(String email, String password) {
-        UsuarioEntity user = userRepo.findByEmail(email);
-        if (user != null) { // si el usuarioEmail o user es distinto de vacío, existe, le pedimos la contraseña
-            if (password.equals(user.getPassword())) { // Se le aplican diferentes roles, por lo que se retorna un valor distinto para cada uno
-                // Cambiar el valor de retorno si es necesario
-                if (user.getRole().equals("ADMIN")) {
-                    return 1;
-                } else if (user.getRole().equals("TRABAJADOR")) {
-                    return 2;
-                } else if (user.getRole().equals("CLIENTE")) { // El retorno de usuario sigue siendo el mismo, por lo que no debería generar problemas
-                    return 3;
-                }
-            }
-        }
-        return 0;
-    }
-
-    /**
      * Obtiene un usuario por su ID.
      *
      * @param id El ID del usuario.
@@ -94,4 +70,6 @@ public class UsuarioService {
     public UsuarioEntity getUserByEmail(String email) {
         return userRepo.findByEmail(email);
     }
+
+
 }

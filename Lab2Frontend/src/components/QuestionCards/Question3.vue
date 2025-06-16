@@ -1,115 +1,92 @@
+<template>
+  <v-card class="pa-4">
+    <v-card-title>
+      Distancia Total Recorrida (Último Mes)
+    </v-card-title>
+    <v-card-text>
+      <v-form>
+        <v-select
+          v-model="selectedId"
+          :items="repartidores"
+          item-value="repartidor_id"
+          item-title="nombre"
+          label="Seleccione Repartidor"
+          outlined
+          dense
+          class="mb-4"
+        />
+      </v-form>
+
+      <div v-if="loading" class="d-flex justify-center my-4">
+        <v-progress-circular indeterminate color="primary"/>
+      </div>
+
+      <div v-else-if="error">
+        <v-alert type="error" dense>{{ error }}</v-alert>
+      </div>
+
+      <div v-else-if="distance !== null">
+        <span class="text-h6">
+          ID {{ selectedId }} – {{ distance.toLocaleString() }} metros
+        </span>
+      </div>
+      <div v-else class="text-body-2">
+        Selecciona un repartidor para ver su distancia.
+      </div>
+    </v-card-text>
+  </v-card>
+</template>
+
 <script setup>
-import { ref, watch, onMounted, nextTick } from 'vue'
-import axios from 'axios'
+import { ref, onMounted, watch } from 'vue'
+import { getAllRepartidores, getDistanciaMensual } from '@/api/repartidores'
 
-const sectorConMasTareasCompletadas = ref([])
-const map = ref(null)
-const SectorCargado = ref(false)
+const repartidores = ref([])
+const selectedId = ref(null)
+const distance = ref(null)
+const loading = ref(false)
+const error = ref('')
 
-const getSector = async () => {
+async function fetchRepartidores() {
   try {
-    const usuario = JSON.parse(localStorage.getItem("user"))
-
-    const response = await axios.get("http://localhost:8000/api/tareas/sectorMasCompletadas/" + usuario.id_usuario, {
-      headers: {
-        Authorization: `Bearer ${usuario.token}`,
-      },
-    })
-    if(response.data != ""){
-        sectorConMasTareasCompletadas.value = response.data;
-        SectorCargado.value = true;
-    }
-  } catch (error) {
-    console.error("Error obteniendo sector", error)
+    repartidores.value = await getAllRepartidores()
+  } catch (err) {
+    console.error(err)
+    error.value = 'No se pudieron cargar los repartidores.'
   }
 }
 
-const initMap = async () => {
-    await nextTick();
-
-    const usuario_local = JSON.parse(localStorage.getItem("user"));
-    const response = await axios.get("http://localhost:8000/api/usuarios/" + usuario_local.id_usuario, {
-        headers: {
-        Authorization: `Bearer ${usuario_local.token}`,
-        },
-    });
-    const usuario = response.data;
-    const center = [usuario.ubicacion.coordinates[1], usuario.ubicacion.coordinates[0]];
-
-    map.value = L.map("map").setView(center, 15);
-
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "&copy; OpenStreetMap contributors",
-    }).addTo(map.value);
-
-    if (SectorCargado.value) {
-        const sectorCenter = [
-        sectorConMasTareasCompletadas.value.ubicacion.coordinates[0][0][1],
-        sectorConMasTareasCompletadas.value.ubicacion.coordinates[0][0][0],
-        ];
-        map.value.setView(sectorCenter, 15);
-
-        const geoJSON = {
-        type: "Feature",
-        geometry: {
-            type: "Polygon",
-            coordinates: [sectorConMasTareasCompletadas.value.ubicacion.coordinates[0]],
-        },
-        properties: {},
-        };
-        L.geoJSON(geoJSON).addTo(map.value);
-    }
-};
+async function fetchDistance(id) {
+  if (id == null) {
+    distance.value = null
+    return
+  }
+  loading.value = true
+  error.value = ''
+  distance.value = null
+  try {
+    const metros = await getDistanciaMensual(id)
+    distance.value = metros
+  } catch (err) {
+    console.error(err)
+    error.value = 'Error al obtener la distancia mensual.'
+  } finally {
+    loading.value = false
+  }
+}
 
 onMounted(async () => {
-  await getSector()
+  await fetchRepartidores()
 })
 
-watch(sectorConMasTareasCompletadas, async () => {
-    await initMap()
-  
+watch(selectedId, id => {
+  fetchDistance(id)
 })
 </script>
-    <template>
-    <v-container>
-        <v-row>
-        <v-col v-if="SectorCargado" cols="12" md="4">
-            <div class="text-h4">
-                Sector: {{sectorConMasTareasCompletadas.id_sector}}
-            </div>
-        </v-col> 
-        <v-col v-else>
-            <div class="text-h4">
-                No hay sectores cerca con tareas completadas
-            </div>
-        </v-col>
-        <v-col cols="12" md="8">
-            mapa: 
-            <div id="map" class="rounded mb-2"></div>
-        </v-col>
-        </v-row>
-    </v-container>
-    </template>
 
-    <script>
-    export default {
-        name: "Query3",
-    };
-    </script>
-
-    <style>
-    table {
-        width: 100%;
-        margin-top: 1rem;
-    }
-    td,
-    th {
-        border: 1px solid black;
-    }
-    #map {
-    height: 400px;
-    width: 100%;
-    border: 1px solid black;
-    }
-
-    </style>
+<style scoped>
+.v-card {
+  max-width: 450px;
+  margin: 0 auto;
+}
+</style>

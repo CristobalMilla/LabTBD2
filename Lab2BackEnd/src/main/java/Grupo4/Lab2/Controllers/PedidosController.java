@@ -1,5 +1,6 @@
 package Grupo4.Lab2.Controllers;
 
+import Grupo4.Lab2.DTO.PedidoYZonasQueCruzaDTO;
 import Grupo4.Lab2.Entities.PedidosEntity;
 import Grupo4.Lab2.DTO.RegistrarPedidoDTO;
 import Grupo4.Lab2.Services.PedidosService;
@@ -40,10 +41,8 @@ public class PedidosController {
     @PostMapping("/create")
     public ResponseEntity<String> registrarPedido(@RequestBody RegistrarPedidoDTO dto) {
         try {
-            boolean registrado = pedidosService.registrarPedido(dto);
-            return registrado
-                    ? ResponseEntity.ok("Pedido registrado correctamente.")
-                    : ResponseEntity.status(500).body("Error al registrar el pedido.");
+            long pedido_id = pedidosService.registrarPedido(dto);
+            return ResponseEntity.ok("Pedido registrado con ID: " + pedido_id);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Datos inválidos: " + e.getMessage());
         } catch (Exception e) {
@@ -78,6 +77,19 @@ public class PedidosController {
             return ResponseEntity.ok("Pedido confirmado y stock descontado correctamente.");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
+
+    // Query 5
+    // Listar todos los pedidos cuya ruta estimada cruce más de 2 zonas de reparto.
+    @GetMapping("/pedidos-que-cruzan-mas-de-2-zonas")
+    public ResponseEntity<List<PedidoYZonasQueCruzaDTO>> getPedidosQueCruzanMasDe2Zonas() {
+        try {
+            List<PedidoYZonasQueCruzaDTO> pedidos = pedidosService.pedidosQueCruzanMasDe2Zonas();
+            return ResponseEntity.ok(pedidos);
+        }
+        catch (Exception e) {
+            return ResponseEntity.status(500).build();
         }
     }
 }

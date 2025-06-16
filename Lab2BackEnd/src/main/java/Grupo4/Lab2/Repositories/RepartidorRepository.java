@@ -3,48 +3,84 @@ package Grupo4.Lab2.Repositories;
 import Grupo4.Lab2.DTO.RepartidorEntregaDTO;
 import Grupo4.Lab2.DTO.RepartidorVistaDTO;
 import Grupo4.Lab2.Entities.RepartidorEntity;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKTReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.sql2o.Sql2o;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 public class RepartidorRepository {
 
     private final Sql2o sql2o;
+    private final GeometryFactory geometryFactory;
 
     @Autowired
     public RepartidorRepository(Sql2o sql2o) {
         this.sql2o = sql2o;
+        this.geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+    }
+
+    private RepartidorEntity mapRowToRepartidorEntity(Map<String, Object> row) {
+        if (row == null) return null;
+        RepartidorEntity r = new RepartidorEntity();
+        // Antes: (Long) row.get("repartidor_id")
+        Number idNum = (Number) row.get("repartidor_id");
+        r.setRepartidor_id(idNum == null ? 0L : idNum.longValue());
+        r.setNombre((String) row.get("nombre"));
+        r.setTelefono((String) row.get("telefono"));
+        r.setDisponible((Boolean) row.get("disponible"));
+
+        String ubicWkt = (String) row.get("ubicacion_wkt");
+        if (ubicWkt != null && !ubicWkt.isBlank()) {
+          try {
+            Point p = (Point) new WKTReader(this.geometryFactory).read(ubicWkt);
+            r.setUbicacion_actual(p);
+          } catch (Exception ex) {
+            r.setUbicacion_actual(null);
+          }
+        }
+        return r;
     }
 
     public List<RepartidorEntity> findAll(){
-        String sql = "SELECT * FROM repartidores";
+        String sql = "SELECT repartidor_id, nombre, telefono, disponible, ST_AsText(ubicacion_actual) as ubicacion_wkt FROM repartidores";
         try(var con = sql2o.open()){
-            return con.createQuery(sql)
-                    .executeAndFetch(RepartidorEntity.class);
+            List<Map<String, Object>> rows = con.createQuery(sql).executeAndFetchTable().asList();
+            return rows.stream()
+                    .map(this::mapRowToRepartidorEntity)
+                    .collect(Collectors.toList());
         }
     }
 
     public RepartidorEntity findById(long id){
-        String sql = "SELECT * FROM repartidores WHERE repartidor_id = :id";
+        String sql = "SELECT repartidor_id, nombre, telefono, disponible, ST_AsText(ubicacion_actual) as ubicacion_wkt FROM repartidores WHERE repartidor_id = :id";
         try(var con = sql2o.open()){
-            return con.createQuery(sql)
+            List<Map<String, Object>> rows = con.createQuery(sql)
                     .addParameter("id", id)
-                    .executeAndFetchFirst(RepartidorEntity.class);
+                    .executeAndFetchTable().asList();
+            return mapRowToRepartidorEntity(rows.get(0));
         }
     }
-    //AGREGAR COLUMA UBICACION
+
     public void save(RepartidorEntity repartidor){
-        String sql = "INSERT INTO repartidores (repartidor_id, nombre, telefono, disponible) " +
-                "VALUES (:repartidor_id, :nombre, :telefono, :disponible)";
+        String ubicacionWkt = (repartidor.getUbicacion_actual() != null) ? repartidor.getUbicacion_actual().toText() : null;
+        String sql = "INSERT INTO repartidores (repartidor_id, nombre, telefono, disponible, ubicacion_actual) " +
+                "VALUES (:repartidor_id, :nombre, :telefono, :disponible, ST_GeomFromText(:ubicacionWkt, 4326))";
         try (var con = sql2o.open()) {
             con.createQuery(sql)
                     .addParameter("repartidor_id", repartidor.getRepartidor_id())
                     .addParameter("nombre", repartidor.getNombre())
                     .addParameter("telefono", repartidor.getTelefono())
                     .addParameter("disponible", repartidor.getDisponible())
+                    .addParameter("ubicacionWkt", ubicacionWkt)
                     .executeUpdate();
         }
     }
@@ -56,16 +92,18 @@ public class RepartidorRepository {
                     .executeUpdate();
         }
     }
-    //AGREGAR COLUMA UBICACION
+
     public void update(RepartidorEntity repartidor){
+        String ubicacionWkt = (repartidor.getUbicacion_actual() != null) ? repartidor.getUbicacion_actual().toText() : null;
         String sql = "UPDATE repartidores SET nombre = :nombre, telefono = :telefono, " +
-                "disponible = :disponible WHERE repartidor_id = :repartidor_id";
+                "disponible = :disponible, ubicacion_actual = ST_GeomFromText(:ubicacionWkt, 4326) WHERE repartidor_id = :repartidor_id";
         try (var con = sql2o.open()) {
             con.createQuery(sql)
                     .addParameter("repartidor_id", repartidor.getRepartidor_id())
                     .addParameter("nombre", repartidor.getNombre())
                     .addParameter("telefono", repartidor.getTelefono())
                     .addParameter("disponible", repartidor.getDisponible())
+                    .addParameter("ubicacionWkt", ubicacionWkt)
                     .executeUpdate();
         }
     }
@@ -112,4 +150,16 @@ public class RepartidorRepository {
 
     }
 
+    public double calcularDistanciaMensual(long repartidorId) {
+        String sql = ""
+          + "SELECT COALESCE(SUM(ST_Length(ruta_estimada::geography)),0) "
+          + "FROM pedidos "
+          + "WHERE repartidor_id = :id "
+          +   "AND fecha_entrega >= now() - INTERVAL '1 month'";
+        try (var con = sql2o.open()) {
+            return con.createQuery(sql)
+                      .addParameter("id", repartidorId)
+                      .executeScalar(Double.class);
+        }
+    }
 }

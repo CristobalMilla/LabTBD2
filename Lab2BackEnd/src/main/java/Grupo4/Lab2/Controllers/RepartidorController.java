@@ -5,6 +5,7 @@ import Grupo4.Lab2.DTO.RepartidorVistaDTO;
 import Grupo4.Lab2.Entities.RepartidorEntity;
 import Grupo4.Lab2.Services.RepartidorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public class RepartidorController {
     @Autowired
     private RepartidorService repartidorService;
 
-    @GetMapping("/")
+    @GetMapping("/all")
     public List<RepartidorEntity> getRepartidores(){
         return repartidorService.findall();
     }
@@ -55,5 +56,11 @@ public class RepartidorController {
     @GetMapping("/vista")
     public List<RepartidorVistaDTO> repartidoresVista(){
         return repartidorService.repartidoresVista();
+    }
+    
+    @GetMapping("/{id}/distancia-mensual")
+    public ResponseEntity<Double> distanciaMensual(@PathVariable long id) {
+        double metros = repartidorService.getDistanciaMensual(id);
+        return ResponseEntity.ok(metros);
     }
 }
