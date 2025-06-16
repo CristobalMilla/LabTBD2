@@ -8,7 +8,7 @@
         </v-btn>
       </v-app-bar-title>
       <v-spacer></v-spacer>
-      <v-btn variant="text" @click="goToTaskDetails" class="mr-2" prepend-icon="mdi-clipboard-text">
+      <v-btn variant="text" @click="goToEmpresasDetails" class="mr-2" prepend-icon="mdi-clipboard-text">
         Empresas
       </v-btn>
       <notification-badge class="mr-2" />
@@ -118,8 +118,8 @@ export default {
       logoutUser();
       this.$router.push('/login')
     },
-    goToTaskDetails() {
-      this.$router.push('/taskdetails')
+    goToEmpresasDetails() {
+      this.$router.push('/empresasdetails')
     },
     initMap() {
       this.map = L.map('map').setView([-33.455, -70.685], 13);

@@ -36,8 +36,8 @@ const logout = () => {
   router.push('/login');
 };
 
-const goToTaskDetails = () => {
-  router.push('/taskdetails');
+const goToEmpresasDetails = () => {
+  router.push('/empresasdetails');
 };
 </script>
 
@@ -51,7 +51,7 @@ const goToTaskDetails = () => {
         </v-btn>
       </v-app-bar-title>
       <v-spacer></v-spacer>
-      <v-btn variant="text" @click="goToTaskDetails" class="mr-2" prepend-icon="mdi-clipboard-text">
+      <v-btn variant="text" @click="goToEmpresasDetails" class="mr-2" prepend-icon="mdi-clipboard-text">
         Empresas
       </v-btn>
       <NotificationBadge class="mr-2" />

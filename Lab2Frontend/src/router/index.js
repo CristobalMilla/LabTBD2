@@ -4,7 +4,7 @@ import Register from "@/pages/Register.vue";
 import Dashboard from "@/pages/Dashboard.vue";
 import NotFound from "@/pages/NotFound.vue";
 import Home from "@/pages/Home.vue";
-import TaskDetails from "@/pages/TaskDetails.vue";
+import EmpresasDetails from "@/pages/EmpresasDetails.vue";
 import EmpresaEdit from "@/pages/EmpresaEdit.vue";
 
 const routes = [
@@ -14,7 +14,7 @@ const routes = [
   { path: "/home", component: Home },
   { path: "/dashboard", component: Dashboard },
   { path: "/:pathMatch(.*)*", component: NotFound },
-  { path: "/taskdetails", component: TaskDetails },
+  { path: "/empresasdetails", component: EmpresasDetails },
   { path: "/empresas/edit/:id", component: EmpresaEdit },
 ];
 
