@@ -1,7 +1,9 @@
 package Grupo4.Lab2.Services;
 
 import Grupo4.Lab2.Entities.PuntoInteresEntity;
+import Grupo4.Lab2.Repositories.ClienteRepository;
 import Grupo4.Lab2.Repositories.PuntoInteresRepository;
+import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +14,9 @@ public class PuntoInteresService {
 
     @Autowired
     private PuntoInteresRepository repo;
+
+    @Autowired
+    private ClienteRepository repoCliente;
 
     public void save(PuntoInteresEntity puntoInteres){
         repo.save(puntoInteres);
@@ -33,4 +38,8 @@ public class PuntoInteresService {
         return repo.findAll();
     }
 
+    public List<PuntoInteresEntity> findNearby(Long idCliente){
+        Point point = repoCliente.findById(idCliente).getUbicacion();
+        return repo.findNearby(point);
+    }
 }

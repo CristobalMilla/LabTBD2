@@ -62,4 +62,12 @@ public class PuntoInteresController {
             return ResponseEntity.ok(service.findById(id));
         }
     }
+    @GetMapping("/puntos/{id}")
+    public ResponseEntity<List<PuntoInteresEntity>> getPuntosCliente(@PathVariable Long id){
+        List<PuntoInteresEntity> puntos = service.findNearby(id);
+        if (puntos == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(puntos);
+    }
 }
