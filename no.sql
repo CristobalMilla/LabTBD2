@@ -283,7 +283,7 @@ INSERT INTO detalle_pedidos (pedido_id, producto_id, cantidad) VALUES
 (2, 2, 1),
 (3, 3, 1),
 (4, 4, 3),
-(5, 5, 2)
+(5, 5, 2),
 (6, 1, 2),
 (7, 2, 1),
 (8, 3, 1),
@@ -307,7 +307,7 @@ INSERT INTO calificaciones (pedido_id, puntuacion, comentario) VALUES
 (2, 4, 'Buena pizza, pero llegó tibia'),
 (3, 5, 'Excelente servicio'),
 (4, 3, 'Demoró un poco'),
-(5, 5, '¡Sushi fresco y delicioso!')
+(5, 5, '¡Sushi fresco y delicioso!'),
 (6, 5, 'Muy rápido y sabroso'),
 (7, 4, 'Buena pizza, pero llegó tibia'),
 (8, 5, 'Excelente servicio'),
