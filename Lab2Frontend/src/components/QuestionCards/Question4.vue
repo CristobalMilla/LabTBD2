@@ -10,7 +10,7 @@
         :item-title="item => item.empresaId + ' - ' + item.nombre"
         item-value="empresaId"
         label="Selecciona una empresa"
-        @change="fetchEntregaMasLejana"
+        
         class="mb-4"
       />
       <div v-if="error" class="text-red mb-4">
@@ -25,7 +25,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import L from "leaflet";
 import { getAllEmpresas, getEntregaMasLejana } from "@/api/empresas";
 
@@ -57,7 +57,11 @@ const fetchEmpresas = async () => {
 };
 
 const fetchEntregaMasLejana = async () => {
-  if (!selectedEmpresaId.value || !map) return;
+  console.log("fetchEntregaMasLejana function called.");
+  if (!selectedEmpresaId.value || !map) {
+    console.log("Condición de retorno met: selectedEmpresaId.value =", selectedEmpresaId.value, ", map =", map);
+    return;
+  }
   
   try {
     console.log("Buscando entrega más lejana para empresa ID:", selectedEmpresaId.value);
@@ -108,9 +112,18 @@ onMounted(async () => {
     setTimeout(() => {
       map.invalidateSize();
     }, 100);
+    console.log("selectedEmpresaId inicial en onMounted:", selectedEmpresaId.value);
   } catch (error) {
     console.error("Error en la inicialización:", error);
     error.value = "Error al inicializar el mapa";
+  }
+});
+
+// Nuevo watch para selectedEmpresaId
+watch(selectedEmpresaId, (newVal, oldVal) => {
+  console.log('selectedEmpresaId cambió de:', oldVal, 'a:', newVal);
+  if (newVal) {
+    fetchEntregaMasLejana();
   }
 });
 </script>
