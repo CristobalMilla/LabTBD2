@@ -123,11 +123,12 @@ public class ZonaCoberturaRepository {
     // 7. Opcional. Implementar una función que calcule automáticamente la zona a la que pertenece un cliente
     public ZonaDTO obtenerZonaPorCliente(Long cliente_id) {
         String sql = """
-            SELECT zona_id AS zonaId, nombre, ST_AsText(geom) AS geom
-            FROM zonas_cobertura
-            WHERE ST_Within((
-                SELECT ubicacion FROM clientes WHERE cliente_id = :cliente_id
-            ), geom)
+            SELECT  z.zona_id AS zonaId, z.nombre, ST_AsText(z.geom) AS geom,
+                    ST_AsText(c.ubicacion) AS clienteUbicacion
+            FROM zonas_cobertura z, clientes c
+            WHERE c.cliente_id = :cliente_id
+              AND ST_Within(c.ubicacion, z.geom)
+            LIMIT 1;
         """;
 
         try (Connection con = sql2o.open()) {

@@ -30,15 +30,18 @@
 
 <script setup>
 import { ref, onMounted, watch } from "vue";
-import { getClientes, obtenerZonaDeCliente } from "@/api/clientes";
+import { getClientes} from "@/api/clientes";
+import { obtenerZonaDeCliente } from "@/api/zonasCobertura";
 import L from "leaflet";
 import wellknown from "wellknown";
 
 const clientes = ref([]);
 const selectedClienteId = ref(null);
 const zona = ref(null);
+
 let map = null;
 let drawnLayer = null;
+let clienteMarker = null;
 
 const fetchClientes = async () => {
   const fetchedClientes = await getClientes();
@@ -54,6 +57,7 @@ const fetchZonaDeCliente = async () => {
     return;
   }
   try {
+
     zona.value = await obtenerZonaDeCliente(selectedClienteId.value);
   } catch (error) {
     console.error("Error al obtener la zona del cliente:", error);
@@ -81,7 +85,12 @@ const drawZoneOnMap = () => {
     map.removeLayer(drawnLayer);
     drawnLayer = null; // Clear drawnLayer reference
   }
+  if (clienteMarker) {
+    map.removeLayer(clienteMarker);
+    clienteMarker = null;
+  }
 
+  // ahora dibujamos la zona del cliente
   if (zona.value && zona.value.geom) {
     try {
       const geojson = wellknown.parse(zona.value.geom);
@@ -97,6 +106,23 @@ const drawZoneOnMap = () => {
   } else {
     clearMap(); // Clear map if no zone data
   }
+
+  // ahora dibujamos el marcador del cliente
+    if (zona.value && zona.value.clienteUbicacion) {
+        try {
+        const punto = zona.value.clienteUbicacion
+            .replace("POINT(", "")
+            .replace(")", "")
+            .split(" ");
+        const latlng = [parseFloat(punto[1]), parseFloat(punto[0])];
+        clienteMarker = L.marker(latlng)
+            .addTo(map)
+            .bindPopup(`Cliente ubicado aquí en zona ${zona.value.nombre}`)
+            .openPopup();
+        } catch (e) {
+        console.error("Error al parsear el punto del cliente:", e);
+        }
+    }
 };
 
 const clearMap = () => {

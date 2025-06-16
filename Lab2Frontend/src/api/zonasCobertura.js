@@ -15,6 +15,7 @@ export const isClientInZonaCobertura = async (cliente_id) => {
   const response = await axiosInstance.get(`/isClientInZonaCobertura/${cliente_id}`);
   return response.data;
 };
+
 export async function getAllByIds(ids) {
   const response = await fetch(`${API_BASE_URL}/api/zonasCobertura/byListIds`, {
     method: 'PUT',
@@ -25,3 +26,9 @@ export async function getAllByIds(ids) {
   }
   return response.json();
 }
+
+// 7. 1era extra
+export const obtenerZonaDeCliente = async (clienteId) => {
+  const response = await axiosInstance.get(`/zonasCobertura/zona-cliente/${clienteId}`);
+  return response.data;
+};
