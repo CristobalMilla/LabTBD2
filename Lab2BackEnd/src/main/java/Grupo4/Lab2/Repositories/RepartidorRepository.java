@@ -29,28 +29,25 @@ public class RepartidorRepository {
     }
 
     private RepartidorEntity mapRowToRepartidorEntity(Map<String, Object> row) {
-        if (row == null) {
-            return null;
-        }
-        RepartidorEntity repartidor = new RepartidorEntity();
-        repartidor.setRepartidor_id((Long) row.get("repartidor_id"));
-        repartidor.setNombre((String) row.get("nombre"));
-        repartidor.setTelefono((String) row.get("telefono"));
-        repartidor.setDisponible((Boolean) row.get("disponible"));
-        String ubicacionWkt = (String) row.get("ubicacion_wkt");
+        if (row == null) return null;
+        RepartidorEntity r = new RepartidorEntity();
+        // Antes: (Long) row.get("repartidor_id")
+        Number idNum = (Number) row.get("repartidor_id");
+        r.setRepartidor_id(idNum == null ? 0L : idNum.longValue());
+        r.setNombre((String) row.get("nombre"));
+        r.setTelefono((String) row.get("telefono"));
+        r.setDisponible((Boolean) row.get("disponible"));
 
-        if (ubicacionWkt != null && !ubicacionWkt.isEmpty()) {
-            try {
-                WKTReader reader = new WKTReader(this.geometryFactory);
-                repartidor.setUbicacion_actual((Point) reader.read(ubicacionWkt));
-            } catch (ParseException e) {
-                System.err.println("Error al parsear WKT de ubicación: " + e.getMessage());
-                repartidor.setUbicacion_actual(null);
-            }
-        } else {
-            repartidor.setUbicacion_actual(null);
+        String ubicWkt = (String) row.get("ubicacion_wkt");
+        if (ubicWkt != null && !ubicWkt.isBlank()) {
+          try {
+            Point p = (Point) new WKTReader(this.geometryFactory).read(ubicWkt);
+            r.setUbicacion_actual(p);
+          } catch (Exception ex) {
+            r.setUbicacion_actual(null);
+          }
         }
-        return repartidor;
+        return r;
     }
 
     public List<RepartidorEntity> findAll(){

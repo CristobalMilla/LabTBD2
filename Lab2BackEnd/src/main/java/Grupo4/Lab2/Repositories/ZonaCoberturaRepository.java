@@ -32,7 +32,7 @@ public class ZonaCoberturaRepository {
         ZonaCoberturaEntity zona = new ZonaCoberturaEntity();
         zona.setZona_id((Integer) row.get("zona_id"));
         zona.setNombre((String) row.get("nombre"));
-        String wkt = (String) row.get("geom_wkt");
+        String wkt = (String) row.get("geom");
         if (wkt != null) {
             try {
                 Polygon polygon = (Polygon) wktReader.read(wkt);
@@ -52,17 +52,26 @@ public class ZonaCoberturaRepository {
     }
 
     public List<ZonaCoberturaEntity> findAll() {
-        String query = "SELECT zona_id, nombre,  ST_AsText(geom) as geom_wkt FROM zonas_cobertura";
+        String query = ""
+                + "SELECT zona_id, nombre, "
+                + "       ST_AsText(geom) AS geom "
+                + "FROM zonas_cobertura";
         try (Connection con = sql2o.open()) {
             List<Map<String, Object>> results = con.createQuery(query)
                     .executeAndFetchTable()
                     .asList();
+            for (Map<String, Object> row : results) {
+                ZonaCoberturaEntity z = mapToZonaCoberturaEntity(row);
+            }
             return results.stream().map(this::mapToZonaCoberturaEntity).toList();
         }
     }
 
     public ZonaCoberturaEntity findById(long id) {
-        String query = "SELECT zona_id, nombre,  ST_AsText(geom) as geom_wkt FROM zonas_cobertura WHERE zona_id = :id";
+        String query = ""
+                + "SELECT zona_id, nombre, "
+                + "       ST_AsText(geom) AS geom "
+                + "FROM zonas_cobertura WHERE zona_id = :id";
         try (Connection con = sql2o.open()) {
             List<Map<String, Object>> results = con.createQuery(query)
                     .addParameter("id", id)
@@ -137,16 +146,21 @@ public class ZonaCoberturaRepository {
     //Determinar si un cliente se encuentra dentro de una zona de cobertura
     //Se devolvera la lista zonas de cobertura en las que el cliente se encuentra
     public List<ZonaCoberturaEntity> findZonasCoberturaByClienteId(long cliente_id){
-        String sql = "SELECT zc.zona_id, zc.nombre, ST_AsText(zc.geom) as geom_wkt " +
-                "FROM zonas_cobertura zc, clientes c" +
-                "WHERE c.cliente_id = cliente_id = :cliente_id " +
-                        "AND ST_Contains(zc.geom, c.ubicacion)";
+        String sql =
+            "SELECT zc.zona_id, zc.nombre, " +
+            "       ST_AsText(zc.geom) AS geom " +
+            "  FROM zonas_cobertura zc " +
+            "  JOIN clientes c " +
+            "    ON ST_Contains(zc.geom, c.ubicacion) " +
+            " WHERE c.cliente_id = :cliente_id";
         try (Connection con = sql2o.open()) {
-            List<Map<String, Object>> results = con.createQuery(sql)
-                    .addParameter("cliente_id", cliente_id)
-                    .executeAndFetchTable()
-                    .asList();
-            return results.stream().map(this::mapToZonaCoberturaEntity).toList();
+            var rows = con.createQuery(sql)
+                          .addParameter("cliente_id", cliente_id)
+                          .executeAndFetchTable()
+                          .asList();
+            return rows.stream()
+                       .map(this::mapToZonaCoberturaEntity)
+                       .toList();
         }
     }
 }

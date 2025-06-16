@@ -1,7 +1,7 @@
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export async function getAllRepartidores() {
-  const res = await fetch(`${API}/api/repartidores/`);
+  const res = await fetch(`${API}/api/repartidores/all`);
   if (!res.ok) throw new Error('No se pudieron cargar los repartidores');
   return res.json(); // Array de RepartidorEntity
 }

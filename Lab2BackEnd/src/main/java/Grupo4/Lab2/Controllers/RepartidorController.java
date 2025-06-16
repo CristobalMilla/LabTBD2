@@ -18,7 +18,7 @@ public class RepartidorController {
     @Autowired
     private RepartidorService repartidorService;
 
-    @GetMapping("/")
+    @GetMapping("/all")
     public List<RepartidorEntity> getRepartidores(){
         return repartidorService.findall();
     }
