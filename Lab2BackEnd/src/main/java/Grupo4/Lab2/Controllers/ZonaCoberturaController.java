@@ -83,7 +83,6 @@ public class ZonaCoberturaController {
 
     @PutMapping("/byListIds")
     public List<ZonaCoberturaEntity> getZonasCoberturaByListIds(@RequestBody PedidoYZonasQueCruzaDTO pedido){
-        System.out.println("aaaaa");
         return zonaCoberturaService.getZonasCoberturaByPedido(pedido);
     }
 }

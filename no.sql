@@ -252,13 +252,58 @@ INSERT INTO pedidos (cliente_id, empresa_id, repartidor_id, fecha, fecha_entrega
  ST_SetSRID(ST_MakePoint(-70.687, -33.460), 4326),
  ST_SetSRID(ST_MakeLine(ST_MakePoint(-70.685, -33.460), ST_MakePoint(-70.687, -33.460)), 4326));
 
+ 
+ INSERT INTO pedidos (cliente_id, empresa_id, repartidor_id, fecha, fecha_entrega, estado, punto_inicio, punto_final, ruta_estimada) VALUES
+(1, 1, 1, NOW(), NOW() + INTERVAL '30 minutes', 'En camino',
+ ST_SetSRID(ST_MakePoint(-70.688, -33.454), 4326), -- Inicio en Zona Norte
+ ST_SetSRID(ST_MakePoint(-70.676, -33.456), 4326), -- Final en Zona Este
+ ST_SetSRID(ST_MakeLine(ARRAY[
+   ST_MakePoint(-70.688, -33.454), 
+   ST_MakePoint(-70.686, -33.458), 
+   ST_MakePoint(-70.676, -33.456)
+ ]), 4326)),
+
+-- Pedido 2: Cruza Zona Sur, Zona Centro y Zona Oeste
+(2, 2, 2, NOW(), NOW() + INTERVAL '40 minutes', 'Pendiente',
+ ST_SetSRID(ST_MakePoint(-70.688, -33.460), 4326), -- Inicio en Zona Sur
+ ST_SetSRID(ST_MakePoint(-70.692, -33.456), 4326), -- Final en Zona Oeste
+ ST_SetSRID(ST_MakeLine(ARRAY[
+   ST_MakePoint(-70.688, -33.460), 
+   ST_MakePoint(-70.686, -33.458), 
+   ST_MakePoint(-70.692, -33.456)
+ ]), 4326)),
+
+-- Pedido 3: Cruza Zona Este, Zona Centro y Zona Norte
+(3, 3, 3, NOW(), NOW() + INTERVAL '25 minutes', 'Entregado',
+ ST_SetSRID(ST_MakePoint(-70.676, -33.454), 4326), -- Inicio en Zona Este
+ ST_SetSRID(ST_MakePoint(-70.688, -33.452), 4326), -- Final en Zona Norte
+ ST_SetSRID(ST_MakeLine(ARRAY[
+   ST_MakePoint(-70.676, -33.454), 
+   ST_MakePoint(-70.686, -33.458), 
+   ST_MakePoint(-70.688, -33.452)
+ ]), 4326)),
+
+-- Pedido 4: Cruza Zona Oeste, Zona Centro y Zona Sur
+(4, 4, 4, NOW(), NOW() + INTERVAL '35 minutes', 'En camino',
+ ST_SetSRID(ST_MakePoint(-70.692, -33.456), 4326), -- Inicio en Zona Oeste
+ ST_SetSRID(ST_MakePoint(-70.688, -33.460), 4326), -- Final en Zona Sur
+ ST_SetSRID(ST_MakeLine(ARRAY[
+   ST_MakePoint(-70.692, -33.456), 
+   ST_MakePoint(-70.686, -33.458), 
+   ST_MakePoint(-70.688, -33.460)
+ ]), 4326));
+
 -- Detalle de pedidos
 INSERT INTO detalle_pedidos (pedido_id, producto_id, cantidad) VALUES
 (1, 1, 2),
 (2, 2, 1),
 (3, 3, 1),
 (4, 4, 3),
-(5, 5, 2);
+(5, 5, 2)
+(6, 1, 2),
+(7, 2, 1),
+(8, 3, 1),
+(9, 4, 3);
 
 -- Pagos
 INSERT INTO pagos (pedido_id, medio_id, monto) VALUES
@@ -266,7 +311,11 @@ INSERT INTO pagos (pedido_id, medio_id, monto) VALUES
 (2, 2, 7990),
 (3, 3, 2500),
 (4, 3, 5400),
-(5, 4, 13800);
+(5, 4, 13800),
+(6, 2, 7990),
+(7, 3, 2500),
+(8, 3, 5400),
+(9, 4, 13800);
 
 -- Calificaciones
 INSERT INTO calificaciones (pedido_id, puntuacion, comentario) VALUES
@@ -274,7 +323,11 @@ INSERT INTO calificaciones (pedido_id, puntuacion, comentario) VALUES
 (2, 4, 'Buena pizza, pero llegó tibia'),
 (3, 5, 'Excelente servicio'),
 (4, 3, 'Demoró un poco'),
-(5, 5, '¡Sushi fresco y delicioso!');
+(5, 5, '¡Sushi fresco y delicioso!')
+(6, 5, 'Muy rápido y sabroso'),
+(7, 4, 'Buena pizza, pero llegó tibia'),
+(8, 5, 'Excelente servicio'),
+(9, 3, 'Demoró un poco');
 
 -- Urgencias
 INSERT INTO urgencias (pedido_id, nivel) VALUES
@@ -282,7 +335,11 @@ INSERT INTO urgencias (pedido_id, nivel) VALUES
 (2, 'urgente'),
 (3, 'urgente'),
 (4, 'no urgente'),
-(5, 'no urgente');
+(5, 'no urgente'),
+(6, 'no urgente'),
+(7, 'urgente'),
+(8, 'urgente'),
+(9, 'no urgente');
 
 -- Zonas de cobertura
 INSERT INTO zonas_cobertura (nombre, geom, empresa_id) VALUES

@@ -170,7 +170,7 @@ public class PedidosRepository {
                            "FROM pedidos p " +
                            "INNER JOIN zonas_cobertura z ON ST_Intersects(p.ruta_estimada, z.geom) " +
                            "GROUP BY p.pedido_id " +
-                           "HAVING COUNT(z.zona_id) > 0";
+                           "HAVING COUNT(z.zona_id) > 2";
             return conn.createQuery(query).executeAndFetch(PedidoYZonasQueCruzaDTO.class);
 
         } catch (Exception e) {

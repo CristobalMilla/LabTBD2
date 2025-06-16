@@ -59,7 +59,6 @@ public class ZonaCoberturaService {
 
     public List<ZonaCoberturaEntity> getZonasCoberturaByPedido(PedidoYZonasQueCruzaDTO pedido){
         List<ZonaCoberturaEntity> zonas = new ArrayList<>();
-        System.out.println(pedido.getIds_zonas());
         try{
             for(Long id : pedido.getIds_zonas()){
                 zonas.add(getById(id));
