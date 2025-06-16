@@ -3,6 +3,8 @@ package Grupo4.Lab2.Repositories;
 import Grupo4.Lab2.DTO.PedidoYZonasQueCruzaDTO;
 import Grupo4.Lab2.DTO.RegistrarPedidoDTO;
 import Grupo4.Lab2.Entities.PedidosEntity;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.sql2o.Connection;
@@ -18,10 +20,16 @@ import java.util.stream.Collectors;
 public class PedidosRepository {
 
     private final Sql2o sql2o;
+    private final RepartidorRepository repartidorRepository;
+    private final ClienteRepository clienteRepository;
+    private final EmpresaRepository empresaRepository;
 
     @Autowired
-    public PedidosRepository(Sql2o sql2o) {
+    public PedidosRepository(Sql2o sql2o, RepartidorRepository repartidorRepository, ClienteRepository clienteRepository, EmpresaRepository empresaRepository) {
         this.sql2o = sql2o;
+        this.repartidorRepository = repartidorRepository;
+        this.clienteRepository = clienteRepository;
+        this.empresaRepository = empresaRepository;
     }
 
     public PedidosEntity findById(long idPedido) {
@@ -52,7 +60,7 @@ public class PedidosRepository {
     }
 
     // 7.
-    public boolean registrarPedido(RegistrarPedidoDTO dto) {
+    public long registrarPedido(RegistrarPedidoDTO dto) {
         String sql = "SELECT registrar_pedido(" +
                     ":clienteId," +
                     ":empresaId," +
@@ -83,7 +91,7 @@ public class PedidosRepository {
 
             long id_pedido = ((Number) result).longValue();
             System.out.println("Pedido registrado con ID: " + id_pedido);
-            return true;
+            return id_pedido;
         } catch (Exception e) {
             Throwable cause = e.getCause(); // toma la excepcion original y revisa si fue causada x una excepción interna
             String mensaje = cause != null ? cause.getMessage() : e.getMessage(); // si la causa interna es null se muestra la excepcion principal, si no la especifica
@@ -169,6 +177,68 @@ public class PedidosRepository {
             System.err.println("Error al obtener los pedidos.");
             e.printStackTrace();
             return null;
+        }
+    }
+
+    //Hacer update al pedido, agregando punto_inicio y punto_final
+    public PedidosEntity updatePedidoPuntos(PedidosEntity pedido) {
+        Point punto_inicio = empresaRepository.findById(pedido.getRepartidor_id()).getUbicacion();
+        Point punto_final = clienteRepository.findById(pedido.getCliente_id()).getUbicacion();
+        String sql = "UPDATE pedidos " +
+                "SET punto_inicio = ST_GeomFromText(:punto_inicio, 4326), punto_final = ST_GeomFromText(:punto_final, 4326) " +
+                "WHERE pedido_id = :pedido_id";
+        try (Connection conn = sql2o.beginTransaction()) {
+            conn.createQuery(sql)
+                    .addParameter("punto_inicio", punto_inicio.toString())
+                    .addParameter("punto_final", punto_final.toString())
+                    .addParameter("pedido_id", pedido.getPedido_id())
+                    .executeUpdate();
+            conn.commit();
+        }
+        pedido.setPunto_inicio(punto_inicio);
+        pedido.setPunto_final(punto_final);
+        return pedido;
+    }
+
+    //Hacer update al pedido, agregando ruta
+    public boolean updatePedidoRuta(PedidosEntity pedido) {
+        String sql = "UPDATE pedidos AS p " +
+                "SET ruta_estimada = (" +
+                    "SELECT ST_LineMerge(ST_Collect(seg.geom)) " +
+                    "FROM pgr_dijkstra(" +
+                        "'SELECT cleaned_street_id AS id, source, target, cost FROM calles_cleaned', " +
+                        "find_nearest_node(e.ubicacion), " +
+                        "find_nearest_node(cl.ubicacion), " +
+                        "directed := FALSE " +
+                    ") AS route " +
+                    "JOIN calles_cleaned AS seg ON route.edge = seg.cleaned_street_id) " +
+                "FROM empresas AS e, clientes AS cl " +
+                "WHERE p.empresa_id = e.empresa_id " +
+                    "AND p.cliente_id = cl.cliente_id " +
+                    "AND p.pedido_id = :pedido_id";
+        try (Connection conn = sql2o.beginTransaction()) {
+            conn.createQuery(sql)
+                    .addParameter("pedido_id", pedido.getPedido_id())
+                    .executeUpdate();
+            conn.commit();
+            return true;
+        }
+        catch (Exception e){
+            System.err.println("Error al actualizar la ruta del pedido " + pedido.getPedido_id() + "\n" + e.getMessage());
+            return false;
+        }
+    }
+    public PedidosEntity setPedidoRuta(PedidosEntity pedido){
+        String sql = "SELECT ST_AsText(p.ruta_estimada) AS ruta_estimada " +
+                "FROM pedidos AS p" +
+                "WHERE p.pedido_id = :pedido_id";
+        try (Connection conn = sql2o.beginTransaction()){
+            LineString ruta = (LineString) conn.createQuery(sql)
+                    .addParameter("pedido_id", pedido.getPedido_id())
+                    .executeScalar();
+            conn.commit();
+            pedido.setRuta_estimada(ruta);
+            return pedido;
         }
     }
 }

@@ -41,10 +41,8 @@ public class PedidosController {
     @PostMapping("/create")
     public ResponseEntity<String> registrarPedido(@RequestBody RegistrarPedidoDTO dto) {
         try {
-            boolean registrado = pedidosService.registrarPedido(dto);
-            return registrado
-                    ? ResponseEntity.ok("Pedido registrado correctamente.")
-                    : ResponseEntity.status(500).body("Error al registrar el pedido.");
+            long pedido_id = pedidosService.registrarPedido(dto);
+            return ResponseEntity.ok("Pedido registrado con ID: " + pedido_id);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Datos inválidos: " + e.getMessage());
         } catch (Exception e) {
