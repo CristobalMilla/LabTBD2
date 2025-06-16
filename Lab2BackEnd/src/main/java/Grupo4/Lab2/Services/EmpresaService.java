@@ -30,7 +30,8 @@ public class EmpresaService {
         empresaRepository.deleteById(id);
     }
 
-    public List<Point> getEntregasCercanas(Long id){return empresaRepository.findNearby(id);}
+    public List<CoordenadaDTO> getEntregasCercanas(Long id){
+        return empresaRepository.findNearby(id).stream().map(punto -> new CoordenadaDTO(punto.getX(), punto.getY())).toList();}
 
     // 4.
     public CoordenadaDTO getEntregaMasLejana(long empresaId) {

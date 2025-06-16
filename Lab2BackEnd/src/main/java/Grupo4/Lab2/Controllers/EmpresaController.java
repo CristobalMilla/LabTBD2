@@ -55,8 +55,8 @@ public class EmpresaController {
         }
     }
     @GetMapping("/entregascercanas/{id}")
-    public ResponseEntity<List<Point>> getEntregasCercanas(@PathVariable Long id){
-        List<Point> puntos = empresaService.getEntregasCercanas(id);
+    public ResponseEntity<List<CoordenadaDTO>> getEntregasCercanas(@PathVariable Long id){
+        List<CoordenadaDTO> puntos = empresaService.getEntregasCercanas(id);
         if (puntos == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
