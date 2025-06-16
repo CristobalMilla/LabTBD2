@@ -4,8 +4,11 @@ Trabajo de laboratorio 2 para proyecto de Taller de Base de Datos 1-2025. Paso a
 
 1. Primero hay que crear las variables de entrono en tu idle, que require el archivo application.properties y el de sql2o, el primero está ubicado en: \LabTBD2\Lab2BackEnd\src\main\resources 
 
-2. Debes de importar en tu database en postgres el archivo calles_cleaned dentro de la carpeta principal en 
+2. Debes de importar en tu database en postgres el archivo calles_cleaned dentro de la carpeta principal en "archivos importar". Luego de esto  debes ejecutar la siguiente linea:
+ 
+SELECT pgr_createTopology('calles_cleaned', 0.0001, 'geom', 'cleaned_street_id');
 
+Posteriormente importas el segundo archivo dentro de "archivos importar"
 
 El archivo entrega.sql dentro de la carpeta LabTBD2 debes de ejecutarlo en tu database de Postgres.
 
