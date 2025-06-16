@@ -92,4 +92,16 @@ public class PedidosController {
             return ResponseEntity.status(500).build();
         }
     }
+
+    @PostMapping("/createFull")
+    public ResponseEntity<PedidosEntity> createFull(@RequestBody RegistrarPedidoDTO dto) {
+        try {
+            PedidosEntity pedido = pedidosService.crearPedidoCompleto(dto);
+            return ResponseEntity.ok(pedido);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
 }
