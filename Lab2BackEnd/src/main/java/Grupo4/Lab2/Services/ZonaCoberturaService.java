@@ -1,11 +1,12 @@
 package Grupo4.Lab2.Services;
 
-import Grupo4.Lab2.Entities.ClienteEntity;
+import Grupo4.Lab2.DTO.PedidoYZonasQueCruzaDTO;
 import Grupo4.Lab2.Entities.ZonaCoberturaEntity;
 import Grupo4.Lab2.Repositories.ZonaCoberturaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -37,5 +38,20 @@ public class ZonaCoberturaService {
     // cambiar por un dto
     public List<ZonaCoberturaEntity> getZonasConAltaDensidad(){
         return zonaRepository.getZonasConAltaDensidad();
+    }
+
+    public List<ZonaCoberturaEntity> getZonasCoberturaByPedido(PedidoYZonasQueCruzaDTO pedido){
+        List<ZonaCoberturaEntity> zonas = new ArrayList<>();
+        System.out.println(pedido.getIds_zonas());
+        try{
+            for(Long id : pedido.getIds_zonas()){
+                zonas.add(getById(id));
+            }
+            return zonas;
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
     }
 }

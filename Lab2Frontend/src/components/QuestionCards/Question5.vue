@@ -1,33 +1,86 @@
 <script setup>
-import { onMounted, ref } from 'vue'
-import axios from 'axios'
+import { nextTick, onMounted, ref, watch } from 'vue'
 import {getPedidosQueCruzanMasDe2Zonas} from '@/api/pedidos'
+import { getAllByIds } from '@/api/zonasCobertura';
 
 const pedidos = ref([])
-const loading = ref(false)
-const error = ref(null)
+const loading = ref(true)
+const error = ref(false)
+const map = ref(null)
+const loading_map = ref(false)
+const pedido_index = ref(-1)
+const zonas = ref([])
 
 const getpedidos = async () => {
   try {
-    const response = await getPedidosQueCruzanMasDe2Zonas()
-    console.log(response)
+    pedidos.value = await getPedidosQueCruzanMasDe2Zonas()
   } catch (error) {
     console.error('Error fetching pedidos:', error)
+    error.value = true
   } finally {
     loading.value = false
   }
+};
+
+const initMap = async () => {
+  await nextTick();
+  const sectorCenter = [-33.464467, -70.705074];
+  map.value = L.map("map").setView(sectorCenter, 15);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "&copy; OpenStreetMap contributors",
+  }).addTo(map.value);
+};
+
+onMounted(async () => {
+  await getpedidos()
+})
+
+const getZonasCruzadas = async () =>{
+  console.log(pedidos.value[0].ids_zonas)
+  zonas.value = getAllByIds(pedidos.value[0])
+  console.log(zonas.value)
+};
+
+watch(pedidos, async () => {
+  if (pedidos.value.length > 0 && pedido_index > -1) {
+    await initMap()
+    await getZonasCruzadas();
+  }
+})
+
+const drawZonas = () => {
+  const sectorCenter = [
+    zonas.value.geom[0][1],
+    zonas.value.geom[0][0]
+    ];
+  map.value.setView(sectorCenter, 14);
+  for(var i = 0; i < zonas.value.length; i++){
+    const geoJSON = {
+    type: "Feature",
+    geometry: {
+      type: "Polygon",
+      coordinates: [zonas.value[i].geom],
+    },
+    properties: {},
+    };
+    L.geoJSON(geoJSON).addTo(map.value);
+  }
+  
 }
 
-onMounted(() => {
-  getpedidos()
+watch(zonas, async () => {
+  if(zonas.value.length > 0){
+    await drawZonas();
+  }
 })
+
 </script>
 
 <template>
   <div>
     <v-card class="mx-auto" max-width="800">
       <v-card-title class="text-h6 text-center">
-        Tareas Realizadas por Sector
+        Pedidos que se estima que cruzen mas de 2 zonas de reparto
       </v-card-title>
 
       <v-card-text>
@@ -36,26 +89,46 @@ onMounted(() => {
         </div>
 
         <div v-else-if="error" class="text-center red--text">
-          {{ error }}
+          error
         </div>
 
         <div v-else>
-          <v-table v-if="pedidos.length > 0">
-            <thead>
-              <tr>
-                <th class="text-center">Sector</th>
-                <th class="text-center">Cantidad de Tareas Completadas</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(pedido, index) in pedidos" :key="index">
-                <td class="text-center">{{ pedido.pedido_id }}</td>
-                <td class="text-center">{{ pedido.cliente_id }}</td>
-              </tr>
-            </tbody>
-          </v-table>
-          <div v-else class="text-center pa-4">
-            No hay tareas completadas en ningún sector.
+          <div>
+            <div v-if="loading_map">
+              <v-container>
+                <v-row>
+
+                <v-col cols="12" md="12">
+                    <div id="map" class="rounded mb-2"></div>
+                </v-col>
+                </v-row>
+              </v-container>
+            </div>
+            <v-table v-else-if="pedidos.length > 0">
+              <thead>
+                <tr>
+                  <th class="text-center">Pedido</th>
+                  <th class="text-center">Cliente</th>
+                  <th class="text-center">Empresa</th>
+                  <th class="text-center">Repartidor</th>
+                  <th class="text-center">Zonas que cruza</th>
+                  <th class="text-center">Ver Mapa</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(pedido, index) in pedidos" :key="index">
+                    <td class="text-center">{{ pedido.pedido_id }}</td>
+                    <td class="text-center">{{ pedido.cliente_id }}</td>
+                    <td class="text-center">{{ pedido.empresa_id }}</td>
+                    <td class="text-center">{{ pedido.repartidor_id }}</td>
+                    <td class="text-center">{{ pedido.zonas_que_cruza }}</td>
+                    <td class="text-center"> - </td>
+                </tr>
+              </tbody>
+            </v-table>
+            <div v-else class="text-center pa-4">
+              No hay tareas completadas en ningún sector.
+            </div>
           </div>
         </div>
       </v-card-text>
