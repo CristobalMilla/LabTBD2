@@ -99,12 +99,10 @@ CREATE TABLE IF NOT EXISTS usuario (
 -- Crear tabla de zonas de cobertura
 CREATE TABLE zonas_cobertura (
     zona_id SERIAL PRIMARY KEY,
-    empresa_id INT,
     nombre VARCHAR(100),
     geom GEOMETRY(Polygon, 4326)
 );
 
---Seccion poblar ubicaciones
 
 
 
@@ -136,6 +134,36 @@ CREATE TABLE calles_cleaned (
     target INTEGER,                        
     cost DOUBLE PRECISION
 );
+
+
+--Importar archivos csv de calles_cleaned y calles_cleaned_vertices_pgr
+
+
+
+--Funcion para snapear nodos a la topologia
+CREATE OR REPLACE FUNCTION find_nearest_node(input_point GEOMETRY(Point, 4326))
+RETURNS BIGINT AS $$
+DECLARE
+    nearest_node_id BIGINT;
+BEGIN
+    SELECT
+        id
+    INTO
+        nearest_node_id
+    FROM
+        calles_cleaned_vertices_pgr
+    ORDER BY
+        ST_Distance(the_geom, input_point)
+    LIMIT 1;
+
+    -- Opcional: Añadir error handling si no se encuentra un nodo cercano (por ejemplo, si el nodo inicial esta muy lejos de la red/topologia)
+    IF nearest_node_id IS NULL THEN
+        RAISE EXCEPTION 'No network node found near the input point.';
+    END IF;
+
+    RETURN nearest_node_id;
+END;
+$$ LANGUAGE plpgsql;
 
 -- Clientes
 INSERT INTO clientes (nombre, direccion, email, telefono, ubicacion) VALUES
@@ -236,7 +264,16 @@ INSERT INTO urgencias (pedido_id, nivel) VALUES
 (4, 'no urgente'),
 (5, 'no urgente');
 
+-- Zonas de cobertura
+INSERT INTO zonas_cobertura (nombre, geom, empresa_id) VALUES
+('Zona Norte', ST_GeomFromText('POLYGON((-70.688 -33.454, -70.688 -33.452, -70.684 -33.452, -70.684 -33.454, -70.688 -33.454))', 4326)),
+('Zona Sur', ST_GeomFromText('POLYGON((-70.688 -33.460, -70.688 -33.462, -70.684 -33.462, -70.684 -33.460, -70.688 -33.460))', 4326)),
+('Zona Este', ST_GeomFromText('POLYGON((-70.680 -33.456, -70.680 -33.454, -70.676 -33.454, -70.676 -33.456, -70.680 -33.456))', 4326)),
+('Zona Oeste', ST_GeomFromText('POLYGON((-70.692 -33.456, -70.692 -33.454, -70.688 -33.454, -70.688 -33.456, -70.692 -33.456))', 4326)),
+('Zona Centro', ST_GeomFromText('POLYGON((-70.686 -33.458, -70.686 -33.456, -70.682 -33.456, -70.682 -33.458, -70.686 -33.458))', 4326));
+
 -- Calles
+-- Si se importo archivo, no usar este (aunque, como calles esta vacio, calles_cleaned quedara vacio)
 INSERT INTO calles_cleaned (street_id, fid, shape_leng, st_length_, nom_ruta, comuna, geom)
 SELECT
     c.ogc_fid,
@@ -248,11 +285,3 @@ SELECT
     ST_GeometryN((ST_Dump(ST_LineMerge(c.geom))).geom, 1) --Hace un LineMerge al MultiLine de calles, Realiza un Dump a distintas filas en una tabla, .geom accede a la parte de geom de esa tabla, y GeometryN asegura que la operacion siempre devuelva LineString
 FROM
     calles AS c;
-
--- Zonas de cobertura
-INSERT INTO zonas_cobertura (nombre, geom, empresa_id) VALUES
-('Zona Norte', ST_GeomFromText('POLYGON((-70.688 -33.454, -70.688 -33.452, -70.684 -33.452, -70.684 -33.454, -70.688 -33.454))', 4326), 1),
-('Zona Sur', ST_GeomFromText('POLYGON((-70.688 -33.460, -70.688 -33.462, -70.684 -33.462, -70.684 -33.460, -70.688 -33.460))', 4326), 2),
-('Zona Este', ST_GeomFromText('POLYGON((-70.680 -33.456, -70.680 -33.454, -70.676 -33.454, -70.676 -33.456, -70.680 -33.456))', 4326), 3),
-('Zona Oeste', ST_GeomFromText('POLYGON((-70.692 -33.456, -70.692 -33.454, -70.688 -33.454, -70.688 -33.456, -70.692 -33.456))', 4326), 4),
-('Zona Centro', ST_GeomFromText('POLYGON((-70.686 -33.458, -70.686 -33.456, -70.682 -33.456, -70.682 -33.458, -70.686 -33.458))', 4326), 5);
