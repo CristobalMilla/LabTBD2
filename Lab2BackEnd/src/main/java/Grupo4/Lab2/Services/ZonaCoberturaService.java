@@ -1,6 +1,8 @@
 package Grupo4.Lab2.Services;
 
+import Grupo4.Lab2.DTO.CoordenadaDTO;
 import Grupo4.Lab2.DTO.PedidoYZonasQueCruzaDTO;
+import Grupo4.Lab2.DTO.ZonaDTO;
 import Grupo4.Lab2.Entities.ZonaCoberturaEntity;
 import Grupo4.Lab2.Repositories.ZonaCoberturaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,12 @@ public class ZonaCoberturaService {
     public List<ZonaCoberturaEntity> getZonasCoberturaByClienteId(long cliente_id){
         return zonaRepository.findZonasCoberturaByClienteId( cliente_id);
     }
+
+    // 7.
+    public ZonaDTO obtenerZonaPorCliente(Long clienteId) {
+        return zonaRepository.obtenerZonaPorCliente(clienteId);
+    }
+
 
     // Query 8
     // Detectar zonas con alta densidad de pedidos mediante agregación de puntos.

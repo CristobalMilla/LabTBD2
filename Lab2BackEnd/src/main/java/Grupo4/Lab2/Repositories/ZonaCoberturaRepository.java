@@ -1,8 +1,9 @@
 package Grupo4.Lab2.Repositories;
 
-import Grupo4.Lab2.Entities.ClienteEntity;
+
+import Grupo4.Lab2.DTO.CoordenadaDTO;
+import Grupo4.Lab2.DTO.ZonaDTO;
 import Grupo4.Lab2.Entities.ZonaCoberturaEntity;
-import Grupo4.Lab2.Repositories.ClienteRepository;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.io.ParseException;
@@ -119,6 +120,23 @@ public class ZonaCoberturaRepository {
         }
     }
 
+    // 7. Opcional. Implementar una función que calcule automáticamente la zona a la que pertenece un cliente
+    public ZonaDTO obtenerZonaPorCliente(Long cliente_id) {
+        String sql = """
+            SELECT zona_id AS zonaId, nombre, ST_AsText(geom) AS geom
+            FROM zonas_cobertura
+            WHERE ST_Within((
+                SELECT ubicacion FROM clientes WHERE cliente_id = :cliente_id
+            ), geom)
+        """;
+
+        try (Connection con = sql2o.open()) {
+            return con.createQuery(sql)
+                    .addParameter("cliente_id", cliente_id)
+                    .executeAndFetchFirst(ZonaDTO.class);
+        }
+    }
+
     // Query 8
     // Detectar zonas con alta densidad de pedidos mediante agregación de puntos.
      // cambiar por un dto
@@ -163,4 +181,6 @@ public class ZonaCoberturaRepository {
                        .toList();
         }
     }
+
+
 }
