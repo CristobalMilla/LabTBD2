@@ -3,6 +3,7 @@ package Grupo4.Lab2.Repositories;
 
 import Grupo4.Lab2.DTO.CoordenadaDTO;
 import Grupo4.Lab2.DTO.ZonaDTO;
+import Grupo4.Lab2.DTO.ZonaYDensidadXkm2DTO;
 import Grupo4.Lab2.Entities.ZonaCoberturaEntity;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
@@ -141,7 +142,7 @@ public class ZonaCoberturaRepository {
     // Query 8
     // Detectar zonas con alta densidad de pedidos mediante agregación de puntos.
      // cambiar por un dto
-    public List<ZonaCoberturaEntity> getZonasConAltaDensidad(){
+    public List<ZonaYDensidadXkm2DTO> getZonasConAltaDensidad(){
         try (Connection conn = sql2o.open()) {
             String query = "WITH agrupacion_pedidos AS ( " +
                         "SELECT z.zona_id, ST_Collect(p.punto_final) AS puntos_agrupados_x_zona " +
@@ -152,8 +153,8 @@ public class ZonaCoberturaRepository {
                     "FROM agrupacion_pedidos ap " +
                     "INNER JOIN zonas_cobertura z ON ap.zona_id = z.zona_id " +
                     "GROUP BY ap.zona_id, ap.puntos_agrupados_x_zona, z.geom " +
-                    "HAVING (ST_NPoints(ap.puntos_agrupados_x_zona)/(ST_Area(geom::geography)/1000000)) > 1"; // cambiar por alguna densidad
-            return conn.createQuery(query).executeAndFetch(ZonaCoberturaEntity.class);
+                    "HAVING (ST_NPoints(ap.puntos_agrupados_x_zona)/(ST_Area(geom::geography)/1000000)) > 100"; // cambiar por alguna densidad
+            return conn.createQuery(query).executeAndFetch(ZonaYDensidadXkm2DTO.class);
         }
         catch (Exception e){
             System.out.println("Error al obtener las zonas con alta densidad");

@@ -2,12 +2,14 @@
 import { nextTick, onMounted, ref, watch } from 'vue'
 import {getPedidosQueCruzanMasDe2Zonas} from '@/api/pedidos'
 import { getAllByIds } from '@/api/zonasCobertura';
+import wellknown from "wellknown";
+import L from "leaflet";
 
 const pedidos = ref([])
 const loading = ref(true)
 const error = ref(false)
 const map = ref(null)
-const loading_map = ref(false)
+const view_map = ref(false)
 const pedido_index = ref(-1)
 const zonas = ref([])
 
@@ -16,7 +18,6 @@ const getpedidos = async () => {
     pedidos.value = await getPedidosQueCruzanMasDe2Zonas()
   } catch (error) {
     console.error('Error fetching pedidos:', error)
-    error.value = true
   } finally {
     loading.value = false
   }
@@ -33,36 +34,45 @@ const initMap = async () => {
 
 onMounted(async () => {
   await getpedidos()
+  await initMap()
 })
 
-const getZonasCruzadas = async () =>{
-  console.log(pedidos.value[0].ids_zonas)
-  zonas.value = getAllByIds(pedidos.value[0])
-  console.log(zonas.value)
+const verMapa = async (index) => {
+  pedido_index.value = index;
+  view_map.value = true;
+  zonas.value = []; // Limpiar zonas anteriores
+
+  if (map.value) {
+    map.value.remove(); // Eliminar el mapa anterior
+  }
+
+  await nextTick();
+  await initMap();
+  await getZonasCruzadas();
 };
 
+const getZonasCruzadas = async () => {
+  if (pedido_index.value > -1) {
+    zonas.value = await getAllByIds(pedidos.value[pedido_index.value]);
+  }
+};
+
+
 watch(pedidos, async () => {
-  if (pedidos.value.length > 0 && pedido_index > -1) {
-    await initMap()
+  if (pedidos.value.length > 0 && pedido_index.value > -1) {
     await getZonasCruzadas();
   }
 })
 
 const drawZonas = () => {
+  const geoJSON_1_zona = wellknown.parse(zonas.value[0].geom)
   const sectorCenter = [
-    zonas.value.geom[0][1],
-    zonas.value.geom[0][0]
+    geoJSON_1_zona.coordinates[0][0][1],
+    geoJSON_1_zona.coordinates[0][0][0]
     ];
   map.value.setView(sectorCenter, 14);
   for(var i = 0; i < zonas.value.length; i++){
-    const geoJSON = {
-    type: "Feature",
-    geometry: {
-      type: "Polygon",
-      coordinates: [zonas.value[i].geom],
-    },
-    properties: {},
-    };
+    const geoJSON = wellknown.parse(zonas.value[i].geom)
     L.geoJSON(geoJSON).addTo(map.value);
   }
   
@@ -73,6 +83,7 @@ watch(zonas, async () => {
     await drawZonas();
   }
 })
+
 
 </script>
 
@@ -94,16 +105,20 @@ watch(zonas, async () => {
 
         <div v-else>
           <div>
-            <div v-if="loading_map">
+            <div v-if="view_map">
               <v-container>
                 <v-row>
-
-                <v-col cols="12" md="12">
-                    <div id="map" class="rounded mb-2"></div>
-                </v-col>
+                  <v-col cols="12" md="12">
+                    <v-btn color="red" variant="tonal" @click="view_map = false">
+                      <v-icon left>mdi-close</v-icon>
+                        Cerrar Mapa
+                      </v-btn>
+                    <div id="map" style="height: 400px; margin-top: 16px;"></div>
+                  </v-col>
                 </v-row>
               </v-container>
             </div>
+
             <v-table v-else-if="pedidos.length > 0">
               <thead>
                 <tr>
@@ -122,7 +137,11 @@ watch(zonas, async () => {
                     <td class="text-center">{{ pedido.empresa_id }}</td>
                     <td class="text-center">{{ pedido.repartidor_id }}</td>
                     <td class="text-center">{{ pedido.zonas_que_cruza }}</td>
-                    <td class="text-center"> - </td>
+                    <td class="text-center">
+                      <v-btn color="primary" variant="outlined" @click="verMapa(index)">
+                        <v-icon left>mdi-map</v-icon>
+                      </v-btn>
+                    </td>
                 </tr>
               </tbody>
             </v-table>

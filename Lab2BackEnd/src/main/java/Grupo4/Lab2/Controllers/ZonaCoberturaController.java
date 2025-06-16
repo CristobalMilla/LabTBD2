@@ -3,6 +3,7 @@ package Grupo4.Lab2.Controllers;
 import Grupo4.Lab2.DTO.CoordenadaDTO;
 import Grupo4.Lab2.DTO.PedidoYZonasQueCruzaDTO;
 import Grupo4.Lab2.DTO.ZonaDTO;
+import Grupo4.Lab2.DTO.ZonaYDensidadXkm2DTO;
 import Grupo4.Lab2.Entities.ClienteEntity;
 import Grupo4.Lab2.Entities.ZonaCoberturaEntity;
 import Grupo4.Lab2.Services.ZonaCoberturaService;
@@ -42,8 +43,8 @@ public class ZonaCoberturaController {
     }
 
     @GetMapping("/zonasConAltaDensidad")
-    public ResponseEntity<List<ZonaCoberturaEntity>> getZonasConAltaDensidad(){
-        List<ZonaCoberturaEntity> zonasConAltaDensidad = zonaCoberturaService.getZonasConAltaDensidad();
+    public ResponseEntity<List<ZonaYDensidadXkm2DTO>> getZonasConAltaDensidad(){
+        List<ZonaYDensidadXkm2DTO> zonasConAltaDensidad = zonaCoberturaService.getZonasConAltaDensidad();
         return ResponseEntity.ok(zonasConAltaDensidad);
     }
 
