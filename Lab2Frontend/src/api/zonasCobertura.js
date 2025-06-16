@@ -32,3 +32,14 @@ export const obtenerZonaDeCliente = async (clienteId) => {
   const response = await axiosInstance.get(`/zonasCobertura/zona-cliente/${clienteId}`);
   return response.data;
 };
+
+// query 8
+export async function getZonasAltaDensidad() {
+  const response = await fetch(`${API_BASE_URL}/api/zonasCobertura/zonasConAltaDensidad`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' }});
+  if (!response.ok) {
+    throw new Error('Error al obtener la zona');
+  }
+  return response.json();
+}
