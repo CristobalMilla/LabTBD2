@@ -14,7 +14,6 @@ import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Repository
 public class PedidosRepository {
@@ -35,7 +34,8 @@ public class PedidosRepository {
     public PedidosEntity findById(long idPedido) {
         try (Connection conn = sql2o.open()) {
             PedidosEntity pedido;
-            String query = "SELECT * FROM pedidos WHERE pedido_id = :idPedido";
+            String query = "SELECT pedido_id, cliente_id, empresa_id, repartidor_id, ST_AsText(punto_inicio) AS punto_inicioWkt, ST_AsText(punto_final) AS punto_finalWkt, ST_AsText(ruta_estimada) AS ruta_estimadaWkt " +
+                    "FROM pedidos WHERE pedido_id = :idPedido";
             pedido = conn.createQuery(query)
                     .addParameter("idPedido", idPedido)
                     .executeAndFetchFirst(PedidosEntity.class);
@@ -49,7 +49,8 @@ public class PedidosRepository {
     public List<PedidosEntity> findAll() {
         try (Connection conn = sql2o.open()) {
             List<PedidosEntity> pedidos;
-            String query = "SELECT * FROM pedidos ORDER BY pedido_id";
+            String query = "SELECT pedido_id, cliente_id, empresa_id, repartidor_id, ST_AsText(punto_inicio) AS punto_inicioWkt, ST_AsText(punto_final) AS punto_finalWkt, ST_AsText(ruta_estimada) AS ruta_estimadaWkt " +
+                    "FROM pedidos ORDER BY pedido_id";
             pedidos = conn.createQuery(query)
                     .executeAndFetch(PedidosEntity.class);
             return pedidos;
