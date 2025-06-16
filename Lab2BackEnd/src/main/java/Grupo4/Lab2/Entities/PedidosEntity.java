@@ -1,8 +1,11 @@
 package Grupo4.Lab2.Entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.io.WKTReader;
 
 import java.sql.Timestamp;
 
@@ -12,8 +15,12 @@ public class PedidosEntity {
     private Long cliente_id;
     private Long empresa_id;
     private Long repartidor_id;
+
+    @JsonIgnore
     private Point punto_inicio;
+    @JsonIgnore
     private Point punto_final;
+    @JsonIgnore
     private LineString ruta_estimada;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
@@ -96,22 +103,75 @@ public class PedidosEntity {
         this.estado = estado;
     }
 
+    @JsonIgnore
     public Point getPunto_inicio() {
         return punto_inicio;
     }
+
+    @JsonIgnore
     public void setPunto_inicio(Point punto_inicio) {
         this.punto_inicio = punto_inicio;
     }
+
+    @JsonIgnore
     public Point getPunto_final() {
         return punto_final;
     }
+
+    @JsonIgnore
     public void setPunto_final(Point punto_final) {
         this.punto_final = punto_final;
     }
+
+    @JsonIgnore
     public LineString getRuta_estimada() {
         return ruta_estimada;
     }
+
+    @JsonIgnore
     public void setRuta_estimada(LineString ruta_estimada) {
         this.ruta_estimada = ruta_estimada;
+    }
+
+    @JsonProperty("punto_inicio")
+    public String getPuntoInicioWkt() {
+        return punto_inicio != null ? punto_inicio.toText() : null;
+    }
+
+    @JsonProperty("punto_inicio")
+    public void setPuntoInicioWkt(String wkt) throws Exception {
+        if (wkt == null || wkt.isEmpty()) {
+            this.punto_inicio = null;
+        } else {
+            this.punto_inicio = (Point) new WKTReader().read(wkt);
+        }
+    }
+
+    @JsonProperty("punto_final")
+    public String getPuntoFinalWkt() {
+        return punto_final != null ? punto_final.toText() : null;
+    }
+
+    @JsonProperty("punto_final")
+    public void setPuntoFinalWkt(String wkt) throws Exception {
+        if (wkt == null || wkt.isEmpty()) {
+            this.punto_final = null;
+        } else {
+            this.punto_final = (Point) new WKTReader().read(wkt);
+        }
+    }
+
+    @JsonProperty("ruta_estimada")
+    public String getRutaEstimadaWkt() {
+        return ruta_estimada != null ? ruta_estimada.toText() : null;
+    }
+
+    @JsonProperty("ruta_estimada")
+    public void setRutaEstimadaWkt(String wkt) throws Exception {
+        if (wkt == null || wkt.isEmpty()) {
+            this.ruta_estimada = null;
+        } else {
+            this.ruta_estimada = (LineString) new WKTReader().read(wkt);
+        }
     }
 }
