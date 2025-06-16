@@ -17,7 +17,15 @@ public class ZonaCoberturaService {
     private ZonaCoberturaRepository zonaRepository;
 
     public List<ZonaCoberturaEntity> getAll() {
-        return zonaRepository.findAll();
+        List<ZonaCoberturaEntity> zonas = zonaRepository.findAll();
+        for (ZonaCoberturaEntity zona : zonas) {
+            if (zona.getGeom() != null) {
+                System.out.println("Zona ID: " + zona.getZona_id() + ", Nombre: " + zona.getNombre() + ", Geom WKT: " + zona.getGeom().toText());
+            } else {
+                System.out.println("Zona ID: " + zona.getZona_id() + ", Nombre: " + zona.getNombre() + ", Geom WKT: null");
+            }
+        }
+        return zonas;
     }
     public ZonaCoberturaEntity getById(long id) {
         return zonaRepository.findById(id);
