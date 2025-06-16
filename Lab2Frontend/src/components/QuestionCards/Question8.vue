@@ -53,7 +53,7 @@ onMounted(async () => {
   <div>
     <v-card class="mx-auto" max-width="800">
       <v-card-title class="text-h5 text-center font-weight-bold ">
-        Zonas con densidad mayor a 100 pedidos/km²
+        Zonas con densidad mayor a 20 pedidos/km²
       </v-card-title>
 
 

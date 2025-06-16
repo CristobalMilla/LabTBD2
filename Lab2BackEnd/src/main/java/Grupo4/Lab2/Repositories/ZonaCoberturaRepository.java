@@ -152,7 +152,7 @@ public class ZonaCoberturaRepository {
                     "FROM agrupacion_pedidos ap " +
                     "INNER JOIN zonas_cobertura z ON ap.zona_id = z.zona_id " +
                     "GROUP BY ap.zona_id, ap.puntos_agrupados_x_zona, z.geom " +
-                    "HAVING (ST_NPoints(ap.puntos_agrupados_x_zona)/(ST_Area(geom::geography)/1000000)) > 100"; // cambiar por alguna densidad
+                    "HAVING (ST_NPoints(ap.puntos_agrupados_x_zona)/(ST_Area(geom::geography)/1000000)) > 20"; // cambiar por alguna densidad
             return conn.createQuery(query).executeAndFetch(ZonaYDensidadXkm2DTO.class);
         }
         catch (Exception e){
