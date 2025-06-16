@@ -42,6 +42,9 @@ public class ZonaCoberturaController {
         return ResponseEntity.ok(zona);
     }
 
+
+    // Query 8
+    // Detectar zonas con alta densidad de pedidos mediante agregación de puntos.
     @GetMapping("/zonasConAltaDensidad")
     public ResponseEntity<List<ZonaYDensidadXkm2DTO>> getZonasConAltaDensidad(){
         List<ZonaYDensidadXkm2DTO> zonasConAltaDensidad = zonaCoberturaService.getZonasConAltaDensidad();
