@@ -138,7 +138,7 @@ public class ZonaCoberturaRepository {
     //Se devolvera la lista zonas de cobertura en las que el cliente se encuentra
     public List<ZonaCoberturaEntity> findZonasCoberturaByClienteId(long cliente_id){
         String sql = "SELECT zc.zona_id, zc.nombre, ST_AsText(zc.geom) as geom_wkt " +
-                "FROM zona_coberturas zc, cliente c" +
+                "FROM zonas_cobertura zc, clientes c" +
                 "WHERE c.cliente_id = cliente_id = :cliente_id " +
                         "AND ST_Contains(zc.geom, c.ubicacion)";
         try (Connection con = sql2o.open()) {
