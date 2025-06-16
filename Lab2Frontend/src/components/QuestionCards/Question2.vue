@@ -10,7 +10,6 @@
         item-title="nombre"
         item-value="cliente_id"
         label="Selecciona un cliente"
-        @change="fetchZonasCobertura"
         class="mb-4"
       />
       <v-list v-if="zonas.length">
@@ -69,6 +68,10 @@ onMounted(async () => {
 
 watch(zonas, () => {
   drawPolygons();
+});
+watch(selectedClienteId, (newVal) => {
+  console.log('Selected:', newVal);
+  fetchZonasCobertura();
 });
 </script>
 

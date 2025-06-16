@@ -7,7 +7,7 @@ export const getZonasCobertura = async () => {
 };
 
 export const getByClienteId = async (cliente_id) => {
-  const response = await axiosInstance.get(`/zonasCobertura/${cliente_id}`);
+  const response = await axiosInstance.get(`/zonasCobertura/getByClienteId/${cliente_id}`);
   return response.data;
 };
 
