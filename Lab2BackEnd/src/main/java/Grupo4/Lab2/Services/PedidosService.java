@@ -4,6 +4,7 @@ import Grupo4.Lab2.DTO.PedidoYZonasQueCruzaDTO;
 import Grupo4.Lab2.DTO.RegistrarPedidoDTO;
 import Grupo4.Lab2.Entities.PedidosEntity;
 import Grupo4.Lab2.Repositories.PedidosRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -67,6 +68,7 @@ public class PedidosService {
         return pedidosRepository.updatePedidoRuta(pedido);
     }
     //Funcion de crear pedido por completo
+    @Transactional
     public PedidosEntity crearPedidoCompleto(RegistrarPedidoDTO pedido){
         long pedido_id = registrarPedido(pedido);
         PedidosEntity pedido_registrado = pedidosRepository.findById(pedido_id);
@@ -75,6 +77,7 @@ public class PedidosService {
         if(!ruta_actualizada){
             System.out.println("Error al actualizar la ruta del pedido con ID: " + pedido_id);
         }
+        pedidosRepository.setPedidoRuta(pedido_actualizado);
         return pedido_actualizado;
     }
 }
