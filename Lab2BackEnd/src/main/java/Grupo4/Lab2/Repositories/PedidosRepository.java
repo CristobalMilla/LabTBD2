@@ -34,7 +34,13 @@ public class PedidosRepository {
     public PedidosEntity findById(long idPedido) {
         try (Connection conn = sql2o.open()) {
             PedidosEntity pedido;
-            String query = "SELECT pedido_id, cliente_id, empresa_id, repartidor_id, ST_AsText(punto_inicio) AS punto_inicioWkt, ST_AsText(punto_final) AS punto_finalWkt, ST_AsText(ruta_estimada) AS ruta_estimadaWkt " +
+            String query = "SELECT pedido_id, " +
+                    "cliente_id, " +
+                    "empresa_id, " +
+                    "repartidor_id, " +
+                    "ST_AsText(punto_inicio) AS puntoInicioWkt, " +
+                    "ST_AsText(punto_final) AS puntoFinalWkt, " +
+                    "ST_AsText(ruta_estimada) AS rutaEstimadaWkt " +
                     "FROM pedidos WHERE pedido_id = :idPedido";
             pedido = conn.createQuery(query)
                     .addParameter("idPedido", idPedido)
@@ -49,7 +55,13 @@ public class PedidosRepository {
     public List<PedidosEntity> findAll() {
         try (Connection conn = sql2o.open()) {
             List<PedidosEntity> pedidos;
-            String query = "SELECT pedido_id, cliente_id, empresa_id, repartidor_id, ST_AsText(punto_inicio) AS punto_inicioWkt, ST_AsText(punto_final) AS punto_finalWkt, ST_AsText(ruta_estimada) AS ruta_estimadaWkt " +
+            String query = "SELECT pedido_id, " +
+                    "cliente_id, " +
+                    "empresa_id, " +
+                    "repartidor_id, " +
+                    "ST_AsText(punto_inicio) AS puntoInicioWkt, " +
+                    "ST_AsText(punto_final) AS puntoFinalWkt, " +
+                    "ST_AsText(ruta_estimada) AS rutaEstimadaWkt " +
                     "FROM pedidos ORDER BY pedido_id";
             pedidos = conn.createQuery(query)
                     .executeAndFetch(PedidosEntity.class);
