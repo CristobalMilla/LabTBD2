@@ -56,14 +56,14 @@ public class ClienteRepository {
     }
 
     public ClienteEntity findById(long idCliente) {
-        try (Connection conn = sql2o.open()) {
-            ClienteEntity cliente;
-            String query = "SELECT cliente_id, nombre, direccion, email, telefono, ST_AsText(ubicacion) as ubicacion_wkt FROM clientes WHERE cliente_id = :idCliente";
-            List<Map<String, Object>> rows = conn.createQuery(query)
-                    .addParameter("idCliente", idCliente)
-                    .executeAndFetchTable().asList();
-            cliente = mapRowToClienteEntity(rows.get(0));
-            return cliente;
+        String sql = ""
+                + "SELECT cliente_id, nombre, direccion, email, telefono, "
+                + "       ST_AsText(ubicacion) AS ubicacionWkt "
+                + "FROM clientes WHERE cliente_id = :id";
+        try (Connection con = sql2o.open()) {
+            return con.createQuery(sql)
+                    .addParameter("id", idCliente)
+                    .executeAndFetchFirst(ClienteEntity.class);
         }
         catch (Exception e){
             return null;
@@ -71,14 +71,13 @@ public class ClienteRepository {
     }
 
     public List<ClienteEntity> findAll() {
-        try (Connection conn = sql2o.open()) {
-            List<ClienteEntity> clientes;
-            String query = "SELECT cliente_id, nombre, direccion, email, telefono, ST_AsText(ubicacion) as ubicacion_wkt FROM clientes";
-            List<Map<String, Object>> rows = conn.createQuery(query).executeAndFetchTable().asList();
-            clientes = rows.stream()
-                    .map(this::mapRowToClienteEntity)
-                    .collect(Collectors.toList());
-            return clientes;
+        String sql = ""
+                + "SELECT cliente_id, nombre, direccion, email, telefono, "
+                + "       ST_AsText(ubicacion) AS ubicacionWkt "
+                + "FROM clientes";
+        try (Connection con = sql2o.open()) {
+            return con.createQuery(sql)
+                    .executeAndFetch(ClienteEntity.class);
         }
         catch (Exception e){
             return null;

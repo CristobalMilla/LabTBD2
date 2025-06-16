@@ -14,8 +14,6 @@ public class EmpresaEntity {
     @JsonIgnore
     private Point ubicacion;      // tu JTS Point interno
 
-    private String ubicacionWkt;  // WKT para JSON
-
     public EmpresaEntity(String nombre, long empresa_id, String direccion, String tipo_servicio, Point ubicacion) {
         this.nombre = nombre;
         this.empresa_id = empresa_id;
