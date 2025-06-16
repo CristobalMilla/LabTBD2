@@ -3,6 +3,7 @@ package Grupo4.Lab2.Repositories;
 
 import Grupo4.Lab2.DTO.CoordenadaDTO;
 import Grupo4.Lab2.DTO.ZonaDTO;
+import Grupo4.Lab2.DTO.ZonaYDensidadXkm2DTO;
 import Grupo4.Lab2.Entities.ZonaCoberturaEntity;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
@@ -123,11 +124,12 @@ public class ZonaCoberturaRepository {
     // 7. Opcional. Implementar una función que calcule automáticamente la zona a la que pertenece un cliente
     public ZonaDTO obtenerZonaPorCliente(Long cliente_id) {
         String sql = """
-            SELECT zona_id AS zonaId, nombre, ST_AsText(geom) AS geom
-            FROM zonas_cobertura
-            WHERE ST_Within((
-                SELECT ubicacion FROM clientes WHERE cliente_id = :cliente_id
-            ), geom)
+            SELECT  z.zona_id AS zonaId, z.nombre, ST_AsText(z.geom) AS geom,
+                    ST_AsText(c.ubicacion) AS clienteUbicacion
+            FROM zonas_cobertura z, clientes c
+            WHERE c.cliente_id = :cliente_id
+              AND ST_Within(c.ubicacion, z.geom)
+            LIMIT 1;
         """;
 
         try (Connection con = sql2o.open()) {
@@ -140,7 +142,7 @@ public class ZonaCoberturaRepository {
     // Query 8
     // Detectar zonas con alta densidad de pedidos mediante agregación de puntos.
      // cambiar por un dto
-    public List<ZonaCoberturaEntity> getZonasConAltaDensidad(){
+    public List<ZonaYDensidadXkm2DTO> getZonasConAltaDensidad(){
         try (Connection conn = sql2o.open()) {
             String query = "WITH agrupacion_pedidos AS ( " +
                         "SELECT z.zona_id, ST_Collect(p.punto_final) AS puntos_agrupados_x_zona " +
@@ -151,8 +153,8 @@ public class ZonaCoberturaRepository {
                     "FROM agrupacion_pedidos ap " +
                     "INNER JOIN zonas_cobertura z ON ap.zona_id = z.zona_id " +
                     "GROUP BY ap.zona_id, ap.puntos_agrupados_x_zona, z.geom " +
-                    "HAVING (ST_NPoints(ap.puntos_agrupados_x_zona)/(ST_Area(geom::geography)/1000000)) > 1"; // cambiar por alguna densidad
-            return conn.createQuery(query).executeAndFetch(ZonaCoberturaEntity.class);
+                    "HAVING (ST_NPoints(ap.puntos_agrupados_x_zona)/(ST_Area(geom::geography)/1000000)) > 100"; // cambiar por alguna densidad
+            return conn.createQuery(query).executeAndFetch(ZonaYDensidadXkm2DTO.class);
         }
         catch (Exception e){
             System.out.println("Error al obtener las zonas con alta densidad");
