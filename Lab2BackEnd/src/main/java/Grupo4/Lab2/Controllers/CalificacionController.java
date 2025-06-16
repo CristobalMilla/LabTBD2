@@ -13,7 +13,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/api/calificaciones")
-@CrossOrigin
+@CrossOrigin("*")
 public class CalificacionController {
     @Autowired
     private CalificacionService calificacionService;

@@ -13,7 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/zonasCobertura")
-@CrossOrigin
+@CrossOrigin("*")
 public class ZonaCoberturaController {
     @Autowired
     private ZonaCoberturaService zonaCoberturaService;

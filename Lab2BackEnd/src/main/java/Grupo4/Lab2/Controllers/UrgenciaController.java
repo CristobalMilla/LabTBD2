@@ -11,7 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/urgencias")
-@CrossOrigin
+@CrossOrigin("*")
 public class UrgenciaController {
 
     @Autowired
