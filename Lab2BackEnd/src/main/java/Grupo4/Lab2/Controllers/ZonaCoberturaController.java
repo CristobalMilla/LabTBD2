@@ -1,6 +1,8 @@
 package Grupo4.Lab2.Controllers;
 
+import Grupo4.Lab2.DTO.CoordenadaDTO;
 import Grupo4.Lab2.DTO.PedidoYZonasQueCruzaDTO;
+import Grupo4.Lab2.DTO.ZonaDTO;
 import Grupo4.Lab2.Entities.ClienteEntity;
 import Grupo4.Lab2.Entities.ZonaCoberturaEntity;
 import Grupo4.Lab2.Services.ZonaCoberturaService;
@@ -13,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/zonasCobertura")
-@CrossOrigin
+@CrossOrigin("*")
 public class ZonaCoberturaController {
     @Autowired
     private ZonaCoberturaService zonaCoberturaService;
@@ -44,6 +46,20 @@ public class ZonaCoberturaController {
         List<ZonaCoberturaEntity> zonasConAltaDensidad = zonaCoberturaService.getZonasConAltaDensidad();
         return ResponseEntity.ok(zonasConAltaDensidad);
     }
+
+    // 7. Opcional 1
+    @GetMapping("/zona-cliente/{clienteId}")
+    public ResponseEntity<ZonaDTO> obtenerZonaDeCliente(@PathVariable Long clienteId) {
+        System.out.println("\n---\nzona-cliente id : "+clienteId);
+        ZonaDTO zona = zonaCoberturaService.obtenerZonaPorCliente(clienteId);
+
+        if (zona == null) {
+            return ResponseEntity.notFound().build(); // Cliente fuera de todas las zonas
+        }
+
+        return ResponseEntity.ok(zona);
+    }
+
     //Consulta especial 2
     //Determinar si un cliente se encuentra dentro de una zona de cobertura
     //Se devolvera la lista zonas de cobertura en las que el cliente se encuentra

@@ -14,8 +14,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/api/pedidos")
-@CrossOrigin
-
+@CrossOrigin("*")
 public class PedidosController {
 
     @Autowired

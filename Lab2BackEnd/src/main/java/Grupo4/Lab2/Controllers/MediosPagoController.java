@@ -13,7 +13,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/api/mediosPago")
-@CrossOrigin
+@CrossOrigin("*")
 public class MediosPagoController {
     @Autowired
     private MediosPagoService mediosPagoService;

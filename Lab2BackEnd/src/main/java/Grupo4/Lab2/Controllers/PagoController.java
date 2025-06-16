@@ -13,7 +13,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/api/pagos")
-@CrossOrigin
+@CrossOrigin("*")
 public class PagoController {
     @Autowired
     private PagoService pagoService;

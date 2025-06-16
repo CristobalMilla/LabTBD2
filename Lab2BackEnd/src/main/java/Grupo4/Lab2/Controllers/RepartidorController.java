@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/repartidores")
-@CrossOrigin
+@CrossOrigin("*")
 public class RepartidorController {
 
     @Autowired

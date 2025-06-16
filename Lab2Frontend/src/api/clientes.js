@@ -10,3 +10,8 @@ export const clientesNoCercanosAEmpresas = async () => {
   const response = await axiosInstance.get("/clientes/clientesNoCercanosAEmpresas");
   return response.data;
 };
+
+export const obtenerZonaDeCliente = async (clienteId) => {
+  const response = await axiosInstance.get(`/zonasCobertura/zona-cliente/${clienteId}`);
+  return response.data;
+};

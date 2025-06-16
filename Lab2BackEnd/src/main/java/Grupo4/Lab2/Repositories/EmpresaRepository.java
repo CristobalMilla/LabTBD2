@@ -116,7 +116,7 @@ public class EmpresaRepository {
 
     // 4. Identificar el punto de entrega más lejano desde cada empresa asociada.
     public CoordenadaDTO findFurthest(long empresa_id){
-        String sql = "SELECT ST_X(p.punto_final) AS longitude, ST_Y(p.punto_final) AS latitude"+
+        String sql = "SELECT ST_X(p.punto_final) AS longitude, ST_Y(p.punto_final) AS latitude "+
                 "FROM pedidos p "+
                 "JOIN empresas e ON e.empresa_id = p.empresa_id "+
                 "WHERE e.empresa_id = :empresa_id "+

@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RequestMapping("/api/calles-vertices") 
+@RequestMapping("/api/calles-vertices")
+@CrossOrigin("*")
 public class CallesVerticesController { 
 
     @Autowired

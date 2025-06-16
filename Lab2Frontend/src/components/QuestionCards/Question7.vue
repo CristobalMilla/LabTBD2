@@ -1,52 +1,132 @@
-<script setup>
-
-import { ref, onMounted } from 'vue';
-//Pregunta 7
-import { getAllTasksPerUserPerSector } from "@/api/tasks";
-
-const tasksBySectorAndUser = ref([]);
-
-onMounted(async () => {
-  // Pregunta 7
-  const response = await getAllTasksPerUserPerSector();
-  tasksBySectorAndUser.value = response;
-});
-
-</script>
-
 <template>
-  <v-container>
-    <v-card class="sector-tasks-section mt-8" elevation="2">
-      <v-card-title class="d-flex align-center pa-6 bg-grey-lighten-4">
-        <v-icon size="28" color="primary" class="mr-3">mdi-format-list-bulleted</v-icon>
-        <span class="text-h5">Tareas por Sector</span>
-      </v-card-title>
-      <v-card-text>
-      <div>
-        <v-list v-if="tasksBySectorAndUser.length > 0">
-          <v-list-item
-            v-for="task in tasksBySectorAndUser"
-            :key="task.id_sector"
-            class="py-4 px-6"
-            >
-            <v-list-item-content>
-              <v-list-item-title>Id del sector: {{ task.id_sector }}</v-list-item-title>
-              <v-list-item-subtitle>Id del usuario: {{ task.id_usuario }}</v-list-item-subtitle>
-              <v-list-item-subtitle>Numero de tareas: {{ task.numero_de_tareas }}</v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
-        </v-list>
-        <div v-else class="text-center text-grey pa-6">
-          No hay tareas completadas.
-        </div>
+  <v-card>
+    <v-card-title>
+      Zona de Cobertura de un Cliente
+    </v-card-title>
+    <v-card-text>
+      <v-select
+        v-model="selectedClienteId"
+        :items="clientes"
+        item-title="itemTitle"
+        item-value="cliente_id"
+        label="Selecciona un cliente"
+        class="mb-4"
+      />
+      <div v-if="zona" class="mt-4">
+        <p><strong>ID de Zona:</strong> {{ zona.zonaId }}</p>
+        <p><strong>Nombre de Zona:</strong> {{ zona.nombre }}</p>
+        <p><strong>Geometría (WKT):</strong> {{ zona.geom }}</p>
       </div>
-      </v-card-text>
-    </v-card>
-  </v-container>
+      <div v-else-if="selectedClienteId" class="mt-4 text-info">
+        <p>No se encontró una zona de cobertura para el cliente seleccionado.</p>
+      </div>
+      <div v-else class="mt-4 text-muted">
+        <p>Selecciona un cliente para ver su zona de cobertura.</p>
+      </div>
+      <div id="map" style="height: 400px; margin-top: 16px;"></div>
+    </v-card-text>
+  </v-card>
 </template>
 
-<script>
-export default {
-  name: "Question7",
+<script setup>
+import { ref, onMounted, watch } from "vue";
+import { getClientes, obtenerZonaDeCliente } from "@/api/clientes";
+import L from "leaflet";
+import wellknown from "wellknown";
+
+const clientes = ref([]);
+const selectedClienteId = ref(null);
+const zona = ref(null);
+let map = null;
+let drawnLayer = null;
+
+const fetchClientes = async () => {
+  const fetchedClientes = await getClientes();
+  clientes.value = fetchedClientes.map(cliente => ({
+    ...cliente,
+    itemTitle: `${cliente.cliente_id} - ${cliente.nombre}`
+  }));
 };
+
+const fetchZonaDeCliente = async () => {
+  if (!selectedClienteId.value) {
+    zona.value = null;
+    return;
+  }
+  try {
+    zona.value = await obtenerZonaDeCliente(selectedClienteId.value);
+  } catch (error) {
+    console.error("Error al obtener la zona del cliente:", error);
+    zona.value = null; // Ensure zona is null on error
+  }
+};
+
+const initMap = () => {
+  if (map) {
+    map.remove();
+  }
+  map = L.map("map").setView([-33.45, -70.68], 13); // Default view
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap contributors"
+  }).addTo(map);
+};
+
+const drawZoneOnMap = () => {
+  if (!map) {
+    initMap(); 
+  }
+
+  // Clear previous layer
+  if (drawnLayer) {
+    map.removeLayer(drawnLayer);
+    drawnLayer = null; // Clear drawnLayer reference
+  }
+
+  if (zona.value && zona.value.geom) {
+    try {
+      const geojson = wellknown.parse(zona.value.geom);
+      if (geojson) {
+        drawnLayer = L.geoJSON(geojson).addTo(map);
+        map.fitBounds(drawnLayer.getBounds().pad(0.2)); 
+        map.invalidateSize(); 
+      }
+    } catch (e) {
+      console.error("Error parsing WKT or drawing GeoJSON:", e);
+      clearMap(); // Clear map on parsing error
+    }
+  } else {
+    clearMap(); // Clear map if no zone data
+  }
+};
+
+const clearMap = () => {
+  if (drawnLayer) {
+    map.removeLayer(drawnLayer);
+    drawnLayer = null;
+  }
+  if (map) {
+    map.setView([-33.45, -70.68], 13); // Reset to default view
+    map.invalidateSize();
+  }
+};
+
+onMounted(async () => {
+  await fetchClientes();
+  initMap();
+  drawZoneOnMap(); // Call drawZoneOnMap initially to show default map or initial zone if selectedClient has a default value
+});
+
+watch(selectedClienteId, (newVal) => {
+  fetchZonaDeCliente();
+});
+
+watch(zona, () => {
+  drawZoneOnMap();
+});
 </script>
+
+<style scoped>
+#map {
+  width: 100%;
+}
+</style>

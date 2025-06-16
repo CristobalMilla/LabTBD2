@@ -14,7 +14,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/api/empresas")
-@CrossOrigin
+@CrossOrigin("*")
 public class EmpresaController {
     @Autowired
     EmpresaService empresaService;
@@ -64,9 +64,10 @@ public class EmpresaController {
     }
 
     // 4.
-    @GetMapping("/entrega-mas-lejana/{empresa_id}")
-    public ResponseEntity<CoordenadaDTO> getPuntoMasLejano(@PathVariable("empresa_id") long empresa_id) {
-        CoordenadaDTO coordenada = empresaService.getEntregaMasLejana(empresa_id);
+    @GetMapping("/entrega-mas-lejana/{empresaId}")
+    public ResponseEntity<CoordenadaDTO> getPuntoMasLejano(@PathVariable("empresaId") long empresaId) {
+
+        CoordenadaDTO coordenada = empresaService.getEntregaMasLejana(empresaId);
         if (coordenada == null) {
             return ResponseEntity.notFound().build();
         }
