@@ -21,7 +21,7 @@ public class OpinionesClientesRepositoryImpl implements OpinionesClientesReposit
     private MongoDatabase database;
 
     // The name of the MongoDB collection for OpinionesClientes.
-    private static final String COLLECTION_NAME = "opinionesClientes";
+    private static final String COLLECTION_NAME = "opiniones_clientes";
 
     /**
      * Helper method to get the MongoDB collection for OpinionesClientes,

@@ -19,6 +19,8 @@ public class MongoDbConfig {
     @Value("${spring.data.mongodb.database}")
     private String mongoDbName;
 
+    @Value("${spring.data.mongodb.uri}") // Eliminar este atributo si se trabaja con la bd local
+    private String mongoUri;
     /**
      * Configures and provides a MongoClient bean.
      * This client is used to connect to the MongoDB instance.
@@ -29,7 +31,7 @@ public class MongoDbConfig {
     public MongoClient mongoClient() {
         // Create a new MongoClient instance. By default, it connects to localhost:27017.
         // You can customize connection settings here if needed (e.g., server address, credentials).
-        return MongoClients.create();
+        return MongoClients.create(mongoUri); // Eliminar mongoUri si se tiene la bd en local
     }
 
     /**
