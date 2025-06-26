@@ -1,23 +1,23 @@
 package Grupo4.Lab2.MongoDB.Repositories;
 
 import Grupo4.Lab2.MongoDB.Entities.OpinionesClientes;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.DeleteResult; // For delete operations
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
+import static com.mongodb.client.model.Filters.eq; // For filtering documents
 
-@Repository
+// Interface for OpinionesClientes data access operations in MongoDB.
 public interface OpinionesClientesRepository {
-
     List<OpinionesClientes> findAll();
-
-    // Método para buscar opiniones por el ID de la empresa
-    List<OpinionesClientes> findByEmpresaId(long empresa_id);
-
-    // Método para buscar opiniones por la puntuación
-    List<OpinionesClientes> findByPuntuacion(int puntuacion);
-
-    void save(OpinionesClientes opinionesClientes);
-
+    OpinionesClientes findById(long id);
+    OpinionesClientes save(OpinionesClientes opinion);
+    OpinionesClientes update(long id, OpinionesClientes opinion);
     void delete(long id);
+    long count();
 }
+
