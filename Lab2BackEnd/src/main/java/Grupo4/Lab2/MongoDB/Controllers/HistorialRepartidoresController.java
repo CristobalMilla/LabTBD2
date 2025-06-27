@@ -26,7 +26,7 @@ public class HistorialRepartidoresController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<HistorialRepartidores> getHistorialById(@PathVariable long id) {
+    public ResponseEntity<HistorialRepartidores> getHistorialById(@PathVariable String id) {
         HistorialRepartidores historial = historialRepartidoresService.getHistorialById(id);
         if (historial != null) {
             return ResponseEntity.ok(historial);
@@ -52,7 +52,7 @@ public class HistorialRepartidoresController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<HistorialRepartidores> updateHistorial(@PathVariable long id, @RequestBody HistorialRepartidores historial) {
+    public ResponseEntity<HistorialRepartidores> updateHistorial(@PathVariable String id, @RequestBody HistorialRepartidores historial) {
         HistorialRepartidores updatedHistorial = historialRepartidoresService.updateHistorial(id, historial);
         if (updatedHistorial != null) {
             return ResponseEntity.ok(updatedHistorial);
@@ -62,9 +62,9 @@ public class HistorialRepartidoresController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOpinion(@PathVariable long id) {
+    public ResponseEntity<Void> deleteOpinion(@PathVariable String id) {
         historialRepartidoresService.deleteHistorial(id);
-        return ResponseEntity.noContent().build(); // Returns 204 No Content
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/count")

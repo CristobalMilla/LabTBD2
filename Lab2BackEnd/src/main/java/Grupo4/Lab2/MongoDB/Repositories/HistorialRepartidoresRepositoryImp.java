@@ -4,6 +4,7 @@ import Grupo4.Lab2.MongoDB.Entities.HistorialRepartidores;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.DeleteResult;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -26,7 +27,7 @@ public class HistorialRepartidoresRepositoryImp implements HistorialRepartidores
         return getCollection().find().into(new ArrayList<>());
     }
 
-    public HistorialRepartidores findById(long historial_repartidor_id) {
+    public HistorialRepartidores findById(ObjectId historial_repartidor_id) {
         return getCollection().find(eq("_id", historial_repartidor_id)).first();
     }
 
@@ -39,12 +40,12 @@ public class HistorialRepartidoresRepositoryImp implements HistorialRepartidores
         return historial;
     }
 
-    public HistorialRepartidores update(long historial_repartidor_id, HistorialRepartidores historial) {
+    public HistorialRepartidores update(ObjectId historial_repartidor_id, HistorialRepartidores historial) {
         getCollection().replaceOne(eq("_id", historial_repartidor_id), historial);
         return historial;
     }
 
-    public void delete(long historial_repartidor_id) {
+    public void delete(ObjectId historial_repartidor_id) {
         DeleteResult result = getCollection().deleteOne(eq("_id", historial_repartidor_id));
         if (result.getDeletedCount() == 0) {
             System.out.println("No se elimino ningun documento ya que el id:" + historial_repartidor_id + " no estaba en ninguno.");

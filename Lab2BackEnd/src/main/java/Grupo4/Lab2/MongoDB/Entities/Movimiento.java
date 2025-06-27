@@ -6,6 +6,8 @@ public class Movimiento {
     private String ubicacion; // en wkt
     private Date tiempo;
 
+    public Movimiento() {}
+
     public Movimiento(String ubicacion, Date tiempo) {
         this.ubicacion = ubicacion;
         this.tiempo = tiempo;
