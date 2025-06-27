@@ -9,12 +9,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-// This service class handles the business logic for OpinionesClientes.
-// It uses the repository to interact with the MongoDB database.
+
 @Service
 public class OpinionesClientesService {
 
-    // Autowire the repository to access MongoDB operations.
     private final OpinionesClientesRepository opinionesClientesRepository;
     private static final String OPINION_ID_SEQUENCE = "opinion_id_sequence";
 
@@ -41,14 +39,11 @@ public class OpinionesClientesService {
     }
 
     public OpinionesClientes updateOpinion(long id, OpinionesClientes opinion) {
-        // Check if the opinion exists before updating.
         OpinionesClientes existingOpinion = opinionesClientesRepository.findById(id);
         if (existingOpinion == null) {
-            // Or throw a custom exception (e.g., NotFoundException)
-            System.out.println("Opinion with ID " + id + " not found for update.");
+            System.out.println("Opinion con ID " + id + " no se encontro.");
             return null;
         }
-        // Ensure the ID in the payload matches the path variable ID
         opinion.setOpinion_id(id);
         return opinionesClientesRepository.update(id, opinion);
     }

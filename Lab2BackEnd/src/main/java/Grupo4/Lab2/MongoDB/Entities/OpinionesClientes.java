@@ -3,20 +3,16 @@ package Grupo4.Lab2.MongoDB.Entities;
 import org.bson.codecs.pojo.annotations.BsonId;
 import java.time.Instant; 
 
-// This class represents the "OpinionesClientes" entity stored in MongoDB.
 public class OpinionesClientes {
 
-    // @BsonId maps this field to MongoDB's special "_id" field, which must be unique.
-    // Using 'long' for opinion_id is acceptable, but ObjectId is also common for _id.
     @BsonId
     private long opinion_id;
     private String comentarios;
     private int puntuacion;
     private Instant fecha; // se cambia de localdate a Instant para manejar mejor las fechas en MongoDB
-    private long cliente_id; // ID of the client who gave the opinion
-    private long empresa_id; // ID of the company the opinion is for
+    private long cliente_id;
+    private long empresa_id;
 
-    // --- Constructors ---
     // Default constructor is required by the POJO codec for object creation.
     public OpinionesClientes() {
     }
@@ -31,8 +27,7 @@ public class OpinionesClientes {
         this.empresa_id = empresa_id;
     }
 
-    // --- Getters and Setters ---
-    // These methods are essential for the POJO codec to access and set field values.
+    // --- Getters y Setters
     public long getOpinion_id() {
         return opinion_id;
     }
@@ -61,9 +56,7 @@ public class OpinionesClientes {
         return fecha;
     }
 
-    public void setFecha(Instant fecha) {
-        this.fecha = fecha;
-    }
+    public void setFecha(Instant fecha) { this.fecha = fecha; }
 
     public long getCliente_id() {
         return cliente_id;

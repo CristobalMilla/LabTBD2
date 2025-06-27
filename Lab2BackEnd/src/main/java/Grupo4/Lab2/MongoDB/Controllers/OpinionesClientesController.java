@@ -11,13 +11,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-// This REST controller provides API endpoints for managing OpinionesClientes.
 @RestController
-@RequestMapping("/api/opiniones") // Base path for all endpoints in this controller
-@CrossOrigin("*")
+@RequestMapping("/api/opiniones")
 public class OpinionesClientesController {
 
-    // Autowire the service to handle business logic.
     private final OpinionesClientesService opinionesClientesService;
 
     @Autowired
@@ -25,26 +22,13 @@ public class OpinionesClientesController {
         this.opinionesClientesService = opinionesClientesService;
     }
 
-    /**
-     * GET /opiniones
-     * Retrieves all client opinions.
-     *
-     * @return A list of OpinionesClientes.
-     */
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<OpinionesClientes>> getAllOpiniones() {
         List<OpinionesClientes> opiniones = opinionesClientesService.getAllOpiniones();
         return ResponseEntity.ok(opiniones);
     }
 
-    /**
-     * GET /opiniones/{id}
-     * Retrieves a single client opinion by its ID.
-     *
-     * @param id The ID of the opinion to retrieve.
-     * @return The OpinionesClientes object or a 404 Not Found if not found.
-     */
-    @GetMapping("/{id}")
+    @GetMapping("/getById/{id}")
     public ResponseEntity<OpinionesClientes> getOpinionById(@PathVariable long id) {
         OpinionesClientes opinion = opinionesClientesService.getOpinionById(id);
         if (opinion != null) {
@@ -54,28 +38,13 @@ public class OpinionesClientesController {
         }
     }
 
-    /**
-     * POST /opiniones
-     * Creates a new client opinion.
-     *
-     * @param opinion The OpinionesClientes object to create (from request body).
-     * @return The created OpinionesClientes object with a 201 Created status.
-     */
-    @PostMapping
+    @PostMapping("/save")
     public ResponseEntity<OpinionesClientes> createOpinion(@RequestBody OpinionesClientes opinion) {
         OpinionesClientes createdOpinion = opinionesClientesService.createOpinion(opinion);
         return new ResponseEntity<>(createdOpinion, HttpStatus.CREATED); // Returns 201 Created
     }
 
-    /**
-     * PUT /opiniones/{id}
-     * Updates an existing client opinion.
-     *
-     * @param id The ID of the opinion to update.
-     * @param opinion The updated OpinionesClientes object (from request body).
-     * @return The updated OpinionesClientes object or a 404 Not Found if original not found.
-     */
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<OpinionesClientes> updateOpinion(@PathVariable long id, @RequestBody OpinionesClientes opinion) {
         OpinionesClientes updatedOpinion = opinionesClientesService.updateOpinion(id, opinion);
         if (updatedOpinion != null) {
@@ -85,25 +54,12 @@ public class OpinionesClientesController {
         }
     }
 
-    /**
-     * DELETE /opiniones/{id}
-     * Deletes a client opinion by its ID.
-     *
-     * @param id The ID of the opinion to delete.
-     * @return A 204 No Content status if successful.
-     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteOpinion(@PathVariable long id) {
         opinionesClientesService.deleteOpinion(id);
         return ResponseEntity.noContent().build(); // Returns 204 No Content
     }
 
-    /**
-     * GET /opiniones/count
-     * Retrieves the total number of client opinions.
-     *
-     * @return The count of opinions.
-     */
     @GetMapping("/count")
     public ResponseEntity<Long> countOpiniones() {
         long count = opinionesClientesService.countOpiniones();
