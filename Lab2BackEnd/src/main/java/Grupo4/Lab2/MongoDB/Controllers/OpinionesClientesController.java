@@ -1,5 +1,6 @@
 package Grupo4.Lab2.MongoDB.Controllers;
 
+import Grupo4.Lab2.MongoDB.DTO.PromedioPuntuacionXEmpresaDTO;
 import Grupo4.Lab2.MongoDB.Entities.OpinionesClientes;
 import Grupo4.Lab2.MongoDB.Services.OpinionesClientesService;
 import Grupo4.Lab2.MongoDB.DTO.OpinionStatsPorHoraDTO;
@@ -107,6 +108,12 @@ public class OpinionesClientesController {
     public ResponseEntity<Long> countOpiniones() {
         long count = opinionesClientesService.countOpiniones();
         return ResponseEntity.ok(count);
+    }
+
+    @GetMapping("/promedioXempresa")
+    public ResponseEntity<List<PromedioPuntuacionXEmpresaDTO>> getPromedioXempresa() {
+        List<PromedioPuntuacionXEmpresaDTO> promedios = opinionesClientesService.getPuntuacionPromedioXEmpresa();
+        return ResponseEntity.ok(promedios);
     }
 
     /**

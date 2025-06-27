@@ -1,14 +1,9 @@
 package Grupo4.Lab2.MongoDB.Repositories;
 
+import Grupo4.Lab2.MongoDB.DTO.PromedioPuntuacionXEmpresaDTO;
 import Grupo4.Lab2.MongoDB.Entities.OpinionesClientes;
 import Grupo4.Lab2.MongoDB.DTO.OpinionStatsPorHoraDTO;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.result.DeleteResult; // For delete operations
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.List;
 import static com.mongodb.client.model.Filters.eq; // For filtering documents
 
@@ -21,6 +16,8 @@ public interface OpinionesClientesRepository {
     void delete(long id);
     long count();
     long getNextSequenceId(String sequenceName); // para manejar secuencias de ID
+    // Query 1
+    List<PromedioPuntuacionXEmpresaDTO> getPromedioDePuntiacionXEmpresa();
     List<OpinionStatsPorHoraDTO> getStatsPorHora();
 }
 

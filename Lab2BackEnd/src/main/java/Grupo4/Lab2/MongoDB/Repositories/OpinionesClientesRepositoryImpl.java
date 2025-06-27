@@ -1,11 +1,15 @@
 package Grupo4.Lab2.MongoDB.Repositories;
 
+import Grupo4.Lab2.MongoDB.DTO.PromedioPuntuacionXEmpresaDTO;
 import Grupo4.Lab2.MongoDB.Entities.OpinionesClientes;
 import Grupo4.Lab2.MongoDB.DTO.OpinionStatsPorHoraDTO;
+import Grupo4.Lab2.Repositories.EmpresaRepository;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.BsonField;
+import com.mongodb.client.model.*;
 import com.mongodb.client.result.DeleteResult;
+import org.bson.BsonString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -13,16 +17,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
 
-import com.mongodb.client.model.FindOneAndUpdateOptions;
-import com.mongodb.client.model.ReturnDocument;
-import com.mongodb.client.model.Updates;
 import org.bson.Document;
 
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Updates.inc;
-import com.mongodb.client.model.Aggregates;
-import com.mongodb.client.model.Projections;
-import com.mongodb.client.model.Sorts;
 
 // Implementation of the OpinionesClientesRepository interface.
 @Repository
@@ -31,6 +29,9 @@ public class OpinionesClientesRepositoryImpl implements OpinionesClientesReposit
     // Autowire the MongoDatabase bean, which is configured in MongoDbConfig.
     @Autowired
     private MongoDatabase database;
+
+    @Autowired
+    private EmpresaRepository empresaRepo;
 
     // The name of the MongoDB collection for OpinionesClientes.
     private static final String COLLECTION_NAME = "opiniones_clientes";
@@ -105,6 +106,31 @@ public class OpinionesClientesRepositoryImpl implements OpinionesClientesReposit
 
         // Si el resultado no es nulo, devuelve el valor de la secuencia.
         return (result != null) ? result.getLong("seq") : 1;
+    }
+
+
+    // Query 1
+    public List<PromedioPuntuacionXEmpresaDTO> getPromedioDePuntiacionXEmpresa(){
+        MongoCollection<OpinionesClientes> collection = getCollection();
+        AggregateIterable<PromedioPuntuacionXEmpresaDTO> promedios = collection.aggregate(Arrays.asList(
+                Aggregates.group("$empresa_id", Accumulators.avg("promedio", "$puntuacion")),
+                Aggregates.project(
+                        Projections.fields(
+                                Projections.computed("empresa_id", "$_id"),
+                                Projections.include("promedio")
+                        )
+                ), Aggregates.sort(Sorts.ascending("empresa_id"))
+        ), PromedioPuntuacionXEmpresaDTO.class);
+
+        List<PromedioPuntuacionXEmpresaDTO> promediosList = new ArrayList<>();
+
+        for (PromedioPuntuacionXEmpresaDTO promedio : promedios) {
+            String nombreEmpresa = empresaRepo.findById(promedio.getEmpresa_id()).getNombre();
+            promedio.setNombre_empresa(nombreEmpresa);
+            promediosList.add(promedio);
+        }
+
+        return promediosList;
     }
 
     @Override
