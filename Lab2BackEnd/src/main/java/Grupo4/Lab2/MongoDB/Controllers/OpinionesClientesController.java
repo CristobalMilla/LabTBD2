@@ -11,7 +11,7 @@ import java.util.List;
 
 // This REST controller provides API endpoints for managing OpinionesClientes.
 @RestController
-@RequestMapping("/opiniones") // Base path for all endpoints in this controller
+@RequestMapping("/api/opiniones") // Base path for all endpoints in this controller
 public class OpinionesClientesController {
 
     // Autowire the service to handle business logic.

@@ -37,7 +37,7 @@ public class HistorialRepartidoresController {
 
     @GetMapping("/repartidor/{id}")
     public ResponseEntity<HistorialRepartidores> getHistorialByRepartidorId(@PathVariable long id) {
-        HistorialRepartidores historial = historialRepartidoresService.getHistorialById(id);
+        HistorialRepartidores historial = historialRepartidoresService.getHistorialByRepartidorId(id);
         if (historial != null) {
             return ResponseEntity.ok(historial);
         } else {
