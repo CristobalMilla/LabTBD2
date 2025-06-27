@@ -10,7 +10,13 @@ import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.mongodb.client.model.FindOneAndUpdateOptions;
+import com.mongodb.client.model.ReturnDocument;
+import com.mongodb.client.model.Updates;
+import org.bson.Document;
+
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Updates.inc;
 
 // Implementation of the OpinionesClientesRepository interface.
 @Repository
@@ -22,6 +28,7 @@ public class OpinionesClientesRepositoryImpl implements OpinionesClientesReposit
 
     // The name of the MongoDB collection for OpinionesClientes.
     private static final String COLLECTION_NAME = "opiniones_clientes";
+    private static final String COUNTERS_COLLECTION = "counters"; // Colección para secuencias
 
     /**
      * Helper method to get the MongoDB collection for OpinionesClientes,
@@ -77,5 +84,20 @@ public class OpinionesClientesRepositoryImpl implements OpinionesClientesReposit
     public long count() {
         // Count the total number of documents in the collection.
         return getCollection().countDocuments();
+    }
+
+    @Override
+    public long getNextSequenceId(String sequenceName) {
+        MongoCollection<Document> countersCollection = database.getCollection(COUNTERS_COLLECTION);
+        Document find = new Document("_id", sequenceName);
+        // Incrementa el campo 'seq' en 1 y devuelve el nuevo documento.
+        // upsert(true) crea el documento contador si no existe.
+        FindOneAndUpdateOptions options = new FindOneAndUpdateOptions()
+                .returnDocument(ReturnDocument.AFTER)
+                .upsert(true);
+        Document result = countersCollection.findOneAndUpdate(find, inc("seq", 1L), options);
+
+        // Si el resultado no es nulo, devuelve el valor de la secuencia.
+        return (result != null) ? result.getLong("seq") : 1;
     }
 }

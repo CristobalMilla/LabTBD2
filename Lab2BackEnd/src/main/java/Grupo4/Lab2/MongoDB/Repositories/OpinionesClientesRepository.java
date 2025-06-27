@@ -19,5 +19,6 @@ public interface OpinionesClientesRepository {
     OpinionesClientes update(long id, OpinionesClientes opinion);
     void delete(long id);
     long count();
+    long getNextSequenceId(String sequenceName); // para manejar secuencias de ID
 }
 

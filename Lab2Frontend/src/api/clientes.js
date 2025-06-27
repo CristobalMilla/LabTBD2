@@ -6,6 +6,22 @@ export const getClientes = async () => {
   return response.data;
 };
 
+export const getClienteById = async (id) => {
+  const response = await axiosInstance.get(`/clientes/${id}`);
+  return response.data;
+};
+
+// --- Nuevas funciones para crear y actualizar ---
+export const createCliente = async (cliente) => {
+  const response = await axiosInstance.post("/clientes/create", cliente);
+  return response.data;
+};
+
+export const updateCliente = async (cliente) => {
+  const response = await axiosInstance.put("/clientes/update", cliente);
+  return response.data;
+};
+
 export const clientesNoCercanosAEmpresas = async () => {
   const response = await axiosInstance.get("/clientes/clientesNoCercanosAEmpresas");
   return response.data;

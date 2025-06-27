@@ -8,8 +8,21 @@
         </v-btn>
       </v-app-bar-title>
       <v-spacer></v-spacer>
-      <v-btn variant="text" @click="goToEmpresasDetails" class="mr-2" prepend-icon="mdi-clipboard-text">
+      <v-btn
+        variant="text"
+        @click="goToEmpresasDetails"
+        class="mr-2"
+        prepend-icon="mdi-clipboard-text"
+      >
         Empresas
+      </v-btn>
+      <!-- Nuevo: Clientes (sustituye Crear/Editar Cliente) -->
+      <v-btn
+        variant="text"
+        prepend-icon="mdi-account-group"
+        @click="goToClientes"
+      >
+        Clientes
       </v-btn>
       <notification-badge class="mr-2" />
       <v-btn @click="logout" variant="text" prepend-icon="mdi-logout">
@@ -63,14 +76,10 @@
 <script>
 import { logoutUser } from "@/services/auth";
 import NotificationBadge from '@/components/NotificationBadge.vue';
-// import L from 'leaflet'; // Asegúrate de que Leaflet esté disponible
-// import 'leaflet/dist/leaflet.css';
 
 export default {
   name: 'HomePage',
-  components: {
-    NotificationBadge,
-  },
+  components: { NotificationBadge },
   data() {
     return {
       nickname: 'Usuario',
@@ -116,10 +125,13 @@ export default {
   methods: {
     logout() {
       logoutUser();
-      this.$router.push('/login')
+      this.$router.push('/login');
     },
     goToEmpresasDetails() {
-      this.$router.push('/empresasdetails')
+      this.$router.push('/empresasdetails');
+    },
+    goToClientes() {
+      this.$router.push('/clientes')
     },
     initMap() {
       this.map = L.map('map').setView([-33.455, -70.685], 13);

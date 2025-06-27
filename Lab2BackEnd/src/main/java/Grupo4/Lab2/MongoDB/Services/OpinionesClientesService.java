@@ -14,6 +14,7 @@ public class OpinionesClientesService {
 
     // Autowire the repository to access MongoDB operations.
     private final OpinionesClientesRepository opinionesClientesRepository;
+    private static final String OPINION_ID_SEQUENCE = "opinion_id_sequence";
 
     @Autowired
     public OpinionesClientesService(OpinionesClientesRepository opinionesClientesRepository) {
@@ -29,7 +30,11 @@ public class OpinionesClientesService {
     }
 
     public OpinionesClientes createOpinion(OpinionesClientes opinion) {
-        // You might add business validation or logic here before saving.
+        // Genera y asigna el nuevo ID único
+        long newId = opinionesClientesRepository.getNextSequenceId(OPINION_ID_SEQUENCE);
+        opinion.setOpinion_id(newId);
+        
+        // Guarda la opinión con el nuevo ID
         return opinionesClientesRepository.save(opinion);
     }
 

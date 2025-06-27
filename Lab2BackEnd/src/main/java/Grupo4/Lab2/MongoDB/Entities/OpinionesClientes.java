@@ -1,7 +1,7 @@
 package Grupo4.Lab2.MongoDB.Entities;
 
-import org.bson.codecs.pojo.annotations.BsonId; // Important for MongoDB's _id field
-import java.time.LocalDate; // Used for the date field
+import org.bson.codecs.pojo.annotations.BsonId;
+import java.time.Instant; 
 
 // This class represents the "OpinionesClientes" entity stored in MongoDB.
 public class OpinionesClientes {
@@ -12,7 +12,7 @@ public class OpinionesClientes {
     private long opinion_id;
     private String comentarios;
     private int puntuacion;
-    private LocalDate fecha; // Represents the date of the opinion
+    private Instant fecha; // se cambia de localdate a Instant para manejar mejor las fechas en MongoDB
     private long cliente_id; // ID of the client who gave the opinion
     private long empresa_id; // ID of the company the opinion is for
 
@@ -22,7 +22,7 @@ public class OpinionesClientes {
     }
 
     // Parameterized constructor for easy object creation.
-    public OpinionesClientes(long opinion_id, String comentarios, int puntuacion, LocalDate fecha, long cliente_id, long empresa_id) {
+    public OpinionesClientes(long opinion_id, String comentarios, int puntuacion, Instant fecha, long cliente_id, long empresa_id) {
         this.opinion_id = opinion_id;
         this.comentarios = comentarios;
         this.puntuacion = puntuacion;
@@ -57,11 +57,11 @@ public class OpinionesClientes {
         this.puntuacion = puntuacion;
     }
 
-    public LocalDate getFecha() {
+    public Instant getFecha() {
         return fecha;
     }
 
-    public void setFecha(LocalDate fecha) {
+    public void setFecha(Instant fecha) {
         this.fecha = fecha;
     }
 

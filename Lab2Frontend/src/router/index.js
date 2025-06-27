@@ -13,9 +13,20 @@ const routes = [
   { path: "/register", component: Register },
   { path: "/home", component: Home },
   { path: "/dashboard", component: Dashboard },
-  { path: "/:pathMatch(.*)*", component: NotFound },
   { path: "/empresasdetails", component: EmpresasDetails },
   { path: "/empresas/edit/:id", component: EmpresaEdit },
+
+  // rutas de clientes
+  { path: "/clientes",           component: () => import("@/pages/Clientes.vue") },
+  { path: "/clientes/create",    component: () => import("@/pages/ClienteForm.vue") },
+  { path: "/clientes/edit/:id",  component: () => import("@/pages/ClienteForm.vue") },
+
+  // rutas de opiniones
+  { path: "/opiniones/create",   component: () => import("@/pages/OpinionForm.vue") },
+  { path: "/opiniones/edit/:id", component: () => import("@/pages/OpinionForm.vue") },
+
+  // catch-all al final
+  { path: "/:pathMatch(.*)*", component: NotFound }
 ];
 
 const router = createRouter({
