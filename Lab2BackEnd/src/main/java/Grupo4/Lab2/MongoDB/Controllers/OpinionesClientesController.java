@@ -2,6 +2,7 @@ package Grupo4.Lab2.MongoDB.Controllers;
 
 import Grupo4.Lab2.MongoDB.Entities.OpinionesClientes;
 import Grupo4.Lab2.MongoDB.Services.OpinionesClientesService;
+import Grupo4.Lab2.MongoDB.DTO.OpinionStatsPorHoraDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import java.util.List;
 // This REST controller provides API endpoints for managing OpinionesClientes.
 @RestController
 @RequestMapping("/api/opiniones") // Base path for all endpoints in this controller
+@CrossOrigin("*")
 public class OpinionesClientesController {
 
     // Autowire the service to handle business logic.
@@ -105,5 +107,17 @@ public class OpinionesClientesController {
     public ResponseEntity<Long> countOpiniones() {
         long count = opinionesClientesService.countOpiniones();
         return ResponseEntity.ok(count);
+    }
+
+    /**
+     * GET /opiniones/stats/por-hora
+     * Retrieves client opinion statistics grouped by hour.
+     *
+     * @return A list of OpinionStatsPorHoraDTO containing the statistics.
+     */
+    @GetMapping("/stats/por-hora")
+    public ResponseEntity<List<OpinionStatsPorHoraDTO>> getStatsPorHora() {
+        List<OpinionStatsPorHoraDTO> stats = opinionesClientesService.getStatsPorHora();
+        return ResponseEntity.ok(stats);
     }
 }

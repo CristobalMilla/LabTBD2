@@ -1,14 +1,17 @@
 package Grupo4.Lab2.MongoDB.Repositories;
 
 import Grupo4.Lab2.MongoDB.Entities.OpinionesClientes;
+import Grupo4.Lab2.MongoDB.DTO.OpinionStatsPorHoraDTO;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.BsonField;
 import com.mongodb.client.result.DeleteResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
 
 import com.mongodb.client.model.FindOneAndUpdateOptions;
 import com.mongodb.client.model.ReturnDocument;
@@ -17,6 +20,9 @@ import org.bson.Document;
 
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Updates.inc;
+import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Projections;
+import com.mongodb.client.model.Sorts;
 
 // Implementation of the OpinionesClientesRepository interface.
 @Repository
@@ -99,5 +105,40 @@ public class OpinionesClientesRepositoryImpl implements OpinionesClientesReposit
 
         // Si el resultado no es nulo, devuelve el valor de la secuencia.
         return (result != null) ? result.getLong("seq") : 1;
+    }
+
+    @Override
+    public List<OpinionStatsPorHoraDTO> getStatsPorHora() {
+        MongoCollection<OpinionesClientes> collection = getCollection();
+        List<OpinionStatsPorHoraDTO> results = new ArrayList<>();
+
+        collection.aggregate(Arrays.asList(
+            // Etapa 1: Agrupar por la hora extraída del campo 'fecha'
+            Aggregates.group(
+                // Extrae la hora del día (0-23) del campo 'fecha'. Se asume UTC.
+                new Document("$hour", new Document("date", "$fecha")), 
+                // Define los acumuladores para el grupo
+                new BsonField("averageScore", new Document("$avg", "$puntuacion")),
+                new BsonField("count", new Document("$sum", 1))
+            ),
+            // Etapa 2: Proyectar los campos para que coincidan con el DTO
+            Aggregates.project(
+                Projections.fields(
+                    Projections.excludeId(),
+                    Projections.computed("hour", "$_id"), // Renombrar _id a hour
+                    Projections.include("averageScore", "count")
+                )
+            ),
+            // Etapa 3: Ordenar los resultados por hora
+            Aggregates.sort(Sorts.ascending("hour"))
+        ), Document.class).forEach(doc -> {
+            OpinionStatsPorHoraDTO dto = new OpinionStatsPorHoraDTO();
+            dto.setHour(doc.getInteger("hour"));
+            dto.setAverageScore(doc.getDouble("averageScore"));
+            dto.setCount(doc.getInteger("count").longValue());
+            results.add(dto);
+        });
+
+        return results;
     }
 }

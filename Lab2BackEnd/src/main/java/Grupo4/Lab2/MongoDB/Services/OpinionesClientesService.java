@@ -2,6 +2,7 @@ package Grupo4.Lab2.MongoDB.Services;
 
 import Grupo4.Lab2.MongoDB.Entities.OpinionesClientes;
 import Grupo4.Lab2.MongoDB.Repositories.OpinionesClientesRepository;
+import Grupo4.Lab2.MongoDB.DTO.OpinionStatsPorHoraDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -57,5 +58,9 @@ public class OpinionesClientesService {
 
     public long countOpiniones() {
         return opinionesClientesRepository.count();
+    }
+
+    public List<OpinionStatsPorHoraDTO> getStatsPorHora() {
+        return opinionesClientesRepository.getStatsPorHora();
     }
 }

@@ -6,6 +6,10 @@ import NotFound from "@/pages/NotFound.vue";
 import Home from "@/pages/Home.vue";
 import EmpresasDetails from "@/pages/EmpresasDetails.vue";
 import EmpresaEdit from "@/pages/EmpresaEdit.vue";
+import Clientes from "@/pages/Clientes.vue";
+import ClienteForm from "@/pages/ClienteForm.vue";
+import OpinionForm from "@/pages/OpinionForm.vue";
+import OpinionStats from "@/pages/OpinionStats.vue";
 
 const routes = [
   { path: "/", redirect: "/login" },
@@ -15,17 +19,12 @@ const routes = [
   { path: "/dashboard", component: Dashboard },
   { path: "/empresasdetails", component: EmpresasDetails },
   { path: "/empresas/edit/:id", component: EmpresaEdit },
-
-  // rutas de clientes
-  { path: "/clientes",           component: () => import("@/pages/Clientes.vue") },
-  { path: "/clientes/create",    component: () => import("@/pages/ClienteForm.vue") },
-  { path: "/clientes/edit/:id",  component: () => import("@/pages/ClienteForm.vue") },
-
-  // rutas de opiniones
-  { path: "/opiniones/create",   component: () => import("@/pages/OpinionForm.vue") },
-  { path: "/opiniones/edit/:id", component: () => import("@/pages/OpinionForm.vue") },
-
-  // catch-all al final
+  { path: "/clientes",           component: Clientes },
+  { path: "/clientes/create",    component: ClienteForm },
+  { path: "/clientes/edit/:id",  component: ClienteForm },
+  { path: "/opiniones/create",   component: OpinionForm },
+  { path: "/opiniones/edit/:id", component: OpinionForm },
+  { path: "/opiniones/stats",    component: OpinionStats },
   { path: "/:pathMatch(.*)*", component: NotFound }
 ];
 

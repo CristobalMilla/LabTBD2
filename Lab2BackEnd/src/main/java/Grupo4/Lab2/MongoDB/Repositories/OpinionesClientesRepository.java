@@ -1,6 +1,7 @@
 package Grupo4.Lab2.MongoDB.Repositories;
 
 import Grupo4.Lab2.MongoDB.Entities.OpinionesClientes;
+import Grupo4.Lab2.MongoDB.DTO.OpinionStatsPorHoraDTO;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.DeleteResult; // For delete operations
@@ -20,5 +21,6 @@ public interface OpinionesClientesRepository {
     void delete(long id);
     long count();
     long getNextSequenceId(String sequenceName); // para manejar secuencias de ID
+    List<OpinionStatsPorHoraDTO> getStatsPorHora();
 }
 
