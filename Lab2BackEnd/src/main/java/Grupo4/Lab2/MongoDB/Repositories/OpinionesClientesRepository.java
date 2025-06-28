@@ -17,7 +17,7 @@ public interface OpinionesClientesRepository {
     long count();
     long getNextSequenceId(String sequenceName); // para manejar secuencias de ID
     // Query 1
-    List<PromedioPuntuacionXEmpresaDTO> getPromedioDePuntiacionXEmpresa();
+    List<PromedioPuntuacionXEmpresaDTO> getPromedioDePuntuacionXEmpresa();
     List<OpinionStatsPorHoraDTO> getStatsPorHora();
 }
 

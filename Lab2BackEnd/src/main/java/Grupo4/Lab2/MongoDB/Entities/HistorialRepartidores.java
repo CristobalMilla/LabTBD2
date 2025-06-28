@@ -11,15 +11,15 @@ public class HistorialRepartidores {
 
     private long repartidor_id;
 
-    private List<Movimiento> movimientos;
+    private List<Movimiento> ruta;
 
     public HistorialRepartidores() {
     }
 
-    public HistorialRepartidores(ObjectId historial_repartidor_id, long repartidor_id, List<Movimiento> movimientos) {
+    public HistorialRepartidores(ObjectId historial_repartidor_id, long repartidor_id, List<Movimiento> ruta) {
         this.historial_repartidor_id = historial_repartidor_id;
         this.repartidor_id = repartidor_id;
-        this.movimientos = movimientos;
+        this.ruta = ruta;
     }
 
     public ObjectId getHistorial_repartidor_id() {
@@ -38,11 +38,11 @@ public class HistorialRepartidores {
         this.repartidor_id = repartidor_id;
     }
 
-    public List<Movimiento> getMovimientos() {
-        return movimientos;
+    public List<Movimiento> getRuta() {
+        return ruta;
     }
 
-    public void setMovimientos(List<Movimiento> movimientos) {
-        this.movimientos = movimientos;
+    public void setRuta(List<Movimiento> ruta) {
+        this.ruta = ruta;
     }
 }
