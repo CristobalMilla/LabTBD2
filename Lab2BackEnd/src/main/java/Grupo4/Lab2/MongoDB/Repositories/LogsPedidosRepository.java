@@ -11,6 +11,4 @@ public interface LogsPedidosRepository {
     LogsPedidos update(long id, LogsPedidos log);
     void delete(long id);
     long count();
-    //Query 3:Contar cuántos pedidos tienen más de 3 cambios de estado en menos de 10 minutos.
-    int countPedidosLog10Minutos();
 }

@@ -57,7 +57,7 @@ public class LogsPedidosController {
     //Query 3:Contar cuántos pedidos tienen más de 3 cambios de estado en menos de 10 minutos.
     @GetMapping("/getNumeroPedidos3Cambios")
     public ResponseEntity<Integer> countHistoriales10Minutos(){
-        int count = logsPedidosService.countHistoriales10Minutos();
+        int count = logsPedidosService.countPedidosLog10Minutos();
         if(count > 0){
             return ResponseEntity.ok(count);
         }else{
