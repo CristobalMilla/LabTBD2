@@ -60,14 +60,6 @@
                   >
                     Editar Opinión Existente
                   </v-btn>
-                  <v-divider class="my-2"></v-divider>
-                  <v-btn
-                    block
-                    color="success"
-                    @click="goToStats"
-                  >
-                    Ver Estadísticas de Opiniones
-                  </v-btn>
                 </div>
               </v-card-text>
             </v-card>
@@ -95,9 +87,6 @@ export default {
       if (id && /^\d+$/.test(id.trim())) {
         this.$router.push(`/opiniones/edit/${id.trim()}`);
       }
-    },
-    goToStats() {
-      this.$router.push('/opiniones/stats');
     }
   }
 }

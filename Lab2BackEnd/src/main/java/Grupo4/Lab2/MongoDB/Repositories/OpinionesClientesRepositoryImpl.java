@@ -10,12 +10,14 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.*;
 import com.mongodb.client.result.DeleteResult;
 import org.bson.BsonString;
+import org.bson.conversions.Bson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
+import java.util.regex.Pattern;
 
 import org.bson.Document;
 
@@ -147,6 +149,15 @@ public class OpinionesClientesRepositoryImpl implements OpinionesClientesReposit
             results.add(dto);
         });
 
+        return results;
+    }
+    public List<OpinionesClientes> getOpinionesQuery2(){
+        MongoCollection<OpinionesClientes> collection = getCollection();
+        List<OpinionesClientes> results = new ArrayList<>();
+        Pattern regex = Pattern
+                .compile("demora|retraso|tardanza|error|falla|fallo|problema|insatisfecho|Lento|Larga|equivocacion|malo|mala", Pattern.CASE_INSENSITIVE);
+        Bson filtro = Filters.regex("comentarios", regex);
+        collection.find(filtro).into(results);
         return results;
     }
 }
