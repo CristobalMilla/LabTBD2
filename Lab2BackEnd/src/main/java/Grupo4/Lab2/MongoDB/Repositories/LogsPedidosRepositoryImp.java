@@ -1,11 +1,15 @@
 package Grupo4.Lab2.MongoDB.Repositories;
 
+import Grupo4.Lab2.MongoDB.Entities.EventoPedido;
 import Grupo4.Lab2.MongoDB.Entities.LogsPedidos;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.mongodb.client.model.Filters.eq;
@@ -59,11 +63,11 @@ public class LogsPedidosRepositoryImp implements LogsPedidosRepository {
         int count = 0;
         for (LogsPedidos log : logsPedidos) {
             boolean pedidoTiene3Cambios = false;
-            List<evento> eventos = log.getEvento();
+            List<EventoPedido> eventos = log.getEventos();
             int totalEventos = eventos.size();
             for (int i=0; (i<totalEventos - 2); i++){
-                Instant instante1 = eventos.get(i).getTiempo().toInstant();
-                Instant instante2 = eventos.get(i+1).getTiempo().toInstant();
+                Instant instante1 = eventos.get(i).getTimestamp();
+                Instant instante2 = eventos.get(i+1).getTimestamp();
                 long minutesDiference = Duration.between(instante1, instante2).toMinutes();
                 if (minutesDiference<=10){
                     pedidoTiene3Cambios = true;

@@ -55,6 +55,6 @@ public class LogsPedidosService {
 
     //Query 3:Contar cuántos pedidos tienen más de 3 cambios de estado en menos de 10 minutos.
     public int countHistoriales10Minutos() {
-        return logsPedidosRepository.countPedidosLog10Minutos();
+        return repo.countPedidosLog10Minutos();
     }
 }
