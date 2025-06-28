@@ -6,7 +6,7 @@ import Grupo4.Lab2.MongoDB.Repositories.LogsPedidosRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,8 +24,11 @@ public class LogsPedidosService {
 
     public LogsPedidos getLogById(long id){ return repo.findById(id);}
 
-    public LogsPedidos createLog(Long id_pedido){
-        LocalDateTime timestamp = LocalDateTime.now();
+    public LogsPedidos createLog(Long id_pedido, Instant timestamp){
+        if (repo.findById(id_pedido) != null) {
+            System.out.println("El pedido con id " + id_pedido + " ya existe.");
+            return null;
+        }
         String mensaje = "creado";
         EventoPedido evento = new EventoPedido(mensaje, timestamp);
         List<EventoPedido> eventos = new ArrayList<>();
@@ -34,6 +37,19 @@ public class LogsPedidosService {
         return repo.save(log);}
 
     public LogsPedidos updateLog(long id, LogsPedidos log){ return repo.update(id, log);}
+
+    public LogsPedidos cambiarEstado(long id, String estado, Instant timestamp){
+        LogsPedidos log = repo.findById(id);
+        if (log == null) {
+            System.out.println("El pedido con id " + id + " no existe.");
+            return null;
+        }
+        EventoPedido evento = new EventoPedido(estado, timestamp);
+        List<EventoPedido> eventos = log.getEventos();
+        eventos.add(evento);
+        log.setEventos(eventos);
+        return repo.update(id, log);
+    }
 
     public void deleteLog(long id){ repo.delete(id);}
 }

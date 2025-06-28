@@ -1,12 +1,13 @@
 package Grupo4.Lab2.MongoDB.Entities;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+
 
 public class EventoPedido {
     String estado;
-    LocalDateTime timestamp;
+    Instant timestamp;
 
-    public EventoPedido(String estado, LocalDateTime timestamp) {
+    public EventoPedido(String estado, Instant timestamp) {
         this.estado = estado;
         this.timestamp = timestamp;
     }
@@ -22,11 +23,11 @@ public class EventoPedido {
         this.estado = estado;
     }
 
-    public LocalDateTime getTimestamp() {
+    public Instant getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(LocalDateTime timestamp) {
+    public void setTimestamp(Instant timestamp) {
         this.timestamp = timestamp;
     }
 }
