@@ -79,44 +79,22 @@ public class PedidosRepository {
         }
     }
 
-    // 7.
-    public long registrarPedido(RegistrarPedidoDTO dto) {
-        String sql = "SELECT registrar_pedido(" +
-                    ":clienteId," +
-                    ":empresaId," +
-                    ":repartidorId, " +
-                    ":estado, " +
-                    ":productos, " +
-                    ":cantidades, " +
-                    ":medioPagoId::INTEGER)";
-
+    // 7. Crear un pedido básico (sin detalles) y retornar el ID del pedido creado.
+    public long crearPedidoBasico(RegistrarPedidoDTO dto) {
+        String sql = "INSERT INTO pedidos (cliente_id, empresa_id, repartidor_id, estado, fecha) " +
+                     "VALUES (:clienteId, :empresaId, :repartidorId, :estado, NOW())";
+        
         try (Connection conn = sql2o.open()) {
-            // Acceder a la conexión JDBC para usar el createArray
-            java.sql.Connection jdbcConn = conn.getJdbcConnection();
-
-            // Crea un sql array de tipo INTEGER[]
-            // basicamente convierte el arrreglo Integer[] a SQL INTEGER[]
-            Array productosSql = jdbcConn.createArrayOf("INTEGER", dto.getProductos());
-            Array cantidadesSql = jdbcConn.createArrayOf("INTEGER", dto.getCantidades());
-
-            Object result = conn.createQuery(sql)
+            return conn.createQuery(sql, true) // true para retornar la llave generada
                     .addParameter("clienteId", dto.getCliente_id())
                     .addParameter("empresaId", dto.getEmpresa_id())
                     .addParameter("repartidorId", dto.getRepartidor_id())
                     .addParameter("estado", dto.getEstado())
-                    .addParameter("productos", productosSql) // el objeto productos
-                    .addParameter("cantidades", cantidadesSql)
-                    .addParameter("medioPagoId", dto.getMedio_pago_id())
-                    .executeScalar();
-
-            long id_pedido = ((Number) result).longValue();
-            System.out.println("Pedido registrado con ID: " + id_pedido);
-            return id_pedido;
+                    .executeUpdate()
+                    .getKey(Long.class); // Obtiene el pedido_id generado
         } catch (Exception e) {
-            Throwable cause = e.getCause(); // toma la excepcion original y revisa si fue causada x una excepción interna
-            String mensaje = cause != null ? cause.getMessage() : e.getMessage(); // si la causa interna es null se muestra la excepcion principal, si no la especifica
-            System.err.println("Error al registrar el pedido: \n" + mensaje);// se imprime el mensaje de error
-            throw new RuntimeException(mensaje, e);// permite q el controlador devuelva el msj al frontend como postman x ej
+            System.err.println("Error al crear el pedido básico: \n" + e.getMessage());
+            throw new RuntimeException("Error al crear el pedido básico.", e);
         }
     }
 

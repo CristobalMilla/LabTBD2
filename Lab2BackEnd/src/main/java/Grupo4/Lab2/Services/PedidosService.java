@@ -3,7 +3,9 @@ package Grupo4.Lab2.Services;
 import Grupo4.Lab2.DTO.PedidoYZonasQueCruzaDTO;
 import Grupo4.Lab2.DTO.RegistrarPedidoDTO;
 import Grupo4.Lab2.DTO.RutaFrecuenciaDTO;
+import Grupo4.Lab2.Entities.DetallePedidosEntity;
 import Grupo4.Lab2.Entities.PedidosEntity;
+import Grupo4.Lab2.Repositories.DetallePedidosRepository;
 import Grupo4.Lab2.Repositories.PedidosRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,9 @@ public class PedidosService {
     @Autowired
     private PedidosRepository pedidosRepository;
 
+    @Autowired
+    private DetallePedidosRepository detallePedidosRepository; // Inyectar el repositorio de detalles
+
     public PedidosEntity getById(long idPedido) {
         return pedidosRepository.findById(idPedido);
     }
@@ -25,14 +30,12 @@ public class PedidosService {
         return pedidosRepository.findAll();
     }
 
+    // ELIMINA O COMENTA EL ANTIGUO MÉTODO registrarPedido
+    /*
     public long registrarPedido(RegistrarPedidoDTO dto) {
-        if (dto.getProductos() == null || dto.getCantidades() == null ||
-                dto.getProductos().length != dto.getCantidades().length) {
-            throw new IllegalArgumentException("Los arrays de productos y cantidades deben tener la misma longitud y no ser nulos.");
-        }
-
-        return pedidosRepository.registrarPedido(dto);
+        // ... este método ya no se usará directamente
     }
+    */
 
     public void cambiarEstadoPedido(int pedidoId, String nuevoEstado) {
         pedidosRepository.cambiarEstadoPedido(pedidoId, nuevoEstado);
@@ -77,15 +80,37 @@ public class PedidosService {
 
     //Funcion de crear pedido por completo
     @Transactional
-    public PedidosEntity crearPedidoCompleto(RegistrarPedidoDTO pedido){
-        long pedido_id = registrarPedido(pedido);
-        PedidosEntity pedido_registrado = pedidosRepository.findById(pedido_id);
-        PedidosEntity pedido_actualizado = updatePedidoPuntos(pedido_registrado);
-        boolean ruta_actualizada = updatePedidoRuta(pedido_actualizado);
-        if(!ruta_actualizada){
-            System.out.println("Error al actualizar la ruta del pedido con ID: " + pedido_id);
+    public PedidosEntity crearPedidoCompleto(RegistrarPedidoDTO dto) {
+        // 1. Crear el pedido básico para obtener el ID
+        long pedidoId = pedidosRepository.crearPedidoBasico(dto);
+        
+        // 2. Obtener la entidad recién creada
+        PedidosEntity pedidoRegistrado = pedidosRepository.findById(pedidoId);
+        if (pedidoRegistrado == null) {
+            throw new RuntimeException("No se pudo encontrar el pedido recién creado con ID: " + pedidoId);
         }
-        pedidosRepository.setPedidoRuta(pedido_actualizado);
-        return pedido_actualizado;
+
+        // 3. Actualizar el pedido con puntos de inicio/final y calcular la ruta
+        PedidosEntity pedidoConPuntos = pedidosRepository.updatePedidoPuntos(pedidoRegistrado);
+        boolean rutaActualizada = pedidosRepository.updatePedidoRuta(pedidoConPuntos);
+        if (!rutaActualizada) {
+            System.err.println("Advertencia: No se pudo calcular la ruta para el pedido con ID: " + pedidoId);
+        }
+
+        // 4. Crear los detalles del pedido
+        Integer[] productos = dto.getProductos();
+        Integer[] cantidades = dto.getCantidades();
+        if (productos != null && cantidades != null && productos.length == cantidades.length) {
+            for (int i = 0; i < productos.length; i++) {
+                DetallePedidosEntity detalle = new DetallePedidosEntity();
+                detalle.setPedido_id(pedidoId);
+                detalle.setProducto_id(productos[i]);
+                detalle.setCantidad(cantidades[i]);
+                detallePedidosRepository.save(detalle);
+            }
+        }
+
+        // 5. Devolver la entidad del pedido completa con su ruta
+        return pedidosRepository.findById(pedidoId);
     }
 }

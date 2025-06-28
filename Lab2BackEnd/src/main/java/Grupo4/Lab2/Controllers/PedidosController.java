@@ -38,18 +38,6 @@ public class PedidosController {
         }
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<String> registrarPedido(@RequestBody RegistrarPedidoDTO dto) {
-        try {
-            long pedido_id = pedidosService.registrarPedido(dto);
-            return ResponseEntity.ok("Pedido registrado con ID: " + pedido_id);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Datos inválidos: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error interno: " + e.getMessage());
-        }
-    }
-
     @PostMapping("/cambiar-estado/{pedido_id}/{nuevo_estado}")
     public ResponseEntity<String> cambiarEstadoPedido(@PathVariable("pedido_id") int pedidoId, @PathVariable("nuevo_estado") String nuevoEstado) {
         try {
