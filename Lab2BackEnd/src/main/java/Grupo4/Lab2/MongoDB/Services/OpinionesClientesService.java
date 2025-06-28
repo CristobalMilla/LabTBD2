@@ -62,7 +62,7 @@ public class OpinionesClientesService {
     }
 
     public List<PromedioPuntuacionXEmpresaDTO> getPuntuacionPromedioXEmpresa() {
-        return opinionesClientesRepository.getPromedioDePuntiacionXEmpresa();
+        return opinionesClientesRepository.getPromedioDePuntuacionXEmpresa();
     }
 
     public List<OpinionStatsPorHoraDTO> getStatsPorHora() {
