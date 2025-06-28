@@ -9,7 +9,6 @@ import EmpresaEdit from "@/pages/EmpresaEdit.vue";
 import Clientes from "@/pages/Clientes.vue";
 import ClienteForm from "@/pages/ClienteForm.vue";
 import OpinionForm from "@/pages/OpinionForm.vue";
-import OpinionStats from "@/pages/OpinionStats.vue";
 
 const routes = [
   { path: "/", redirect: "/login" },
@@ -24,7 +23,6 @@ const routes = [
   { path: "/clientes/edit/:id",  component: ClienteForm },
   { path: "/opiniones/create",   component: OpinionForm },
   { path: "/opiniones/edit/:id", component: OpinionForm },
-  { path: "/opiniones/stats",    component: OpinionStats },
   { path: "/:pathMatch(.*)*", component: NotFound }
 ];
 

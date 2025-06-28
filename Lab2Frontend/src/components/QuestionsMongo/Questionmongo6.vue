@@ -1,86 +1,98 @@
 <template>
-  <v-card>
-    <v-card-title>
-      Clientes a 5km o más de cualquier empresa
+  <v-card elevation="2">
+    <v-card-title class="pa-4">
+      Puntuación Promedio y Cantidad de Opiniones por Hora
     </v-card-title>
-    <v-card-text>
-      <v-btn color="primary" @click="fetchClientes" class="mb-4">
-        Consultar clientes lejanos
-      </v-btn>
-      <div v-if="clientes.length === 0 && fetched">
-        <v-alert type="info" variant="tonal">
-          No hay clientes lejanos a empresas.
-        </v-alert>
+    <v-card-text class="pa-4">
+      <div v-if="loading" class="text-center">
+        <v-progress-circular indeterminate color="primary"></v-progress-circular>
       </div>
-      <v-list v-else>
-        <v-list-item v-for="cliente in clientes" :key="cliente.cliente_id">
-          <v-list-item-title>
-            Cliente ID: {{ cliente.cliente_id }}
-          </v-list-item-title>
-        </v-list-item>
-      </v-list>
-      <div id="map6" style="height: 400px; margin-top: 16px;"></div>
+      <Bar v-else-if="chartData.labels.length" :data="chartData" :options="chartOptions" style="height: 400px;" />
+      <div v-else class="text-center">
+        No hay datos para mostrar.
+      </div>
     </v-card-text>
   </v-card>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { clientesNoCercanosAEmpresas } from "@/api/clientes";
-import L from "leaflet";
+import { ref, onMounted } from 'vue';
+import { Bar } from 'vue-chartjs';
+import {
+  Chart as ChartJS,
+  Title,
+  Tooltip,
+  Legend,
+  BarElement,
+  CategoryScale,
+  LinearScale
+} from 'chart.js';
+import { getOpinionStatsPorHora } from '@/api/opiniones';
 
-const clientes = ref([]);
-const fetched = ref(false);
-let map = null;
-let markers = [];
+// Registrar los componentes de Chart.js
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
-function parsePointWKT(wkt) {
-  // WKT: "POINT(lon lat)"
-  const match = wkt.match(/POINT\s*\(\s*(-?\d+\.?\d*)\s+(-?\d+\.?\d*)\s*\)/);
-  if (match) {
-    // Leaflet expects [lat, lon]
-    return [parseFloat(match[2]), parseFloat(match[1])];
-  }
-  return null;
-}
+const loading = ref(true);
+const chartData = ref({
+  labels: [],
+  datasets: []
+});
 
-const fetchClientes = async () => {
-  clientes.value = await clientesNoCercanosAEmpresas();
-  fetched.value = true;
-  drawMarkers();
-};
-
-function drawMarkers() {
-  if (!map) return;
-  // Remove previous markers
-  markers.forEach(marker => map.removeLayer(marker));
-  markers = [];
-  clientes.value.forEach(cliente => {
-    const latlng = parsePointWKT(cliente.ubicacion);
-    if (latlng) {
-      const marker = L.marker(latlng)
-        .addTo(map)
-        .bindPopup(`ID: ${cliente.cliente_id}`);
-      markers.push(marker);
+const chartOptions = ref({
+  responsive: true,
+  maintainAspectRatio: false,
+  scales: {
+    y: {
+      beginAtZero: true
     }
-  });
-  // Optionally fit map to markers
-  if (markers.length > 0) {
-    const group = L.featureGroup(markers);
-    map.fitBounds(group.getBounds().pad(0.2));
   }
-}
+});
 
-onMounted(() => {
-  map = L.map("map6").setView([-33.45, -70.68], 12);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "© OpenStreetMap contributors"
-  }).addTo(map);
+onMounted(async () => {
+  try {
+    // 1. Preparar los arrays para las 24 horas
+    const fullLabels = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, '0')}:00`);
+    const fullAverageScores = Array(24).fill(0);
+    const fullCounts = Array(24).fill(0);
+
+    // 2. Obtener los datos de la API
+    const stats = await getOpinionStatsPorHora();
+    
+    // 3. Poblar los arrays con los datos obtenidos
+    if (stats && stats.length > 0) {
+      stats.forEach(stat => {
+        // El 'hour' del DTO se usa como índice
+        if (stat.hour >= 0 && stat.hour < 24) {
+          fullAverageScores[stat.hour] = stat.averageScore;
+          fullCounts[stat.hour] = stat.count;
+        }
+      });
+    }
+
+    // 4. Asignar los datos completos al gráfico
+    chartData.value = {
+      labels: fullLabels,
+      datasets: [
+        {
+          label: 'Puntuación Promedio',
+          backgroundColor: '#f87979',
+          data: fullAverageScores,
+          yAxisID: 'y' // Asignar al eje Y principal
+        },
+        {
+          label: 'Cantidad de Opiniones',
+          backgroundColor: '#42A5F5',
+          data: fullCounts,
+          yAxisID: 'y1' // Asignar a un segundo eje Y
+        }
+      ]
+    };
+
+  } catch (error) {
+    console.error("Error al obtener estadísticas de opiniones:", error);
+    alert("No se pudieron cargar las estadísticas.");
+  } finally {
+    loading.value = false;
+  }
 });
 </script>
-
-<style scoped>
-#map6 {
-  width: 100%;
-}
-</style>
