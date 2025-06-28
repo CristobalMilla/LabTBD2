@@ -1,6 +1,7 @@
 package Grupo4.Lab2.MongoDB.Controllers;
 
 import Grupo4.Lab2.MongoDB.DTO.PromedioPuntuacionXEmpresaDTO;
+import Grupo4.Lab2.MongoDB.DTO.Query2DTO;
 import Grupo4.Lab2.MongoDB.Entities.OpinionesClientes;
 import Grupo4.Lab2.MongoDB.Services.OpinionesClientesService;
 import Grupo4.Lab2.MongoDB.DTO.OpinionStatsPorHoraDTO;
@@ -82,5 +83,15 @@ public class OpinionesClientesController {
     public ResponseEntity<List<OpinionStatsPorHoraDTO>> getStatsPorHora() {
         List<OpinionStatsPorHoraDTO> stats = opinionesClientesService.getStatsPorHora();
         return ResponseEntity.ok(stats);
+    }
+
+    @GetMapping("/query2")
+    public ResponseEntity<List<Query2DTO>> getQuery2() {
+        List<Query2DTO> paquete = opinionesClientesService.getOpinionesQuery2();
+        if (paquete != null) {
+            return ResponseEntity.ok(paquete);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

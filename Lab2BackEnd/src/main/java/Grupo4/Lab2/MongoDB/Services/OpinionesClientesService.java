@@ -1,12 +1,14 @@
 package Grupo4.Lab2.MongoDB.Services;
 
 import Grupo4.Lab2.MongoDB.DTO.PromedioPuntuacionXEmpresaDTO;
+import Grupo4.Lab2.MongoDB.DTO.Query2DTO;
 import Grupo4.Lab2.MongoDB.Entities.OpinionesClientes;
 import Grupo4.Lab2.MongoDB.Repositories.OpinionesClientesRepository;
 import Grupo4.Lab2.MongoDB.DTO.OpinionStatsPorHoraDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -62,5 +64,14 @@ public class OpinionesClientesService {
 
     public List<OpinionStatsPorHoraDTO> getStatsPorHora() {
         return opinionesClientesRepository.getStatsPorHora();
+    }
+
+    public List<Query2DTO> getOpinionesQuery2() {
+        List<OpinionesClientes> opiniones = opinionesClientesRepository.getOpinionesQuery2();
+        List<Query2DTO> opinionesDTO = new ArrayList<>();
+        for (OpinionesClientes opinion : opiniones) {
+            opinionesDTO.add(new Query2DTO(opinion.getCliente_id(),opinion.getComentarios()));
+        }
+        return opinionesDTO;
     }
 }

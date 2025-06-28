@@ -19,5 +19,7 @@ public interface OpinionesClientesRepository {
     // Query 1
     List<PromedioPuntuacionXEmpresaDTO> getPromedioDePuntuacionXEmpresa();
     List<OpinionStatsPorHoraDTO> getStatsPorHora();
+    // Queery 2
+    List<OpinionesClientes> getOpinionesQuery2();
 }
 
