@@ -92,7 +92,7 @@ public class OpinionesClientesRepositoryImpl implements OpinionesClientesReposit
 
 
     // Query 1
-    public List<PromedioPuntuacionXEmpresaDTO> getPromedioDePuntiacionXEmpresa(){
+    public List<PromedioPuntuacionXEmpresaDTO> getPromedioDePuntuacionXEmpresa(){
         MongoCollection<OpinionesClientes> collection = getCollection();
         AggregateIterable<PromedioPuntuacionXEmpresaDTO> promedios = collection.aggregate(Arrays.asList(
                 Aggregates.group("$empresa_id", Accumulators.avg("promedio", "$puntuacion")),

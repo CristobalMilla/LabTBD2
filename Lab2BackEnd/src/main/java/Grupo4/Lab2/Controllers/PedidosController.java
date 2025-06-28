@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import Grupo4.Lab2.DTO.RutaFrecuenciaDTO;
 
 @Controller
 @RequestMapping("/api/pedidos")
@@ -88,6 +89,18 @@ public class PedidosController {
             return ResponseEntity.ok(pedidos);
         }
         catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    // Query 4 
+    // Obtiene las rutas únicas y su frecuencia para un repartidor en los últimos 7 días.
+    @GetMapping("/frecuencia-rutas/repartidor/{repartidorId}")
+    public ResponseEntity<List<RutaFrecuenciaDTO>> getFrecuenciaRutas(@PathVariable long repartidorId) {
+        try {
+            List<RutaFrecuenciaDTO> frecuencias = pedidosService.getRutaFrecuenciaPorRepartidor(repartidorId);
+            return ResponseEntity.ok(frecuencias);
+        } catch (Exception e) {
             return ResponseEntity.status(500).build();
         }
     }
