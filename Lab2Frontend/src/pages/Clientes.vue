@@ -8,37 +8,70 @@
     </v-app-bar>
     <v-main>
       <v-container class="py-8">
-        <v-row justify="center" align="center" class="gap-4">
-          <!-- Botones de Cliente -->
-          <v-btn
-            color="primary"
-            large
-            @click="$router.push('/clientes/create')"
-          >
-            Crear Cliente
-          </v-btn>
-          <v-btn
-            color="secondary"
-            large
-            @click="editCliente"
-          >
-            Editar Cliente
-          </v-btn>
-          <!-- Botones de Opinión -->
-          <v-btn
-            color="info"
-            large
-            @click="createOpinion"
-          >
-            Crear Opinión
-          </v-btn>
-          <v-btn
-            color="warning"
-            large
-            @click="editOpinion"
-          >
-            Editar Opinión
-          </v-btn>
+        <v-row>
+          <!-- Tarjeta de Gestión de Clientes -->
+          <v-col cols="12" md="6">
+            <v-card class="pa-4" elevation="2">
+              <v-card-title class="text-h5">
+                <v-icon left>mdi-account-group</v-icon>
+                Gestión de Clientes
+              </v-card-title>
+              <v-card-text>
+                <div class="d-flex flex-column ga-4 mt-4">
+                  <v-btn
+                    block
+                    color="primary"
+                    @click="$router.push('/clientes/create')"
+                  >
+                    Crear Nuevo Cliente
+                  </v-btn>
+                  <v-btn
+                    block
+                    color="secondary"
+                    @click="editCliente"
+                  >
+                    Editar Cliente Existente
+                  </v-btn>
+                </div>
+              </v-card-text>
+            </v-card>
+          </v-col>
+
+          <!-- Tarjeta de Gestión de Opiniones -->
+          <v-col cols="12" md="6">
+            <v-card class="pa-4" elevation="2">
+              <v-card-title class="text-h5">
+                <v-icon left>mdi-comment-quote</v-icon>
+                Gestión de Opiniones
+              </v-card-title>
+              <v-card-text>
+                <div class="d-flex flex-column ga-4 mt-4">
+                  <v-btn
+                    block
+                    color="info"
+                    @click="createOpinion"
+                  >
+                    Crear Nueva Opinión
+                  </v-btn>
+                  <v-btn
+                    block
+                    color="warning"
+                    @click="editOpinion"
+                  >
+                    Editar Opinión Existente
+                  </v-btn>
+                  <v-divider class="my-2"></v-divider>
+                  <v-btn
+                    block
+                    color="success"
+                    @click="goToStats"
+                  >
+                    Ver Estadísticas de Opiniones
+                  </v-btn>
+                </div>
+              </v-card-text>
+            </v-card>
+          </v-col>
         </v-row>
       </v-container>
     </v-main>
@@ -62,6 +95,9 @@ export default {
       if (id && /^\d+$/.test(id.trim())) {
         this.$router.push(`/opiniones/edit/${id.trim()}`);
       }
+    },
+    goToStats() {
+      this.$router.push('/opiniones/stats');
     }
   }
 }

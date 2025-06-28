@@ -1,7 +1,9 @@
 package Grupo4.Lab2.MongoDB.Services;
 
+import Grupo4.Lab2.MongoDB.DTO.PromedioPuntuacionXEmpresaDTO;
 import Grupo4.Lab2.MongoDB.Entities.OpinionesClientes;
 import Grupo4.Lab2.MongoDB.Repositories.OpinionesClientesRepository;
+import Grupo4.Lab2.MongoDB.DTO.OpinionStatsPorHoraDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +35,7 @@ public class OpinionesClientesService {
         // Genera y asigna el nuevo ID único
         long newId = opinionesClientesRepository.getNextSequenceId(OPINION_ID_SEQUENCE);
         opinion.setOpinion_id(newId);
-        
+
         // Guarda la opinión con el nuevo ID
         return opinionesClientesRepository.save(opinion);
     }
@@ -57,5 +59,13 @@ public class OpinionesClientesService {
 
     public long countOpiniones() {
         return opinionesClientesRepository.count();
+    }
+
+    public List<PromedioPuntuacionXEmpresaDTO> getPuntuacionPromedioXEmpresa() {
+        return opinionesClientesRepository.getPromedioDePuntiacionXEmpresa();
+    }
+
+    public List<OpinionStatsPorHoraDTO> getStatsPorHora() {
+        return opinionesClientesRepository.getStatsPorHora();
     }
 }

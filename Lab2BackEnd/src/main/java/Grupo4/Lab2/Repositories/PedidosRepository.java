@@ -2,6 +2,7 @@ package Grupo4.Lab2.Repositories;
 
 import Grupo4.Lab2.DTO.PedidoYZonasQueCruzaDTO;
 import Grupo4.Lab2.DTO.RegistrarPedidoDTO;
+import Grupo4.Lab2.DTO.RutaFrecuenciaDTO;
 import Grupo4.Lab2.Entities.PedidosEntity;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
@@ -247,6 +248,28 @@ public class PedidosRepository {
             return false;
         }
     }
+
+    // Query 4
+    public List<RutaFrecuenciaDTO> findRutaFrecuenciaByRepartidorEnUltimos7Dias(long repartidorId) {
+        String sql = "SELECT " +
+                     "    ST_AsText(ruta_estimada) AS rutaEstimadaWkt, " +
+                     "    COUNT(*) AS frecuencia " +
+                     "FROM pedidos " +
+                     "WHERE repartidor_id = :repartidorId " +
+                     "  AND fecha >= NOW() - INTERVAL '7 days' " +
+                     "GROUP BY ST_AsText(ruta_estimada) " +
+                     "ORDER BY frecuencia DESC";
+
+        try (Connection conn = sql2o.open()) {
+            return conn.createQuery(sql)
+                    .addParameter("repartidorId", repartidorId)
+                    .executeAndFetch(RutaFrecuenciaDTO.class);
+        } catch (Exception e) {
+            System.err.println("Error al obtener la frecuencia de rutas para el repartidor " + repartidorId + ":\n" + e.getMessage());
+            throw new RuntimeException("Error al consultar la frecuencia de rutas.", e);
+        }
+    }
+
     public PedidosEntity setPedidoRuta(PedidosEntity pedido){
         String sql = "SELECT ST_AsText(p.ruta_estimada) AS ruta_estimada " +
                 "FROM pedidos AS p" +

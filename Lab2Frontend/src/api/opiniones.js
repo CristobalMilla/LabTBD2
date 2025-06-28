@@ -14,3 +14,8 @@ export const updateOpinion = async (id, opinion) => {
   const response = await axiosInstance.put(`/opiniones/${id}`, opinion);
   return response.data;
 };
+
+export const getOpinionStatsPorHora = async () => {
+  const response = await axiosInstance.get('/opiniones/stats/por-hora');
+  return response.data;
+};
