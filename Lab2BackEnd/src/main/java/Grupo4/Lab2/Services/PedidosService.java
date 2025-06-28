@@ -2,6 +2,7 @@ package Grupo4.Lab2.Services;
 
 import Grupo4.Lab2.DTO.PedidoYZonasQueCruzaDTO;
 import Grupo4.Lab2.DTO.RegistrarPedidoDTO;
+import Grupo4.Lab2.DTO.RutaFrecuenciaDTO;
 import Grupo4.Lab2.Entities.PedidosEntity;
 import Grupo4.Lab2.Repositories.PedidosRepository;
 import jakarta.transaction.Transactional;
@@ -67,6 +68,13 @@ public class PedidosService {
     public boolean updatePedidoRuta(PedidosEntity pedido) {
         return pedidosRepository.updatePedidoRuta(pedido);
     }
+
+    // Query 4
+    // Obtiene las rutas únicas y su frecuencia para un repartidor en los últimos 7 días.
+    public List<RutaFrecuenciaDTO> getRutaFrecuenciaPorRepartidor(long repartidorId) {
+        return pedidosRepository.findRutaFrecuenciaByRepartidorEnUltimos7Dias(repartidorId);
+    }
+
     //Funcion de crear pedido por completo
     @Transactional
     public PedidosEntity crearPedidoCompleto(RegistrarPedidoDTO pedido){
