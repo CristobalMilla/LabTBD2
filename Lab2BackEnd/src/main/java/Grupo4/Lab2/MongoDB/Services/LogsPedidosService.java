@@ -59,23 +59,18 @@ public class LogsPedidosService {
         List<LogsPedidos> logsPedidos = repo.findAll();
         int count = 0;
         for (LogsPedidos log : logsPedidos) {
-            boolean pedidoTiene3Cambios = false;
             List<EventoPedido> eventos = log.getEventos();
             int totalEventos = eventos.size();
-            int menos10Minutos = 0;
-            for (int i=0; (i<totalEventos - 2); i++){
+            int pairsUnder10Min = 0;
+            for (int i = 0; i < totalEventos - 1; i++) {
                 Instant instante1 = eventos.get(i).getTimestamp();
-                Instant instante2 = eventos.get(i+1).getTimestamp();
-                long minutesDiference = Duration.between(instante1, instante2).toMinutes();
-                if (minutesDiference<=10){
-                    menos10Minutos++;
-                }
-                if (menos10Minutos>=3){
-                    pedidoTiene3Cambios = true;
-                    break;
+                Instant instante2 = eventos.get(i + 1).getTimestamp();
+                long minutesDifference = Duration.between(instante1, instante2).toMinutes();
+                if (minutesDifference <= 10) {
+                    pairsUnder10Min++;
                 }
             }
-            if(pedidoTiene3Cambios){
+            if (pairsUnder10Min >= 3) {
                 count++;
             }
         }

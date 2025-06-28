@@ -60,7 +60,11 @@ public class LogsPedidosController {
         int count = logsPedidosService.countPedidosLog10Minutos();
         if(count > 0){
             return ResponseEntity.ok(count);
-        }else{
+        }
+        if(count == 0){
+            return ResponseEntity.noContent().build();
+        }
+        else{
             return ResponseEntity.notFound().build();
         }
     }
