@@ -3,7 +3,7 @@ import {onMounted, ref} from 'vue'
 import { getPromedioPuntuacionXEmpresa } from '@/api/opiniones';
 
 const loading = ref(true)
-const error = ref(false)
+const errorFetching = ref(false)
 const promediosXempresa = ref([])
 
 const getPromedios = async () => {
@@ -11,6 +11,7 @@ const getPromedios = async () => {
     promediosXempresa.value = await getPromedioPuntuacionXEmpresa()
   } catch (error) {
     console.error('Error fetching pedidos:', error)
+    errorFetching.value = true
   } finally {
     loading.value = false
   }
@@ -20,8 +21,6 @@ onMounted(async () => {
   await getPromedios();
 })
 
-/*watch(atr, async () => {
-})*/
 </script>
 
 <template>
@@ -35,8 +34,8 @@ onMounted(async () => {
           <v-progress-circular indeterminate color="primary"></v-progress-circular>
         </div>
 
-        <div v-else-if="error" class="text-center red--text">
-          error
+        <div v-else-if="errorFetching" class="text-center red--text">
+          Error al cargar los promedios
         </div>
 
         <div v-else>
@@ -66,12 +65,6 @@ onMounted(async () => {
     </v-card>
   </div>
 </template>
-
-<script>
-export default {
-    name: "Query5",
-};
-</script>
 
 <style scoped>
 .v-table {
