@@ -1,135 +1,144 @@
 <template>
-  <v-card>
-    <v-card-title>
-      Entrega Más Lejana por Empresa
-    </v-card-title>
-    <v-card-text>
-      <v-select
-        v-model="selectedEmpresaId"
-        :items="empresas"
-        :item-title="item => item.empresaId + ' - ' + item.nombre"
-        item-value="empresaId"
-        label="Selecciona una empresa"
-        
-        class="mb-4"
-      />
-      <div v-if="error" class="text-red mb-4">
-        {{ error }}
-      </div>
-      <div v-if="ubicacionActual" class="text-grey mb-4">
-        Ubicación actual: Latitud: {{ ubicacionActual.latitude }}, Longitud: {{ ubicacionActual.longitude }}
-      </div>
-      <div id="map" style="height: 400px;"></div>
-    </v-card-text>
-  </v-card>
+  <v-container>
+    <v-row>
+      <v-col cols="12" md="4">
+        <v-select
+          v-model="selectedRepartidorId"
+          :items="repartidores"
+          item-title="nombre"
+          item-value="repartidor_id"
+          label="Seleccione un Repartidor"
+          variant="outlined"
+          dense
+          :loading="loadingRepartidores"
+        ></v-select>
+        <v-btn
+          @click="fetchRutasFrecuentes"
+          :disabled="!selectedRepartidorId || loadingRutas"
+          :loading="loadingRutas"
+          color="primary"
+          class="mt-2"
+          block
+        >
+          Buscar Rutas Frecuentes
+        </v-btn>
+      </v-col>
+      <v-col cols="12" md="8">
+        <div id="rutas-map" style="height: 400px; width: 100%; border: 1px solid #ccc;"></div>
+      </v-col>
+    </v-row>
+
+    <v-row v-if="rutasFrecuentes.length > 0" class="mt-4">
+      <v-col cols="12">
+        <v-list lines="one">
+          <v-list-subheader>Rutas Encontradas</v-list-subheader>
+          <v-list-item
+            v-for="(ruta, index) in rutasFrecuentes"
+            :key="index"
+            :title="`Ruta ${index + 1}`"
+            :subtitle="`Frecuencia: ${ruta.frecuencia} veces`"
+          >
+            <template v-slot:prepend>
+              <v-avatar :color="routeColors[index % routeColors.length]">
+                <v-icon color="white">mdi-road-variant</v-icon>
+              </v-avatar>
+            </template>
+          </v-list-item>
+        </v-list>
+      </v-col>
+    </v-row>
+    <v-alert v-if="error" type="error" class="mt-4">{{ error }}</v-alert>
+  </v-container>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
-import L from "leaflet";
-import { getAllEmpresas, getEntregaMasLejana } from "@/api/empresas";
+import { ref, onMounted, nextTick } from 'vue';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { getAllRepartidores } from '@/api/repartidores';
+import { getFrecuenciaRutas } from '@/api/pedidos';
 
-const empresas = ref([]);
-const selectedEmpresaId = ref(null);
-const ubicacionActual = ref(null);
+const repartidores = ref([]);
+const selectedRepartidorId = ref(null);
+const rutasFrecuentes = ref([]);
+const loadingRepartidores = ref(false);
+const loadingRutas = ref(false);
 const error = ref(null);
+
 let map = null;
-let marker = null;
+const routeLayers = L.layerGroup();
+const routeColors = ['#FF5733', '#33FF57', '#3357FF', '#FF33A1', '#A133FF', '#33FFA1'];
 
-// No necesitamos el redIcon si usamos circleMarker
-// const redIcon = L.icon({
-//   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-//   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-//   iconSize: [25, 41],
-//   iconAnchor: [12, 41],
-//   popupAnchor: [1, -34],
-//   shadowSize: [41, 41]
-// });
-
-const fetchEmpresas = async () => {
+// Cargar repartidores al montar el componente
+onMounted(async () => {
+  loadingRepartidores.value = true;
   try {
-    empresas.value = await getAllEmpresas();
-    console.log("Empresas obtenidas:", empresas.value);
-  } catch (error) {
-    console.error("Error al obtener empresas:", error);
-    error.value = "Error al cargar las empresas";
-  }
-};
-
-const fetchEntregaMasLejana = async () => {
-  console.log("fetchEntregaMasLejana function called.");
-  if (!selectedEmpresaId.value || !map) {
-    console.log("Condición de retorno met: selectedEmpresaId.value =", selectedEmpresaId.value, ", map =", map);
-    return;
+    repartidores.value = await getAllRepartidores();
+  } catch (e) {
+    error.value = 'Error al cargar la lista de repartidores.';
+  } finally {
+    loadingRepartidores.value = false;
   }
   
-  try {
-    console.log("Buscando entrega más lejana para empresa ID:", selectedEmpresaId.value);
-    const ubicacion = await getEntregaMasLejana(selectedEmpresaId.value);
-    console.log("Ubicación recibida:", ubicacion);
-    
-    if (!ubicacion || !ubicacion.latitude || !ubicacion.longitude) {
-      throw new Error("La ubicación recibida no es válida");
-    }
-
-    ubicacionActual.value = ubicacion;
-    error.value = null;
-    
-    // Remover marcador anterior si existe
-    if (marker) {
-      map.removeLayer(marker);
-    }
-    
-    // Crear nuevo circleMarker
-    marker = L.circleMarker([ubicacion.latitude, ubicacion.longitude], {
-      color: 'red', // Borde rojo
-      radius: 8, // Tamaño del círculo (ajustable)
-      fillColor: '#f03', // Relleno rojo más oscuro
-      fillOpacity: 0.8
-    }).addTo(map);
-    
-    // Centrar el mapa en la nueva ubicación con un zoom más cercano
-    map.setView([ubicacion.latitude, ubicacion.longitude], 15);
-    
-    // Forzar actualización del mapa
-    map.invalidateSize();
-  } catch (error) {
-    console.error("Error al obtener la entrega más lejana:", error);
-    error.value = "Error al obtener la ubicación de la entrega más lejana";
-    ubicacionActual.value = null;
-  }
-};
-
-onMounted(async () => {
-  try {
-    await fetchEmpresas();
-    map = L.map("map").setView([-33.45, -70.68], 13);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap contributors"
-    }).addTo(map);
-    
-    // Forzar actualización inicial del mapa
-    setTimeout(() => {
-      map.invalidateSize();
-    }, 100);
-    console.log("selectedEmpresaId inicial en onMounted:", selectedEmpresaId.value);
-  } catch (error) {
-    console.error("Error en la inicialización:", error);
-    error.value = "Error al inicializar el mapa";
-  }
+  // Inicializar el mapa
+  await nextTick();
+  initMap();
 });
 
-// Nuevo watch para selectedEmpresaId
-watch(selectedEmpresaId, (newVal, oldVal) => {
-  console.log('selectedEmpresaId cambió de:', oldVal, 'a:', newVal);
-  if (newVal) {
-    fetchEntregaMasLejana();
-  }
-});
-</script>
-
-<style scoped>
-#map {
-  width: 100%;
+function initMap() {
+  if (map) return;
+  map = L.map('rutas-map').setView([-33.455, -70.685], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+  routeLayers.addTo(map);
 }
-</style>
+
+async function fetchRutasFrecuentes() {
+  if (!selectedRepartidorId.value) return;
+
+  loadingRutas.value = true;
+  error.value = null;
+  rutasFrecuentes.value = [];
+  routeLayers.clearLayers();
+
+  try {
+    const data = await getFrecuenciaRutas(selectedRepartidorId.value);
+    rutasFrecuentes.value = data;
+    if (data.length > 0) {
+      drawRoutesOnMap(data);
+    } else {
+      alert('No se encontraron rutas frecuentes para este repartidor en los últimos 7 días.');
+    }
+  } catch (e) {
+    error.value = 'Error al obtener las rutas frecuentes.';
+  } finally {
+    loadingRutas.value = false;
+  }
+}
+
+function drawRoutesOnMap(rutas) {
+  const allBounds = [];
+  rutas.forEach((ruta, index) => {
+    const latLngs = parseLineStringWKT(ruta.rutaEstimadaWkt);
+    if (latLngs.length > 0) {
+      const color = routeColors[index % routeColors.length];
+      const polyline = L.polyline(latLngs, { color: color, weight: 5 }).addTo(routeLayers);
+      polyline.bindPopup(`<b>Ruta ${index + 1}</b><br>Frecuencia: ${ruta.frecuencia}`);
+      allBounds.push(polyline.getBounds());
+    }
+  });
+
+  if (allBounds.length > 0) {
+    const combinedBounds = allBounds.reduce((bounds, currentBounds) => bounds.extend(currentBounds));
+    map.fitBounds(combinedBounds, { padding: [50, 50] });
+  }
+}
+
+function parseLineStringWKT(wkt) {
+  if (!wkt || !wkt.toUpperCase().startsWith("LINESTRING")) return [];
+  const coordsStr = wkt.substring(wkt.indexOf('(') + 1, wkt.lastIndexOf(')'));
+  return coordsStr.split(',').map(pair => {
+    const [lng, lat] = pair.trim().split(' ').map(Number);
+    return [lat, lng]; // Leaflet usa [lat, lng]
+  });
+}
+</script>
