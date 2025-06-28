@@ -1,93 +1,98 @@
-
-<template>
-  <div class="five-points-map">
-    <v-select
-        v-model="selectedId"
-        :items="companies"
-        item-title="nombre"
-        item-value="empresa_id"
-        label="Empresa"
-        density="compact"
-        clearable
-        class="mb-4"
-    />
-
-    <div id="five-points-leaflet" style="height: 450px;"></div>
-  </div>
-</template>
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import {onMounted, ref} from 'vue'
+import { getPromedioPuntuacionXEmpresa } from '@/api/opiniones';
 
-const BASE = import.meta.env.VITE_API_BASE_URL;
+const loading = ref(true)
+const error = ref(false)
+const promediosXempresa = ref([])
 
-
-const map        = ref(null);
-const pointsLg   = ref(null);
-const companies  = ref([]);
-const selectedId = ref(null);
-
-function toLatLng({ latitude, longitude }) {
-  return [latitude, longitude];
-}
-
-function dynamicRadius() {
-  const z = map.value?.getZoom() ?? 13;
-  if (z < 12) return 2;
-  if (z < 14) return 3;
-  if (z < 16) return 5;
-  return 7;
-}
-
-
-async function fetchCompanies() {
-  const res = await fetch(`${BASE}/api/empresas/all`);
-  if (res.ok) companies.value = await res.json();
-}
-
-async function fetchPoints(id) {
-  pointsLg.value.clearLayers();
-  if (!id) return;
-  const res = await fetch(`${BASE}/api/empresas/entregascercanas/${id}`);
-  if (res.ok) renderPoints(await res.json());
-}
-
-function renderPoints(puntos) {
-  const radius = dynamicRadius();
-  puntos.forEach(coord => {
-    const latLng = toLatLng(coord);
-    L.circleMarker(latLng, {
-      color: 'red',
-      radius,
-      fillOpacity: 0.9
-    }).addTo(pointsLg.value);
-  });
-}
+const getPromedios = async () => {
+  try {
+    promediosXempresa.value = await getPromedioPuntuacionXEmpresa()
+  } catch (error) {
+    console.error('Error fetching pedidos:', error)
+  } finally {
+    loading.value = false
+  }
+};
 
 onMounted(async () => {
-  map.value = L.map('five-points-leaflet').setView([-33.455, -70.685], 13);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap'
-  }).addTo(map.value);
+  await getPromedios();
+})
 
-  pointsLg.value = L.layerGroup().addTo(map.value);
-  await fetchCompanies();
+/*watch(atr, async () => {
+})*/
+</script>
 
-  map.value.on('zoomend', () => {
-    const r = dynamicRadius();
-    pointsLg.value.eachLayer(l => l.setRadius && l.setRadius(r));
-  });
-});
+<template>
+  <div>
+    <v-card class="mx-auto" max-width="800">
+      <v-card-title class="text-h6 text-center">
+        Promedio de puntuación de cada empresa (de opiniones dejadas por los clientes)
+      </v-card-title>
+      <v-card-text>
+        <div v-if="loading" class="d-flex justify-center">
+          <v-progress-circular indeterminate color="primary"></v-progress-circular>
+        </div>
 
-onBeforeUnmount(() => map.value?.remove());
+        <div v-else-if="error" class="text-center red--text">
+          error
+        </div>
 
-watch(selectedId, id => fetchPoints(id));
+        <div v-else>
+          <div>
+            <v-table v-if="promediosXempresa.length > 0">
+              <thead>
+                <tr>
+                  <th class="text-center">Id</th>
+                  <th class="text-center">Empresa</th>
+                  <th class="text-center">Promedio de Puntuación</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(promedio, index) in promediosXempresa" :key="index">
+                    <td class="text-center">{{ promedio.empresa_id }}</td>
+                    <td class="text-center">{{ promedio.nombre_empresa }}</td>
+                    <td class="text-center">{{ promedio.promedio }}</td>
+                </tr>
+              </tbody>
+            </v-table>
+            <div v-else class="text-center pa-4">
+              No hay opiniones en ninguna empresa.
+            </div>
+          </div>
+        </div>
+      </v-card-text>
+    </v-card>
+  </div>
+</template>
+
+<script>
+export default {
+    name: "Query5",
+};
 </script>
 
 <style scoped>
-.five-points-map {
-  display: flex;
-  flex-direction: column;
+.v-table {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+th, td {
+  padding: 12px;
+}
+
+th {
+  background-color: #f5f5f5;
+  font-weight: bold;
+}
+
+tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+tr:hover {
+  background-color: #f0f0f0;
 }
 </style>

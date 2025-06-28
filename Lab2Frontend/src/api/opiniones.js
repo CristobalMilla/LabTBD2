@@ -15,6 +15,11 @@ export const updateOpinion = async (id, opinion) => {
   return response.data;
 };
 
+export const getPromedioPuntuacionXEmpresa = async () => {
+  const response = await axiosInstance.get('/opiniones/promedioXempresa');
+  return response.data;
+};
+
 export const getOpinionStatsPorHora = async () => {
   const response = await axiosInstance.get('/opiniones/stats/por-hora');
   return response.data;
