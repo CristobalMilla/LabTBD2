@@ -24,6 +24,14 @@
       >
         Clientes
       </v-btn>
+      <!-- Nuevo Botón de Pedidos -->
+      <v-btn
+        variant="text"
+        prepend-icon="mdi-truck-delivery"
+        @click="goToPedidos"
+      >
+        Pedidos
+      </v-btn>
       <notification-badge class="mr-2" />
       <v-btn @click="logout" variant="text" prepend-icon="mdi-logout">
         Cerrar Sesión
@@ -132,6 +140,9 @@ export default {
     },
     goToClientes() {
       this.$router.push('/clientes')
+    },
+    goToPedidos() {
+      this.$router.push('/pedidos');
     },
     initMap() {
       this.map = L.map('map').setView([-33.455, -70.685], 13);
