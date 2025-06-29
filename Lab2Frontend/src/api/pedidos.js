@@ -15,6 +15,11 @@ export async function getFrecuenciaRutas(repartidorId) {
   return response.data;
 }
 
+export async function createPedidoCompleto(pedidoData) {
+  const response = await axiosInstance.post('/pedidos/createFull', pedidoData);
+  return response.data;
+}
+
 export async function getNumeroPedidos3Cambios() {
   const response = await axiosInstance.get(`/logs_pedidos/getNumeroPedidos3Cambios`);
   return response.data;
