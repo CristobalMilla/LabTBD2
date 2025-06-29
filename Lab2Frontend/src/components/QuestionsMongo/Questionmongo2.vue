@@ -1,25 +1,45 @@
 <template>
-  <v-card>
-    <v-card-title>
-      Zonas de Cobertura por Cliente
-    </v-card-title>
-    <v-card-text>
-      <v-select
-        v-model="selectedClienteId"
-        :items="clientes"
-        item-title="nombre"
-        item-value="cliente_id"
-        label="Selecciona un cliente"
-        class="mb-4"
-      />
-      <v-list v-if="zonas.length">
-        <v-list-item v-for="zona in zonas" :key="zona.zona_id">
-          <v-list-item-title>{{ zona.nombre }}</v-list-item-title>
-        </v-list-item>
-      </v-list>
-      <div id="map" style="height: 400px; margin-top: 16px;"></div>
-    </v-card-text>
-  </v-card>
+  <div>
+    <v-card class="mx-auto" max-width="800">
+      <v-card-title class="text-h6 text-center">
+        Listar las opiniones que contengan palabras clave como 'demora' o 'error'
+      </v-card-title>
+
+      <v-card-text>
+        <div v-if="loading" class="d-flex justify-center">
+          <v-progress-circular indeterminate color="primary"></v-progress-circular>
+        </div>
+
+        <div v-else-if="error" class="text-center red--text">
+          error
+        </div>
+
+        <div v-else>
+          <div>
+            <v-table v-if="opiniones.length > 0">
+              <thead>
+              <tr>
+                <th class="text-center">Cliente</th>
+                <th class="text-center">Comentario</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr v-for="(opinion, index) in opiniones" :key="index">
+                <td class="text-center">{{ opinion.cliente }}</td>
+                <td class="text-center">{{ opinion.comentarios }}</td>
+                <td class="text-center">
+                </td>
+              </tr>
+              </tbody>
+            </v-table>
+            <div v-else class="text-center pa-4">
+              No hay opiniones que cumplan con el filtro.
+            </div>
+          </div>
+        </div>
+      </v-card-text>
+    </v-card>
+  </div>
 </template>
 
 <script setup>
@@ -28,55 +48,49 @@ import { getByClienteId } from "@/api/zonasCobertura";
 import { getClientes } from "@/api/clientes";
 import wellknown from "wellknown";
 import L from "leaflet";
+import {getOpinionesQuery2} from "@/api/opiniones.js";
 
-const clientes = ref([]);
-const selectedClienteId = ref(null);
-const zonas = ref([]);
-let map = null;
-let drawnLayers = [];
+const opiniones = ref([]);
+const loading = ref(true)
+const error = ref(false)
 
-const fetchClientes = async () => {
-  clientes.value = await getClientes();
-};
-
-const fetchZonasCobertura = async () => {
-  if (!selectedClienteId.value) return;
-  zonas.value = await getByClienteId(selectedClienteId.value);
-  drawPolygons();
-};
-
-const drawPolygons = () => {
-  if (!map) return;
-  drawnLayers.forEach(layer => map.removeLayer(layer));
-  drawnLayers = [];
-  zonas.value.forEach(zona => {
-    const geojson = wellknown.parse(zona.geom);
-    if (geojson) {
-      const layer = L.geoJSON(geojson).addTo(map);
-      drawnLayers.push(layer);
-    }
-  });
-};
+const fetchOpiniones = async () => {
+  try {
+    opiniones.value = await getOpinionesQuery2();
+  } catch (error) {
+    console.error('Error fetching opiniones:', error)
+  } finally {
+    loading.value = false
+  }
+}
 
 onMounted(async () => {
-  await fetchClientes();
-  map = L.map("map").setView([-33.45, -70.68], 13);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "© OpenStreetMap contributors"
-  }).addTo(map);
+  await fetchOpiniones();
+
 });
 
-watch(zonas, () => {
-  drawPolygons();
-});
-watch(selectedClienteId, (newVal) => {
-  console.log('Selected:', newVal);
-  fetchZonasCobertura();
-});
 </script>
 
 <style scoped>
-#map {
+.v-table {
   width: 100%;
+  margin-top: 1rem;
+}
+
+th, td {
+  padding: 12px;
+}
+
+th {
+  background-color: #f5f5f5;
+  font-weight: bold;
+}
+
+tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+tr:hover {
+  background-color: #f0f0f0;
 }
 </style>

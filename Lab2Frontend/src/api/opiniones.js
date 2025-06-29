@@ -24,3 +24,8 @@ export const getOpinionStatsPorHora = async () => {
   const response = await axiosInstance.get('/opiniones/stats/por-hora');
   return response.data;
 };
+
+export const getOpinionesQuery2 = async () => {
+  const response = await axiosInstance.get('/opiniones/query2');
+  return response.data;
+}

@@ -1,10 +1,12 @@
 package Grupo4.Lab2.MongoDB.Services;
 
+import Grupo4.Lab2.Entities.ClienteEntity;
 import Grupo4.Lab2.MongoDB.DTO.PromedioPuntuacionXEmpresaDTO;
 import Grupo4.Lab2.MongoDB.DTO.Query2DTO;
 import Grupo4.Lab2.MongoDB.Entities.OpinionesClientes;
 import Grupo4.Lab2.MongoDB.Repositories.OpinionesClientesRepository;
 import Grupo4.Lab2.MongoDB.DTO.OpinionStatsPorHoraDTO;
+import Grupo4.Lab2.Repositories.ClienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,10 +19,12 @@ public class OpinionesClientesService {
 
     private final OpinionesClientesRepository opinionesClientesRepository;
     private static final String OPINION_ID_SEQUENCE = "opinion_id_sequence";
+    private final ClienteRepository clienteRepository;
 
     @Autowired
-    public OpinionesClientesService(OpinionesClientesRepository opinionesClientesRepository) {
+    public OpinionesClientesService(OpinionesClientesRepository opinionesClientesRepository, ClienteRepository clienteRepository) {
         this.opinionesClientesRepository = opinionesClientesRepository;
+        this.clienteRepository = clienteRepository;
     }
 
     public List<OpinionesClientes> getAllOpiniones() {
@@ -70,7 +74,11 @@ public class OpinionesClientesService {
         List<OpinionesClientes> opiniones = opinionesClientesRepository.getOpinionesQuery2();
         List<Query2DTO> opinionesDTO = new ArrayList<>();
         for (OpinionesClientes opinion : opiniones) {
-            opinionesDTO.add(new Query2DTO(opinion.getCliente_id(),opinion.getComentarios()));
+            ClienteEntity cliente = clienteRepository.findById(opinion.getCliente_id());
+            if (cliente != null) {
+                opinionesDTO.add(new Query2DTO(cliente.getNombre(),opinion.getComentarios()));
+            }
+
         }
         return opinionesDTO;
     }

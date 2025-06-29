@@ -1,24 +1,17 @@
 package Grupo4.Lab2.MongoDB.DTO;
 
 public class Query2DTO {
-    private Long cliente_id;
+    private String cliente;
     private String comentarios;
 
-    public Query2DTO(Long cliente_id, String comentarios) {
-        this.cliente_id = cliente_id;
+    public Query2DTO(String cliente, String comentarios) {
+        this.cliente = cliente;
         this.comentarios = comentarios;
     }
 
     public Query2DTO() {
     }
 
-    public Long getCliente_id() {
-        return cliente_id;
-    }
-
-    public void setCliente_id(Long cliente_id) {
-        this.cliente_id = cliente_id;
-    }
 
     public String getComentarios() {
         return comentarios;
@@ -26,5 +19,13 @@ public class Query2DTO {
 
     public void setComentarios(String comentarios) {
         this.comentarios = comentarios;
+    }
+
+    public String getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(String cliente) {
+        this.cliente = cliente;
     }
 }
