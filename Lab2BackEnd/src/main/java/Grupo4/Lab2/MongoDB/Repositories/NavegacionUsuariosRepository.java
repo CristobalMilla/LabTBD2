@@ -13,5 +13,6 @@ public interface NavegacionUsuariosRepository {
     NavegacionUsuariosEntity save(NavegacionUsuariosEntity navegacion);
     NavegacionUsuariosEntity update(NavegacionUsuariosEntity navegacion);
     void delete(NavegacionUsuariosEntity navegacion);
+    // Query 5
     AggregateIterable<ClienteBuscaPeroNoCompra> getClientesQueBuscaronPeroNoCompraron();
 }

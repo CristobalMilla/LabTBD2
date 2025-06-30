@@ -1,88 +1,25 @@
 <script setup>
-import { nextTick, onMounted, ref, watch } from 'vue'
-import {getPedidosQueCruzanMasDe2Zonas} from '@/api/pedidos'
-import { getAllByIds } from '@/api/zonasCobertura';
-import wellknown from "wellknown";
-import L from "leaflet";
+import {onMounted, ref} from 'vue'
+import { getClientesQueBuscaronPeroNoCompraron } from '@/api/navegacion_usuarios';
 
-const pedidos = ref([])
 const loading = ref(true)
-const error = ref(false)
-const map = ref(null)
-const view_map = ref(false)
-const pedido_index = ref(-1)
-const zonas = ref([])
+const errorFetching = ref(false)
+const clienteQueBuscaronPeroNoCompraron = ref([])
 
-const getpedidos = async () => {
+const getClientes = async () => {
   try {
-    pedidos.value = await getPedidosQueCruzanMasDe2Zonas()
+    clienteQueBuscaronPeroNoCompraron.value = await getClientesQueBuscaronPeroNoCompraron();
   } catch (error) {
-    console.error('Error fetching pedidos:', error)
+    console.error('Error fetching clientes:', error)
+    errorFetching.value = true
   } finally {
     loading.value = false
   }
 };
 
-const initMap = async () => {
-  await nextTick();
-  const sectorCenter = [-33.464467, -70.705074];
-  map.value = L.map("map").setView(sectorCenter, 15);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "&copy; OpenStreetMap contributors",
-  }).addTo(map.value);
-};
-
 onMounted(async () => {
-  await getpedidos()
+  await getClientes();
 })
-
-const verMapa = async (index) => {
-  pedido_index.value = index;
-  view_map.value = true;
-  zonas.value = []; // Limpiar zonas anteriores
-
-  if (map.value) {
-    map.value.remove(); // Eliminar el mapa anterior
-  }
-
-  await nextTick();
-  await initMap();
-  await getZonasCruzadas();
-};
-
-const getZonasCruzadas = async () => {
-  if (pedido_index.value > -1) {
-    zonas.value = await getAllByIds(pedidos.value[pedido_index.value]);
-  }
-};
-
-
-watch(pedidos, async () => {
-  if (pedidos.value.length > 0 && pedido_index.value > -1) {
-    await getZonasCruzadas();
-  }
-})
-
-const drawZonas = () => {
-  const geoJSON_1_zona = wellknown.parse(zonas.value[0].geom)
-  const sectorCenter = [
-    geoJSON_1_zona.coordinates[0][0][1],
-    geoJSON_1_zona.coordinates[0][0][0]
-    ];
-  map.value.setView(sectorCenter, 14);
-  for(var i = 0; i < zonas.value.length; i++){
-    const geoJSON = wellknown.parse(zonas.value[i].geom)
-    L.geoJSON(geoJSON).addTo(map.value);
-  }
-  
-}
-
-watch(zonas, async () => {
-  if(zonas.value.length > 0){
-    await drawZonas();
-  }
-})
-
 
 </script>
 
@@ -90,62 +27,43 @@ watch(zonas, async () => {
   <div>
     <v-card class="mx-auto" max-width="800">
       <v-card-title class="text-h6 text-center">
-        Pedidos que se estima que cruzen mas de 2 zonas de reparto
+        Clientes que busacaron productos pero no compraron
       </v-card-title>
-
       <v-card-text>
         <div v-if="loading" class="d-flex justify-center">
           <v-progress-circular indeterminate color="primary"></v-progress-circular>
         </div>
 
-        <div v-else-if="error" class="text-center red--text">
-          error
+        <div v-else-if="errorFetching" class="text-center red--text">
+          Error al cargar los clientes
         </div>
 
         <div v-else>
           <div>
-            <div v-if="view_map">
-              <v-container>
-                <v-row>
-                  <v-col cols="12" md="12">
-                    <v-btn color="red" variant="tonal" @click="view_map = false">
-                      <v-icon left>mdi-close</v-icon>
-                        Cerrar Mapa
-                      </v-btn>
-                    <div id="map" style="height: 400px; margin-top: 16px;"></div>
-                  </v-col>
-                </v-row>
-              </v-container>
-            </div>
-
-            <v-table v-else-if="pedidos.length > 0">
+            <v-table v-if="clienteQueBuscaronPeroNoCompraron.length > 0">
               <thead>
                 <tr>
-                  <th class="text-center">Pedido</th>
+                  <th class="text-center">Id</th>
                   <th class="text-center">Cliente</th>
-                  <th class="text-center">Empresa</th>
-                  <th class="text-center">Repartidor</th>
-                  <th class="text-center">Zonas que cruza</th>
-                  <th class="text-center">Ver Mapa</th>
+                  <th class="text-center">Productos Buscados</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(pedido, index) in pedidos" :key="index">
-                    <td class="text-center">{{ pedido.pedido_id }}</td>
-                    <td class="text-center">{{ pedido.cliente_id }}</td>
-                    <td class="text-center">{{ pedido.empresa_id }}</td>
-                    <td class="text-center">{{ pedido.repartidor_id }}</td>
-                    <td class="text-center">{{ pedido.zonas_que_cruza }}</td>
+                <tr v-for="(cliente, index) in clienteQueBuscaronPeroNoCompraron" :key="index">
+                    <td class="text-center">{{ cliente.cliente_id }}</td>
+                    <td class="text-center">{{ cliente.nombre_cliente }}</td>
                     <td class="text-center">
-                      <v-btn color="primary" variant="outlined" @click="verMapa(index)">
-                        <v-icon left>mdi-map</v-icon>
-                      </v-btn>
-                    </td>
+                    <ul class="productos-lista-centrada">
+                      <li v-for="(producto, idx) in cliente.productos_buscados" :key="idx">
+                        {{ producto }}
+                      </li>
+                    </ul>
+                  </td>
                 </tr>
               </tbody>
             </v-table>
             <div v-else class="text-center pa-4">
-              No hay tareas completadas en ningún sector.
+              No hay busquedas de clientes
             </div>
           </div>
         </div>
@@ -153,12 +71,6 @@ watch(zonas, async () => {
     </v-card>
   </div>
 </template>
-
-<script>
-export default {
-    name: "Query5",
-};
-</script>
 
 <style scoped>
 .v-table {
@@ -181,5 +93,16 @@ tr:nth-child(even) {
 
 tr:hover {
   background-color: #f0f0f0;
+}
+.productos-lista-centrada {
+  list-style: none; /* quita los bullets (puedes usar 'disc' si prefieres) */
+  padding: 0;
+  margin: 0;
+  text-align: center; /* centra el texto de los <li> */
+}
+
+.productos-lista-centrada li {
+  margin: 4px 0;
+  font-size: 0.95rem;
 }
 </style>

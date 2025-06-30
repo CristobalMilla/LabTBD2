@@ -70,6 +70,7 @@ public class NavegacionUsuariosService {
         }
     }
 
+    //Query 5
     public List<ClienteBuscaPeroNoCompra> getClientesQueBuscaronPeroNoCompraron(){
         AggregateIterable<ClienteBuscaPeroNoCompra> clientes = navegacionUsuariosRepository.getClientesQueBuscaronPeroNoCompraron();
         List<ClienteBuscaPeroNoCompra> clientesLista = new ArrayList<>();
