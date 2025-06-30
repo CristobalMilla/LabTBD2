@@ -7,6 +7,8 @@ import Grupo4.Lab2.MongoDB.Entities.OpinionesClientes;
 import Grupo4.Lab2.MongoDB.Repositories.OpinionesClientesRepository;
 import Grupo4.Lab2.MongoDB.DTO.OpinionStatsPorHoraDTO;
 import Grupo4.Lab2.Repositories.ClienteRepository;
+import Grupo4.Lab2.Repositories.EmpresaRepository;
+import com.mongodb.client.AggregateIterable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,11 +22,13 @@ public class OpinionesClientesService {
     private final OpinionesClientesRepository opinionesClientesRepository;
     private static final String OPINION_ID_SEQUENCE = "opinion_id_sequence";
     private final ClienteRepository clienteRepository;
+    private final EmpresaRepository empresaRepo;
 
     @Autowired
-    public OpinionesClientesService(OpinionesClientesRepository opinionesClientesRepository, ClienteRepository clienteRepository) {
+    public OpinionesClientesService(OpinionesClientesRepository opinionesClientesRepository, ClienteRepository clienteRepository, EmpresaRepository empresaRepo) {
         this.opinionesClientesRepository = opinionesClientesRepository;
         this.clienteRepository = clienteRepository;
+        this.empresaRepo = empresaRepo;
     }
 
     public List<OpinionesClientes> getAllOpiniones() {
@@ -63,7 +67,15 @@ public class OpinionesClientesService {
     }
 
     public List<PromedioPuntuacionXEmpresaDTO> getPuntuacionPromedioXEmpresa() {
-        return opinionesClientesRepository.getPromedioDePuntuacionXEmpresa();
+        AggregateIterable<PromedioPuntuacionXEmpresaDTO> promedios = opinionesClientesRepository.getPromedioDePuntuacionXEmpresa();
+        List<PromedioPuntuacionXEmpresaDTO> promediosList = new ArrayList<>();
+
+        for (PromedioPuntuacionXEmpresaDTO promedio : promedios) {
+            String nombreEmpresa = empresaRepo.findById(promedio.getEmpresa_id()).getNombre();
+            promedio.setNombre_empresa(nombreEmpresa);
+            promediosList.add(promedio);
+        }
+        return promediosList;
     }
 
     public List<OpinionStatsPorHoraDTO> getStatsPorHora() {

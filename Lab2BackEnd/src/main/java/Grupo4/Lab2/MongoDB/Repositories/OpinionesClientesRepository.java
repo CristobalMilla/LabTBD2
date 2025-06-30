@@ -3,6 +3,7 @@ package Grupo4.Lab2.MongoDB.Repositories;
 import Grupo4.Lab2.MongoDB.DTO.PromedioPuntuacionXEmpresaDTO;
 import Grupo4.Lab2.MongoDB.Entities.OpinionesClientes;
 import Grupo4.Lab2.MongoDB.DTO.OpinionStatsPorHoraDTO;
+import com.mongodb.client.AggregateIterable;
 
 import java.util.List;
 import static com.mongodb.client.model.Filters.eq; // For filtering documents
@@ -17,7 +18,7 @@ public interface OpinionesClientesRepository {
     long count();
     long getNextSequenceId(String sequenceName); // para manejar secuencias de ID
     // Query 1
-    List<PromedioPuntuacionXEmpresaDTO> getPromedioDePuntuacionXEmpresa();
+    AggregateIterable<PromedioPuntuacionXEmpresaDTO> getPromedioDePuntuacionXEmpresa();
     List<OpinionStatsPorHoraDTO> getStatsPorHora();
     // Queery 2
     List<OpinionesClientes> getOpinionesQuery2();

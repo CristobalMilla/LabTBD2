@@ -31,10 +31,6 @@ public class OpinionesClientesRepositoryImpl implements OpinionesClientesReposit
     @Autowired
     private MongoDatabase database;
 
-    @Autowired
-    private EmpresaRepository empresaRepo;
-
-
     private static final String COLLECTION_NAME = "opiniones_clientes";
     private static final String COUNTERS_COLLECTION = "counters"; // Colección para secuencias
 
@@ -94,7 +90,7 @@ public class OpinionesClientesRepositoryImpl implements OpinionesClientesReposit
 
 
     // Query 1
-    public List<PromedioPuntuacionXEmpresaDTO> getPromedioDePuntuacionXEmpresa(){
+    public AggregateIterable<PromedioPuntuacionXEmpresaDTO> getPromedioDePuntuacionXEmpresa(){
         MongoCollection<OpinionesClientes> collection = getCollection();
         AggregateIterable<PromedioPuntuacionXEmpresaDTO> promedios = collection.aggregate(Arrays.asList(
                 Aggregates.group("$empresa_id", Accumulators.avg("promedio", "$puntuacion")),
@@ -103,18 +99,9 @@ public class OpinionesClientesRepositoryImpl implements OpinionesClientesReposit
                                 Projections.computed("empresa_id", "$_id"),
                                 Projections.include("promedio")
                         )
-                ), Aggregates.sort(Sorts.ascending("empresa_id"))
+                ), Aggregates.sort(Sorts.descending("promedio"))
         ), PromedioPuntuacionXEmpresaDTO.class);
-
-        List<PromedioPuntuacionXEmpresaDTO> promediosList = new ArrayList<>();
-
-        for (PromedioPuntuacionXEmpresaDTO promedio : promedios) {
-            String nombreEmpresa = empresaRepo.findById(promedio.getEmpresa_id()).getNombre();
-            promedio.setNombre_empresa(nombreEmpresa);
-            promediosList.add(promedio);
-        }
-
-        return promediosList;
+        return promedios;
     }
 
     @Override
