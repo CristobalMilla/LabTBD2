@@ -52,7 +52,7 @@ onMounted(async () => {
                 <tr v-for="(promedio, index) in promediosXempresa" :key="index">
                     <td class="text-center">{{ promedio.empresa_id }}</td>
                     <td class="text-center">{{ promedio.nombre_empresa }}</td>
-                    <td class="text-center">{{ promedio.promedio }}</td>
+                    <td class="text-center">{{ promedio.promedio.toFixed(2) }}</td>
                 </tr>
               </tbody>
             </v-table>
