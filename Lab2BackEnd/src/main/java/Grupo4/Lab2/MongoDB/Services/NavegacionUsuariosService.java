@@ -76,11 +76,12 @@ public class NavegacionUsuariosService {
         List<ClienteBuscaPeroNoCompra> clientesLista = new ArrayList<>();
 
         for (ClienteBuscaPeroNoCompra cliente : clientes) {
+            long cliente_id = cliente.getCliente_id();
             List<String> productosStr = cliente.getProductos_buscados();
-            productosStr.removeIf(producto -> pedidosRepo.getByNombreProducto(producto) != null);
+            productosStr.removeIf(producto -> productoRepo.getByNombre(producto) == null
+                    || pedidosRepo.getByNombreProductoYCliente(producto, cliente_id) != null);
 
             if (!productosStr.isEmpty()) {
-                long cliente_id = cliente.getCliente_id();
                 cliente.setNombre_cliente(clienteRepo.findById(cliente_id).getNombre());
                 clientesLista.add(cliente);
             }

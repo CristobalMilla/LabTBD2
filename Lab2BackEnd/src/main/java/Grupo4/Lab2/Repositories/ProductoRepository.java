@@ -102,4 +102,13 @@ public class ProductoRepository {
                       .executeAndFetch(ProductoMasPedidoDTO.class);
         }
     }
+
+    public ProductoEntity getByNombre(String nombre) {
+        String sql = "SELECT p. * FROM productos p WHERE p.nombre = :nombre";
+        try (Connection con = sql2o.open()) {
+            return con.createQuery(sql)
+                    .addParameter("nombre", nombre)
+                    .executeAndFetchFirst(ProductoEntity.class);
+        }
+    }
 }

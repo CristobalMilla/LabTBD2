@@ -65,7 +65,7 @@ public class NavegacionUsuariosRepositoryImpl implements NavegacionUsuariosRepos
                                 Projections.computed("cliente_id", "$_id"),
                                 Projections.include("productos_buscados")
                         )
-                )
+                ), Aggregates.sort(Sorts.descending("productos_buscados"))
         ), ClienteBuscaPeroNoCompra.class);
         return clientes;
     }

@@ -27,7 +27,7 @@ onMounted(async () => {
   <div>
     <v-card class="mx-auto" max-width="800">
       <v-card-title class="text-h6 text-center">
-        Clientes que busacaron productos pero no compraron
+        Clientes que buscaron productos pero no compraron
       </v-card-title>
       <v-card-text>
         <div v-if="loading" class="d-flex justify-center">
