@@ -191,7 +191,8 @@ INSERT INTO empresas (nombre, direccion, tipo_servicio, ubicacion) VALUES
 ('TodoPizza', 'Av. Ecuador 4901', 'Pizzería', ST_SetSRID(ST_MakePoint(-70.684, -33.457), 4326)),
 ('Farmacia Central', 'Av. Libertador 1750', 'Farmacia', ST_SetSRID(ST_MakePoint(-70.685, -33.458), 4326)),
 ('Empanadas Express', 'San Alfonso 100', 'Comida chilena', ST_SetSRID(ST_MakePoint(-70.686, -33.459), 4326)),
-('Sushi Go', 'Av. Las Rejas 200', 'Sushi', ST_SetSRID(ST_MakePoint(-70.687, -33.460), 4326));
+('Sushi Go', 'Av. Las Rejas 200', 'Sushi', ST_SetSRID(ST_MakePoint(-70.687, -33.460), 4326)),
+('Ripley', 'Av. Vicuña Mackenna Ote. 7110', 'Ropa', ST_SetSRID(ST_MakePoint(-70.59697301816117, -33.51688418613963), 4326));
 
 -- Medios de pago
 INSERT INTO medios_pago (tipo) VALUES
@@ -211,7 +212,8 @@ INSERT INTO productos (empresa_id, nombre, descripcion, precio, requiere_receta,
 (2, 'Pizza Napolitana', 'Queso, tomate, orégano y jamón', 7990, false, 'Pizzería', 30),
 (3, 'Paracetamol 500mg', 'Caja de 20 comprimidos', 2500, true, 'Medicamento', 100),
 (4, 'Empanada de Pino', 'Empanada tradicional chilena', 1800, false, 'Comida chilena', 60),
-(5, 'Sushi Roll Salmón', '8 piezas con salmón y palta', 6900, false, 'Sushi', 40);
+(5, 'Sushi Roll Salmón', '8 piezas con salmón y palta', 6900, false, 'Sushi', 40),
+(6, 'Polera del Colo 100 años', 'Polera del Colo 100 años', 69990, false, 'Ropa', 100);
 
 -- Pedidos
 INSERT INTO pedidos (cliente_id, empresa_id, repartidor_id, fecha, fecha_entrega, estado, punto_inicio, punto_final, ruta_estimada) VALUES

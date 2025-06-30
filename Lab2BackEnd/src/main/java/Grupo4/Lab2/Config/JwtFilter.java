@@ -1,21 +1,24 @@
 package Grupo4.Lab2.Config;
 
 import Grupo4.Lab2.Services.UsuarioDetailsService;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.springframework.http.HttpHeaders;
 
@@ -55,53 +58,59 @@ public class JwtFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-
-
-        String requestUri = request.getRequestURI();
-        // Ignorar rutas públicas como /auth/**
-        if (requestUri.startsWith("/auth/")) {
-            filterChain.doFilter(request, response);
-            return; // Salir del filtro
-        }
-
-        // 1. Se obtiene el header Authorization
-        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (authHeader == null || authHeader.isEmpty() || !authHeader.startsWith("Bearer ")) {
+        String path = request.getRequestURI();
+        AntPathMatcher matcher = new AntPathMatcher();
+        // Ignora estas rutas completamente (no requiere token)
+        if (matcher.match("/auth/**", path) || matcher.match("/api/**", path)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Se extra el token del encabezado
-        String jwt = authHeader.split(" ")[1].trim();
+        try {
+            // 1. Se obtiene el header Authorization
 
-        // 2. Validar que el token sea válido
-        if (!this.jwtUtil.isValid(jwt)) {
+            String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+            if (authHeader == null || authHeader.isEmpty() || !authHeader.startsWith("Bearer ")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            // Se extra el token del encabezado
+            String jwt = authHeader.split(" ")[1].trim();
+
+            // 2. Validar que el token sea válido
+            if (!this.jwtUtil.isValid(jwt)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            // 3. Extraer el correo del token
+            String email = this.jwtUtil.getEmail(jwt);
+
+            //4 se busca por email
+            UserDetails userDetails = usuarioDetailsService.loadUserByUsername(email);
+
+
+            // 5. Cargar al usuario en el contexto de seguridad
+            UsernamePasswordAuthenticationToken authenticationToken =
+                    new UsernamePasswordAuthenticationToken(
+                            userDetails.getUsername(),
+                            userDetails.getPassword(),
+                            // se añade el rol
+                            userDetails.getAuthorities());
+
+            authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            System.out.println("Autenticación exitosa: " +authenticationToken);
+
+            String roles = SecurityContextHolder.getContext().getAuthentication().getAuthorities().toString();
+            System.out.println("Usuario autenticado con roles: " + roles);
+
             filterChain.doFilter(request, response);
-            return;
+        } catch (TokenExpiredException e) {
+            throw new CredentialsExpiredException("Token expirado", e);
+        } catch (JWTVerificationException e) {
+            throw new BadCredentialsException("Token inválido", e);
         }
-
-        // 3. Extraer el correo del token
-        String email = this.jwtUtil.getEmail(jwt);
-
-        //4 se busca por email
-        UserDetails userDetails = usuarioDetailsService.loadUserByUsername(email);
-
-
-        // 5. Cargar al usuario en el contexto de seguridad
-        UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(
-                        userDetails.getUsername(),
-                        userDetails.getPassword(),
-                        // se añade el rol
-                        userDetails.getAuthorities());
-
-        authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-        System.out.println("Autenticación exitosa: " +authenticationToken);
-
-        String roles = SecurityContextHolder.getContext().getAuthentication().getAuthorities().toString();
-        System.out.println("Usuario autenticado con roles: " + roles);
-
-        filterChain.doFilter(request, response);
     }
 }

@@ -1,6 +1,7 @@
 package Grupo4.Lab2.Config;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,19 +24,13 @@ public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
     private final CorsConfig corsConfig;
-    private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
-    /**
-     * Constructor para SecurityConfig.
-     *
-     * @param jwtFilter El filtro JWT para manejar la autenticación basada en tokens.
-     * @param corsConfig La configuración de CORS.
-     * @param customAccessDeniedHandler El manejador de excepciones de acceso denegado.
-     */
-    public SecurityConfig(JwtFilter jwtFilter, CorsConfig corsConfig, CustomAccessDeniedHandler customAccessDeniedHandler) {
+
+    public SecurityConfig(JwtFilter jwtFilter, CorsConfig corsConfig, CustomAuthenticationEntryPoint customAuthenticationEntryPoint) {
         this.jwtFilter = jwtFilter;
         this.corsConfig = corsConfig;
-        this.customAccessDeniedHandler = customAccessDeniedHandler;
+        this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
     }
 
     /**
@@ -59,6 +54,7 @@ public class SecurityConfig {
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
                             // Mostrar el motivo del acceso denegado
                             String requiredRoles = request.getRequestURI().contains("/api/reserva/") ? "ADMIN, TRABAJADOR, CLIENTE" : "UNKNOWN";
@@ -67,6 +63,7 @@ public class SecurityConfig {
                             System.out.println("Acceso denegado. Rol requerido: " + requiredRoles + ", Rol actual del usuario: " + userRoles);
 
                             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json");
                             response.getWriter().write("Acceso denegado. Rol requerido: " + requiredRoles + "\nRol actual del usuario: " + userRoles + "\nError: " + accessDeniedException.getMessage());
                         })
                 )
