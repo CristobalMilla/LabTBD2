@@ -306,6 +306,33 @@ VALUES
     ST_SetSRID(ST_MakePoint(-70.684255, -33.460171), 4326), -- Ajustado para Zona Sur
     ST_SetSRID(ST_MakeLine(ST_MakePoint(-70.685, -33.460), ST_MakePoint(-70.684255, -33.460171)), 4326));
 
+INSERT INTO pedidos (cliente_id, empresa_id, repartidor_id, fecha, fecha_entrega, estado, punto_inicio, punto_final, ruta_estimada)
+VALUES
+    (1, 2, 2, NOW(), NOW() + INTERVAL '30 minutes', 'Entregado',
+     ST_SetSRID(ST_MakePoint(-70.681, -33.456), 4326),
+     ST_SetSRID(ST_MakePoint(-70.676787, -33.455711), 4326), -- Ajustado para Zona Este
+     ST_SetSRID(ST_MakeLine(ST_MakePoint(-70.681, -33.456), ST_MakePoint(-70.676787, -33.455711)), 4326)),
+
+    (2, 1, 1, NOW(), NOW() + INTERVAL '40 minutes', 'En camino',
+     ST_SetSRID(ST_MakePoint(-70.682, -33.457), 4326),
+     ST_SetSRID(ST_MakePoint(-70.676787, -33.455711), 4326), -- Ajustado para Zona Este
+     ST_SetSRID(ST_MakeLine(ST_MakePoint(-70.682, -33.457), ST_MakePoint(-70.676787, -33.455711)), 4326)),
+
+    (3, 1, 1, NOW(), NOW() + INTERVAL '25 minutes', 'Entregado',
+     ST_SetSRID(ST_MakePoint(-70.683, -33.458), 4326),
+     ST_SetSRID(ST_MakePoint(-70.687664, -33.452142), 4326), -- Ajustado para Zona Norte
+     ST_SetSRID(ST_MakeLine(ST_MakePoint(-70.683, -33.458), ST_MakePoint(-70.687664, -33.452142)), 4326)),
+
+    (4, 6, 5, NOW(), NOW() + INTERVAL '35 minutes', 'Pendiente',
+     ST_SetSRID(ST_MakePoint(-70.684, -33.459), 4326),
+     ST_SetSRID(ST_MakePoint(-70.684255, -33.460171), 4326), -- Ajustado para Zona Sur
+     ST_SetSRID(ST_MakeLine(ST_MakePoint(-70.684, -33.459), ST_MakePoint(-70.684255, -33.460171)), 4326)),
+
+    (5, 1, 1, NOW(), NOW() + INTERVAL '20 minutes', 'Entregado',
+     ST_SetSRID(ST_MakePoint(-70.685, -33.460), 4326),
+     ST_SetSRID(ST_MakePoint(-70.684255, -33.460171), 4326), -- Ajustado para Zona Sur
+     ST_SetSRID(ST_MakeLine(ST_MakePoint(-70.685, -33.460), ST_MakePoint(-70.684255, -33.460171)), 4326));
+
 INSERT INTO pedidos (cliente_id, empresa_id, repartidor_id, fecha, fecha_entrega, estado, punto_inicio, punto_final, ruta_estimada) 
 VALUES 
 (1, 1, 1, NOW(), NOW() + INTERVAL '30 minutes', 'En camino', 
@@ -359,7 +386,12 @@ INSERT INTO detalle_pedidos (pedido_id, producto_id, cantidad) VALUES
 (15, 1, 2),
 (16, 2, 1),
 (17, 3, 1),
-(18, 4, 3);
+(18, 4, 3),
+(19, 2, 1),
+(20, 1, 1),
+(21, 1, 1),
+(22, 6, 1),
+(23, 1, 1);
 
 -- Pagos
 INSERT INTO pagos (pedido_id, medio_id, monto) VALUES
@@ -380,7 +412,12 @@ INSERT INTO pagos (pedido_id, medio_id, monto) VALUES
 (15, 2, 7990),
 (16, 3, 2500),
 (17, 3, 5400),
-(18, 4, 13800);
+(18, 4, 13800),
+(19, 2, 7990),
+(20, 3, 4500),
+(21, 4,4500),
+(22, 4, 69990),
+(23, 1, 4500);
 
 -- Calificaciones
 INSERT INTO calificaciones (pedido_id, puntuacion, comentario) VALUES
@@ -401,7 +438,12 @@ INSERT INTO calificaciones (pedido_id, puntuacion, comentario) VALUES
 (15, 5, 'Muy rápido y sabroso'),
 (16, 4, 'Buena pizza, pero llegó tibia'),
 (17, 5, 'Excelente servicio'),
-(18, 3, 'Demoró un poco');
+(18, 3, 'Demoró un poco'),
+(19, 2, 'Demoró un poco'),
+(20, 3, 'Demoró un poco'),
+(21, 5,'mgta cobreloa'),
+(22, 5, 'Viva el colo'),
+(23, 1, 'Demoró promedio');
 
 -- Urgencias
 INSERT INTO urgencias (pedido_id, nivel) VALUES
@@ -422,7 +464,12 @@ INSERT INTO urgencias (pedido_id, nivel) VALUES
 (15, 'no urgente'),
 (16, 'urgente'),
 (17, 'urgente'),
-(18, 'no urgente');
+(18, 'no urgente'),
+(19, 'no urgente'),
+(20, 'no urgente'),
+(21, 'urgente'),
+(22, 'urgente'),
+(23, 'no urgente');
 
 -- Zonas de cobertura
 INSERT INTO zonas_cobertura (nombre, geom) VALUES
