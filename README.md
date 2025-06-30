@@ -1,6 +1,6 @@
-# LabTBD2
+# LabTBD3
 
-**Trabajo de laboratorio 2 - Taller de Base de Datos 1-2025**  
+**Trabajo de laboratorio 3 - Taller de Base de Datos 1-2025**  
 Este proyecto contiene un sistema completo con Backend y Frontend para manejar información geoespacial. A continuación, se describe el paso a paso para la ejecución.
 
 ---
