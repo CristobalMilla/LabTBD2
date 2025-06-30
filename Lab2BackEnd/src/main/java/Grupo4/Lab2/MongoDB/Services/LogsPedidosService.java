@@ -55,25 +55,8 @@ public class LogsPedidosService {
     public void deleteLog(long id){ repo.delete(id);}
 
     //Query 3:Contar cuántos pedidos tienen más de 3 cambios de estado en menos de 10 minutos.
+
     public int countPedidosLog10Minutos() {
-        List<LogsPedidos> logsPedidos = repo.findAll();
-        int count = 0;
-        for (LogsPedidos log : logsPedidos) {
-            List<EventoPedido> eventos = log.getEventos();
-            int totalEventos = eventos.size();
-            int pairsUnder10Min = 0;
-            for (int i = 0; i < totalEventos - 1; i++) {
-                Instant instante1 = eventos.get(i).getTimestamp();
-                Instant instante2 = eventos.get(i + 1).getTimestamp();
-                long minutesDifference = Duration.between(instante1, instante2).toMinutes();
-                if (minutesDifference <= 10) {
-                    pairsUnder10Min++;
-                }
-            }
-            if (pairsUnder10Min >= 3) {
-                count++;
-            }
-        }
-        return count;
+        return repo.countPedidosLog10Minutos();
     }
 }

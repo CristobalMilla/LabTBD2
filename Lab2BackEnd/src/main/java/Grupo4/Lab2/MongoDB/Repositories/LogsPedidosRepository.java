@@ -11,4 +11,5 @@ public interface LogsPedidosRepository {
     LogsPedidos update(long id, LogsPedidos log);
     void delete(long id);
     long count();
+    int countPedidosLog10Minutos();
 }
