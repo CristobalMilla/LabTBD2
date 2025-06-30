@@ -261,4 +261,17 @@ public class PedidosRepository {
             return pedido;
         }
     }
+    public PedidosEntity getByNombreProducto(String producto){
+        String sql = "SELECT p.pedido_id " +
+                "FROM pedidos AS p " +
+                "INNER JOIN detalle_pedidos dp ON p.pedido_id = dp.pedido_id " +
+                "INNER JOIN productos pr ON dp.producto_id = pr.producto_id " +
+                "WHERE pr.nombre = :producto";
+        try (Connection conn = sql2o.beginTransaction()){
+            return conn.createQuery(sql)
+                    .addParameter("producto", producto)
+                    .executeAndFetchFirst(PedidosEntity.class);
+        }
+    }
+
 }

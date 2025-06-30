@@ -1,5 +1,6 @@
 package Grupo4.Lab2.MongoDB.Controllers;
 
+import Grupo4.Lab2.MongoDB.DTO.ClienteBuscaPeroNoCompra;
 import Grupo4.Lab2.MongoDB.Entities.EventoNavegacion;
 import Grupo4.Lab2.MongoDB.Entities.NavegacionUsuariosEntity;
 import Grupo4.Lab2.MongoDB.Services.NavegacionUsuariosService;
@@ -50,5 +51,11 @@ public class NavegacionUsuariosController {
     public ResponseEntity<Void> agregarEvento(@PathVariable String clienteId, @RequestBody EventoNavegacion evento) {
         service.agregarEvento(clienteId, evento);
         return ResponseEntity.ok().build();
+    }
+
+    // Query 5
+    @GetMapping("/buscaronPeroNoCompraron")
+    public List<ClienteBuscaPeroNoCompra> getClientesQueBuscaronPeroNoCompraron(){
+        return service.getClientesQueBuscaronPeroNoCompraron();
     }
 }
