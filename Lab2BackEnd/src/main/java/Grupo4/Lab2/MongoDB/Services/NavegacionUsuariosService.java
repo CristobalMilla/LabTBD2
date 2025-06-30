@@ -71,22 +71,21 @@ public class NavegacionUsuariosService {
     }
 
     //Query 5
-    public List<ClienteBuscaPeroNoCompra> getClientesQueBuscaronPeroNoCompraron(){
+    public List<ClienteBuscaPeroNoCompra> getClientesQueBuscaronPeroNoCompraron() {
         AggregateIterable<ClienteBuscaPeroNoCompra> clientes = navegacionUsuariosRepository.getClientesQueBuscaronPeroNoCompraron();
         List<ClienteBuscaPeroNoCompra> clientesLista = new ArrayList<>();
-        for(ClienteBuscaPeroNoCompra cliente : clientes){
-            for(String strProducto : cliente.getProductos_buscados()){
-                PedidosEntity pedido = pedidosRepo.getByNombreProducto(strProducto);
-                if(pedido == null){
-                    cliente.getProductos_buscados().remove(strProducto);
-                }
-            }
-            if(!cliente.getProductos_buscados().isEmpty()){
+
+        for (ClienteBuscaPeroNoCompra cliente : clientes) {
+            List<String> productosStr = cliente.getProductos_buscados();
+            productosStr.removeIf(producto -> pedidosRepo.getByNombreProducto(producto) != null);
+
+            if (!productosStr.isEmpty()) {
                 long cliente_id = cliente.getCliente_id();
                 cliente.setNombre_cliente(clienteRepo.findById(cliente_id).getNombre());
                 clientesLista.add(cliente);
             }
         }
+
         return clientesLista;
     }
 }
